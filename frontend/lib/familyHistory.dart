@@ -100,7 +100,7 @@ class _FamilyHistoryPageState extends State<FamilyHistoryPage> {
                         return blueColor
                             .withOpacity(0.8); // Slightly darker when pressed
                       } else if (states.contains(MaterialState.hovered)) {
-                        return Color.fromARGB(255, 49, 107, 231)
+                        return Color.fromARGB(255, 168, 189, 236)
                             .withOpacity(0.9); // Slightly lighter when hovered
                       }
                       return blueColor;
@@ -108,7 +108,7 @@ class _FamilyHistoryPageState extends State<FamilyHistoryPage> {
                     overlayColor: MaterialStateProperty.resolveWith<Color>(
                         (Set<MaterialState> states) {
                       if (states.contains(MaterialState.pressed)) {
-                        return Colors.black12; // Dark overlay when pressed
+                        return Colors.black12; // Dark overlay when press
                       }
                       return Colors.transparent; // No overlay by default
                     }),
