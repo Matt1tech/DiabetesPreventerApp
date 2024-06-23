@@ -14,7 +14,7 @@ class TestPage extends StatelessWidget {
 //Color
 const blueColor = Color.fromARGB(255, 30, 96, 195);
 const pinkColor = Color.fromARGB(255, 141, 87, 255);
-
+/*
 Widget header({required String imagePath, required String welcomeMessage}) {
   return Column(
     children: [
@@ -84,7 +84,7 @@ Widget header({required String imagePath, required String welcomeMessage}) {
     ],
   );
 }
-
+*/
 Widget footer() {
   return Container(
     margin: const EdgeInsets.only(bottom: 00.0),
@@ -129,9 +129,9 @@ class _CustomToggleButtonsState extends State<CustomToggleButtons> {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white, // White background color
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(7),
         border: Border.all(
-            color: Colors.white, width: 2), // Ensure white border around
+            color: Colors.white, width: 1), // Ensure white border around
       ),
       child: ToggleButtons(
         borderColor: Colors.white,
@@ -139,7 +139,7 @@ class _CustomToggleButtonsState extends State<CustomToggleButtons> {
         borderWidth: 3,
         selectedBorderColor: blueColor,
         selectedColor: Colors.white,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(7),
         constraints: const BoxConstraints(
           minHeight: 40.0,
           minWidth: 110.0,
@@ -161,8 +161,7 @@ class _CustomToggleButtonsState extends State<CustomToggleButtons> {
             child: Text(
               option,
               style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+                fontSize: 18,
               ),
             ),
           );
@@ -216,4 +215,81 @@ Widget buildDatePickerField(
       },
     ),
   );
+}
+
+/// A reusable TextFormField with validation.
+///
+/// Parameters:
+/// - `labelText`: The label for the TextFormField.
+/// - `icon`: The icon to display in the TextFormField.
+/// - `validatorMessage`: The message to display when validation fails.
+/// - `validatorFormat`: The validation format (e.g., regex pattern) to apply.
+/// - `suffixText`: The text to display as a suffix.
+/// - `validator`: An optional custom validator function.
+class ReusableTextFormField extends StatelessWidget {
+  final String labelText;
+  final IconData? icon;
+  final String? validatorMessage; // Change to optional
+  final RegExp? validatorFormat; // Change to optional
+  final TextEditingController controller;
+  final bool obscureText;
+  final TextInputType keyboardType;
+  final String? suffixText;
+  final String? Function(String?)? validator;
+
+  ReusableTextFormField({
+    required this.labelText,
+    this.icon,
+    this.validatorMessage,
+    this.validatorFormat,
+    required this.controller,
+    this.obscureText = false,
+    this.keyboardType = TextInputType.text,
+    this.suffixText,
+    this.validator,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
+      controller: controller,
+      obscureText: obscureText,
+      decoration: InputDecoration(
+        labelText: labelText,
+        prefixIcon: icon != null ? Icon(icon) : null,
+        suffixText: suffixText,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
+        labelStyle: TextStyle(
+          fontSize: 16.0,
+          color: Colors.grey,
+        ),
+        floatingLabelStyle: TextStyle(
+          fontSize: 20.0,
+          color: Theme.of(context).primaryColor,
+        ),
+        floatingLabelBehavior: FloatingLabelBehavior.auto,
+        floatingLabelAlignment: FloatingLabelAlignment.start,
+      ),
+      keyboardType: keyboardType,
+      validator: validator ??
+          (value) {
+            if (validatorFormat != null && validatorMessage != null) {
+              if (value == null || !validatorFormat!.hasMatch(value)) {
+                return validatorMessage;
+              }
+            } else {
+              if (value == null || value.isEmpty) {
+                return 'This field is required';
+              }
+            }
+            return null;
+          },
+      autovalidateMode: AutovalidateMode.onUserInteraction,
+    );
+  }
 }

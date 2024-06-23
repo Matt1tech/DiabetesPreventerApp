@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'utilties.dart';
 import 'registerPage.dart';
+import 'customHeader.dart';
 
 class FamilyHistoryPage extends StatefulWidget {
   const FamilyHistoryPage({super.key});
@@ -17,11 +18,14 @@ class _FamilyHistoryPageState extends State<FamilyHistoryPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 141, 87, 255),
+      appBar: CustomHeader(
+        imagePath: 'images/diabetesLogo.png',
+        welcomeMessage: 'Select Carefully!',
+        showWelcomeMessage:
+            true, // Set to false if you don't want the welcome message
+      ),
       body: Column(
         children: [
-          header(
-              imagePath: 'images/diabetesLogo.png',
-              welcomeMessage: 'Select Carefully!'), // Using header widget
           Expanded(
             child:
                 bodyFamilyHistory(), // Using the body specific to family history
@@ -86,56 +90,49 @@ class _FamilyHistoryPageState extends State<FamilyHistoryPage> {
             ),
             const SizedBox(height: 70),
             // Navigation buttons
+
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 // Back button
-                // Back button
-                ElevatedButton(
-                  style: ButtonStyle(
-                    minimumSize: MaterialStateProperty.all(const Size(75, 25)),
-                    backgroundColor: MaterialStateProperty.resolveWith<Color>(
-                        (Set<MaterialState> states) {
-                      if (states.contains(MaterialState.pressed)) {
-                        return blueColor
-                            .withOpacity(0.8); // Slightly darker when pressed
-                      } else if (states.contains(MaterialState.hovered)) {
-                        return Color.fromARGB(255, 168, 189, 236)
-                            .withOpacity(0.9); // Slightly lighter when hovered
-                      }
-                      return blueColor;
-                    }),
-                    overlayColor: MaterialStateProperty.resolveWith<Color>(
-                        (Set<MaterialState> states) {
-                      if (states.contains(MaterialState.pressed)) {
-                        return Colors.black12; // Dark overlay when press
-                      }
-                      return Colors.transparent; // No overlay by default
-                    }),
-                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                      RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
+                TextButton(
+                  style: TextButton.styleFrom(
+                    minimumSize: const Size(120, 50), // Consistent button size
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0), // Padding inside the button
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    foregroundColor: Colors.white,
+                  ).copyWith(
+                    overlayColor: WidgetStateProperty.resolveWith<Color?>(
+                      (Set<WidgetState> states) {
+                        if (states.contains(WidgetState.pressed)) {
+                          return Colors.white
+                              .withOpacity(0.2); // Lighter overlay when pressed
+                        }
+                        return Colors.transparent; // Transparent by default
+                      },
                     ),
                   ),
                   onPressed: () {
                     Navigator.pop(context); // Navigate back on button press
                   },
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment
-                        .center, // Center the content horizontally
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: const [
                       Icon(
                         Icons.arrow_back,
-                        size: 30,
+                        size: 24,
                         color: Colors.white,
-                      ), // Back arrow icon
-                      SizedBox(width: 15), // Space between icon and text
+                      ),
+                      SizedBox(width: 8),
                       Text(
                         'Back',
                         style: TextStyle(
-                          fontSize: 24,
-                          color: Colors.white, // Text color set correctly
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
                         ),
                       ),
                     ],
@@ -143,23 +140,52 @@ class _FamilyHistoryPageState extends State<FamilyHistoryPage> {
                 ),
 
                 // Continue button
-                Builder(
-                  builder: (context) => TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const RegisterPage()),
-                      );
-                    },
-                    child: const Text(
-                      'Continue >>',
-                      style: TextStyle(
-                        fontSize: 20,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
+                TextButton(
+                  style: TextButton.styleFrom(
+                    minimumSize: const Size(120, 50), // Consistent button size
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0), // Padding inside the button
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0),
                     ),
+                    foregroundColor: Colors
+                        .white, // Replace with your color variable if needed
+                  ).copyWith(
+                    overlayColor: WidgetStateProperty.resolveWith<Color?>(
+                      (Set<WidgetState> states) {
+                        if (states.contains(WidgetState.pressed)) {
+                          return Colors.white
+                              .withOpacity(0.2); // Lighter overlay when pressed
+                        }
+                        return Colors.transparent; // Transparent by default
+                      },
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const RegisterPage()),
+                    );
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Text(
+                        'Continue',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20,
+                          color: Colors.white,
+                        ),
+                      ),
+                      SizedBox(width: 8),
+                      Icon(
+                        Icons.arrow_forward,
+                        size: 24,
+                        color: Colors.white,
+                      ),
+                    ],
                   ),
                 ),
               ],

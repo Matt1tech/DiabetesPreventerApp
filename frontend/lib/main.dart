@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/registerPage.dart';
 import 'loginPage.dart'; // Correct relative import for login page
+import 'home.dart'; // Correct relative import for home
 
 void main() {
   runApp(const MyApp());
@@ -12,12 +14,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Diabetes Preventer',
-
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: const LoginPage(), // Set the initial route to LoginPage
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(fontFamily: 'Poppins'),
+      home: const RegisterPage(), // Set the initial route to LoginPage
     );
   }
 }
