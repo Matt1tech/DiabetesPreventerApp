@@ -53,9 +53,8 @@ class CustomHeader extends StatelessWidget implements PreferredSizeWidget {
                   const Expanded(
                     child: Text(
                       'Diabetes Preventer',
-                      textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: 22,
+                        fontSize: 21,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
@@ -69,7 +68,7 @@ class CustomHeader extends StatelessWidget implements PreferredSizeWidget {
         ),
         if (showWelcomeMessage)
           Container(
-            color: pinkColor, // Replace `pinkColor` with the actual color
+            color: pinkColor,
             height: 50,
             width: double.infinity, // Full width
             child: Padding(

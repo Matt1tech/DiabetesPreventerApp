@@ -253,8 +253,7 @@ Widget bodyRegister(
                     'Back',
                     style: TextStyle(
                       fontSize: 18,
-                      color: blueColor, // Customize color as needed
-                      decoration: TextDecoration.underline,
+                      color: blueColor,
                     ),
                   ),
                 ),

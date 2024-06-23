@@ -22,7 +22,7 @@ class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(228, 238, 235, 235),
+      backgroundColor: Color.fromARGB(227, 249, 243, 243),
       appBar: CustomHeader(
         imagePath: 'images/diabetesLogo.png',
         welcomeMessage: 'Welcome to Diabetes Preventer!',
