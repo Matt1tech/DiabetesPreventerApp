@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/registerPage.dart';
-import 'loginPage.dart'; // Correct relative import for login page
-import 'home.dart'; // Correct relative import for home
+import 'package:frontend/Pages/registerPage.dart';
+import 'Pages/loginPage.dart'; // Correct relative import for login page
+import 'Pages/home.dart'; // Correct relative import for home
 
 void main() {
   runApp(const MyApp());
@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(fontFamily: 'Poppins'),
-      home: const RegisterPage(), // Set the initial route to LoginPage
+      home: const LoginPage(), // Set the initial route to LoginPage
     );
   }
 }

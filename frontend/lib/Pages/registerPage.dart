@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
-import 'utilties.dart';
+import '../utilties.dart';
 import 'loginPage.dart';
-import 'customHeader.dart';
+import '../customHeader.dart';
 
 final _formKey = GlobalKey<FormState>();
 final _nameController = TextEditingController();
@@ -33,7 +33,7 @@ class _RegisterPageState extends State<RegisterPage> {
     return Scaffold(
       backgroundColor: Color.fromARGB(227, 249, 243, 243),
       appBar: CustomHeader(
-        imagePath: 'images/diabetesLogo.png',
+        imagePath: 'assets/images/diabetesLogo.png',
         welcomeMessage: 'Welcome to Diabetes Preventer!',
         showWelcomeMessage:
             true, // Set to false if you don't want the welcome message

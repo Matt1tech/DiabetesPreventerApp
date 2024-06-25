@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'utilties.dart';
+import '../utilties.dart';
 import 'registerPage.dart';
-import 'customHeader.dart';
+import '../customHeader.dart';
 
 class FamilyHistoryPage extends StatefulWidget {
   const FamilyHistoryPage({super.key});
@@ -19,7 +19,7 @@ class _FamilyHistoryPageState extends State<FamilyHistoryPage> {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 141, 87, 255),
       appBar: CustomHeader(
-        imagePath: 'images/diabetesLogo.png',
+        imagePath: 'assets/images/diabetesLogo.png',
         welcomeMessage: 'Select Carefully!',
         showWelcomeMessage:
             true, // Set to false if you don't want the welcome message
@@ -45,7 +45,7 @@ class _FamilyHistoryPageState extends State<FamilyHistoryPage> {
           children: [
             // Top image
             Image.asset(
-              'images/diabetesLogo.png',
+              'assets/images/diabetesLogo.png',
               width: 120, // Adjust width as needed
               height: 120, // Adjust height as needed
             ),

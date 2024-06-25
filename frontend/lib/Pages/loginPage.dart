@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'utilties.dart'; // Correct relative import for login page
+import '../utilties.dart'; // Correct relative import for login page
 import 'familyHistory.dart';
-import 'customHeader.dart';
+import 'home.dart';
+import '../customHeader.dart';
 
 final _formKey = GlobalKey<FormState>();
 final _emailController = TextEditingController();
@@ -24,7 +25,7 @@ class LoginPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Color.fromARGB(227, 249, 243, 243),
       appBar: CustomHeader(
-        imagePath: 'images/diabetesLogo.png',
+        imagePath: 'assets/images/diabetesLogo.png',
         welcomeMessage: 'Welcome to Diabetes Preventer!',
         showWelcomeMessage:
             true, // Set to false if you don't want the welcome message
@@ -128,6 +129,10 @@ Widget bodyLogin(BuildContext context) {
                   if (_formKey.currentState!.validate()) {
                     // Handle successful form submission
                     // Add code here to handle login
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => HomePage()),
+                    );
                   }
                 },
                 child: const Text(
