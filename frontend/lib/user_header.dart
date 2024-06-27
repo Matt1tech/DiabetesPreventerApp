@@ -57,39 +57,43 @@ class UserHeader extends StatelessWidget implements PreferredSizeWidget {
                     ),
                   ),
                   const SizedBox(width: 20), // Space between avatar and text
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 5),
-                      Text(
-                        welcomeMessage, // Now showing the welcome message
-                        style: const TextStyle(
-                          fontSize: 21,
-                          color: Colors.white,
-                        ),
-                      ),
-                      if (userName != null) // Display user's name if provided
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
                         const SizedBox(height: 5),
-                      if (userName != null)
                         Text(
-                          userName!,
+                          welcomeMessage, // Now showing the welcome message
                           style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 20,
+                            fontSize: 21,
                             color: Colors.white,
                           ),
+                          overflow: TextOverflow.ellipsis,
                         ),
-                    ],
-                  ),
-                  if (rightIcon != null) const SizedBox(width: 10),
-                  IconButton(
-                    icon: Icon(
-                      rightIcon,
-                      color: Colors.white,
+                        if (userName != null) // Display user's name if provided
+                          const SizedBox(height: 5),
+                        if (userName != null)
+                          Text(
+                            userName!,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
+                              color: Colors.white,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                      ],
                     ),
-                    iconSize: 30.0,
-                    onPressed: () {},
                   ),
+                  if (rightIcon != null)
+                    IconButton(
+                      icon: Icon(
+                        rightIcon,
+                        color: Colors.white,
+                      ),
+                      iconSize: 30.0,
+                      onPressed: () {},
+                    ),
                 ],
               ),
             ),

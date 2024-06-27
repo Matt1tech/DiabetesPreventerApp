@@ -30,7 +30,7 @@ class _HomePageState extends State<HomePage> {
         pageName: 'Home', // This will be shown as the page title
         welcomeMessage:
             'Hello Again!', // This will be shown as the welcome message
-        userName: 'ALBUKAAI MOHAMAD',
+        userName: 'MOHAMAD ALBUKAAI',
         userStatus: 'Active',
         rightIcon: Icons.notifications,
         showWelcomeMessage: true,
