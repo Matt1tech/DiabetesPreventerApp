@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../utilties.dart'; // Correct relative import for login page
-import 'familyHistory.dart';
+import '../utilities.dart'; // Correct relative import for login page
+import 'family_history.dart';
 import 'home.dart';
-import '../customHeader.dart';
+import '../custom_header.dart';
 
 final _formKey = GlobalKey<FormState>();
 final _emailController = TextEditingController();

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
-import '../utilties.dart';
-import 'loginPage.dart';
-import '../customHeader.dart';
+import '../utilities.dart';
+import 'login_page.dart';
+import '../custom_header.dart';
 
 final _formKey = GlobalKey<FormState>();
 final _nameController = TextEditingController();

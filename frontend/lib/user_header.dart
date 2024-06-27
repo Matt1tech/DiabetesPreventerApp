@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'utilties.dart';
+import 'utilities.dart';
 
 class UserHeader extends StatelessWidget implements PreferredSizeWidget {
   final String imagePath;
@@ -44,61 +44,51 @@ class UserHeader extends StatelessWidget implements PreferredSizeWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
+                  CircleAvatar(
+                    radius: 35,
+                    backgroundColor: Colors.white,
+                    child: ClipOval(
+                      child: Image.asset(
+                        imagePath,
+                        fit: BoxFit.cover,
+                        width: 60,
+                        height: 60,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 20), // Space between avatar and text
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      CircleAvatar(
-                        radius: 35,
-                        backgroundColor: Colors.white,
-                        child: ClipOval(
-                          child: Image.asset(
-                            imagePath,
-                            fit: BoxFit.cover,
-                            width: 60,
-                            height: 60,
-                          ),
+                      const SizedBox(height: 5),
+                      Text(
+                        welcomeMessage, // Now showing the welcome message
+                        style: const TextStyle(
+                          fontSize: 21,
+                          color: Colors.white,
                         ),
                       ),
-                      const SizedBox(
-                          width: 20), // Space between avatar and text
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const SizedBox(height: 5),
-                          Text(
-                            welcomeMessage, // Now showing the welcome message
-                            style: const TextStyle(
-                              fontSize: 21,
-                              color: Colors.white,
-                            ),
-                          ),
-                          if (userName !=
-                              null) // Display user's name if provided
-                            const SizedBox(height: 5),
-                          if (userName != null)
-                            Text(
-                              userName!,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 20,
-                                color: Colors.white,
-                              ),
-                            ),
-                        ],
-                      ),
-                      if (rightIcon != null)
-                        Padding(
-                          padding: const EdgeInsets.only(
-                              right: 8.0, top: 8.0), // Adjust padding
-                          child: IconButton(
-                            icon: Icon(
-                              rightIcon,
-                              color: Colors.white,
-                            ),
-                            iconSize: 25.0,
-                            onPressed: () {},
+                      if (userName != null) // Display user's name if provided
+                        const SizedBox(height: 5),
+                      if (userName != null)
+                        Text(
+                          userName!,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20,
+                            color: Colors.white,
                           ),
                         ),
                     ],
+                  ),
+                  if (rightIcon != null) const SizedBox(width: 10),
+                  IconButton(
+                    icon: Icon(
+                      rightIcon,
+                      color: Colors.white,
+                    ),
+                    iconSize: 30.0,
+                    onPressed: () {},
                   ),
                 ],
               ),

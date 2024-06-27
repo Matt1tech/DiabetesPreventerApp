@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:frontend/models/suitableMenu_modal.dart';
-import 'package:frontend/nutritionContainer.dart';
-import '../userHeader.dart';
-import '../utilties.dart';
+import 'package:frontend/models/suitable_menu_modal.dart';
+import 'package:frontend/nutrition_container.dart';
+import '../user_header.dart';
+import '../utilities.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({super.key});

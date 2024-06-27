@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'utilties.dart';
+import 'utilities.dart';
 
 class CustomHeader extends StatelessWidget implements PreferredSizeWidget {
   final String imagePath;
