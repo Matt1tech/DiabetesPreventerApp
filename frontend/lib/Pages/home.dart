@@ -5,6 +5,7 @@ import 'package:frontend/models/suitable_menu_modal.dart';
 import 'package:frontend/nutrition_container.dart';
 import '../user_header.dart';
 import '../utilities.dart';
+import '../charts.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({super.key});
@@ -22,6 +23,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    //suitable menu model
     _getMenu();
     return Scaffold(
       backgroundColor: Color.fromARGB(255, 217, 217, 217),
@@ -36,11 +38,27 @@ class _HomePageState extends State<HomePage> {
         showWelcomeMessage: true,
         topPadding: 50.0,
       ),
-      body: Column(children: [
-        lowerContainer(),
-        const SizedBox(height: 10),
-        nutrientsDetailsSection(),
-      ]),
+      body: Column(
+        children: [
+          lowerContainer(),
+          const SizedBox(height: 10),
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  nutrientsDetailsSection(),
+                  const SizedBox(height: 10),
+                  riskOverviewSection(),
+                  const SizedBox(height: 10),
+                  healthInformationSection(),
+                  const SizedBox(height: 10),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -50,7 +68,7 @@ class _HomePageState extends State<HomePage> {
       children: [
         Container(
           color: pinkColor, // Background color
-          height: 160.0,
+          height: 155.0,
           width: 420,
 
           child: Column(
@@ -58,8 +76,6 @@ class _HomePageState extends State<HomePage> {
             children: menuSlider,
           ),
         ),
-
-        // You can add more widgets here
       ],
     );
   }
@@ -81,46 +97,64 @@ class _HomePageState extends State<HomePage> {
       ),
       const SizedBox(height: 10),
       Container(
-        height: 100,
+        height: 95,
         child: ListView.separated(
-            itemCount: menu.length,
-            scrollDirection: Axis.horizontal,
-            padding: EdgeInsets.only(
-              left: 20,
-              right: 20,
-            ),
-            separatorBuilder: (context, index) => SizedBox(width: 15),
-            itemBuilder: (context, index) {
-              return Container(
-                  width: 90,
-                  decoration: BoxDecoration(
-                    color: menu[index].boxColor.withOpacity(0.7),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Container(
-                        width: 60,
-                        height: 60,
-                        decoration: BoxDecoration(
-                            color: Colors.white, shape: BoxShape.circle),
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: SvgPicture.asset(menu[index].imagePath),
-                        ),
+          itemCount: menu.length,
+          scrollDirection: Axis.horizontal,
+          padding: EdgeInsets.only(
+            left: 20,
+            right: 20,
+          ),
+          separatorBuilder: (context, index) => SizedBox(width: 15),
+          itemBuilder: (context, index) {
+            return InkWell(
+              onTap: () {
+                // Handle button press
+                print('Item ${menu[index].name} pressed');
+                // Add navigation or other logic here
+              },
+              child: Container(
+                width: 90,
+                decoration: BoxDecoration(
+                  color: menu[index].boxColor.withOpacity(0.7),
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 4,
+                      offset: Offset(2, 2),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Container(
+                      width: 60,
+                      height: 60,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
                       ),
-                      Text(
-                        menu[index].name,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w400,
-                          color: Colors.black,
-                          fontSize: 14,
-                        ),
-                      )
-                    ],
-                  ));
-            }),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: SvgPicture.asset(menu[index].imagePath),
+                      ),
+                    ),
+                    Text(
+                      menu[index].name,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w400,
+                        color: Colors.black,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
       ),
     ];
   }
@@ -132,7 +166,7 @@ Column nutrientsDetailsSection() {
     children: [
       const SizedBox(height: 4),
       Container(
-        height: 170.0,
+        height: 200.0,
         width: 420,
         color: Color.fromARGB(217, 217, 217, 217),
         child: Column(
@@ -165,13 +199,13 @@ Column nutrientsDetailsSection() {
               children: [
                 AnimatedNutritionContainer(
                   title: 'Protein',
-                  calories: 90, // Specific calories for Protein
+                  calories: 100, // Specific calories for Protein
                   maxCalories: 200,
                   textColor: const Color.fromARGB(255, 164, 103, 12),
                 ),
                 AnimatedNutritionContainer(
                   title: 'Fats',
-                  calories: 70, // Specific calories for Fats
+                  calories: 150, // Specific calories for Fats
                   maxCalories: 300,
                   textColor: pinkColor,
                 ),
@@ -183,7 +217,7 @@ Column nutrientsDetailsSection() {
                 ),
                 AnimatedNutritionContainer(
                   title: 'Fiber',
-                  calories: 40, // Specific calories for Fiber
+                  calories: 50, // Specific calories for Fiber
                   maxCalories: 100,
                   textColor: Color.fromARGB(255, 3, 58, 16),
                 ),
@@ -198,3 +232,136 @@ Column nutrientsDetailsSection() {
     ],
   );
 }
+
+//Risk Overview Section
+Column riskOverviewSection() {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Padding(
+        padding: const EdgeInsets.only(left: 4),
+        child: Text(
+          'Risk Overview',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: blueColor,
+            fontSize: 18.0,
+          ),
+        ),
+      ),
+      SizedBox(height: 10),
+      Container(
+        height: 250.0,
+        width: 385,
+        decoration: BoxDecoration(
+          color: const Color.fromARGB(255, 255, 255, 255),
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.5),
+              spreadRadius: 5,
+              blurRadius: 7,
+              offset: Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [],
+        ),
+      ),
+    ],
+  );
+}
+
+//Health Information Section
+Column healthInformationSection() {
+  return Column(
+    children: [
+      Container(
+        height: 210.0,
+        width: 420,
+        color: pinkColor,
+        child: Row(
+          children: [],
+        ),
+      ),
+    ],
+  );
+}
+
+
+
+
+
+
+
+/*riskOverviewSection()
+crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Text(
+          'Risk Overview',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.blue,
+            fontSize: 18.0,
+          ),
+        ),
+      ),
+      Container(
+        height: 250.0,
+        width: 420,
+        padding: const EdgeInsets.all(8.0),
+        color: Colors.white,
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              SizedBox(
+                height: 200,
+                child: LineChartSample(),
+              ),
+              SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: SizedBox(
+                      height: 150,
+                      child: BarChartSample(),
+                    ),
+                  ),
+                  SizedBox(width: 20),
+                  Container(
+                    width: 100,
+                    height: 100,
+                    child: PieChartSample(),
+                  ),
+                ],
+              ),
+              SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Text(
+                    'Glucose: 125 mg/dl',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.orange,
+                    ),
+                  ),
+                  Text(
+                    'Blood Pressure: 124/77 mm',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.red,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    ], */

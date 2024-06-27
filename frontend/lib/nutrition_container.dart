@@ -15,7 +15,7 @@ class NutritionContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Container(
-        height: 60.0,
+        height: 70.0,
         width: 90,
         decoration: BoxDecoration(
           color: Color.fromARGB(217, 255, 255, 255),
@@ -83,8 +83,8 @@ class _AnimatedNutritionContainerState
   Widget build(BuildContext context) {
     return Center(
       child: Container(
-        height: 90.0, // Adjust height as needed
-        width: 75,
+        height: 100.0, // Adjust height as needed
+        width: 80,
         decoration: BoxDecoration(
           color: Color.fromARGB(
               255, 255, 255, 255), // Make the background transparent
