@@ -85,17 +85,10 @@ class UserHeader extends StatelessWidget implements PreferredSizeWidget {
                             ),
                         ],
                       ),
-                    ],
-                  ),
-                  if (rightIcon != null)
-                    Row(
-                      mainAxisSize: MainAxisSize
-                          .min, // Ensure the row takes only the necessary space
-                      children: [
-                        Transform.translate(
-                          offset: const Offset(
-                              0, -8), // Adjust the horizontal offset
-
+                      if (rightIcon != null)
+                        Padding(
+                          padding: const EdgeInsets.only(
+                              right: 8.0, top: 8.0), // Adjust padding
                           child: IconButton(
                             icon: Icon(
                               rightIcon,
@@ -105,8 +98,8 @@ class UserHeader extends StatelessWidget implements PreferredSizeWidget {
                             onPressed: () {},
                           ),
                         ),
-                      ],
-                    ),
+                    ],
+                  ),
                 ],
               ),
             ),
