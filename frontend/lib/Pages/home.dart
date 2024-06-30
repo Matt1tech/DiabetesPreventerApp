@@ -6,6 +6,7 @@ import 'package:frontend/models/chart.dart';
 import 'package:frontend/nutrition_container.dart';
 import '../user_header.dart';
 import '../utilities.dart';
+import '../customized_navigation_bar.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({super.key});
@@ -69,15 +70,16 @@ SideTitles monthOfYearBottomTitles() {
 class _HomePageState extends State<HomePage> {
   List<SuitableMenuModel> menu = [];
 
-  void _getMenu() {
-    menu = SuitableMenuModel.getMenu();
-  }
+  int _selectedIndex = 0;
 
-  int _selectedIndex = 0; // Define the selected index variable
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
+  }
+
+  void _getMenu() {
+    menu = SuitableMenuModel.getMenu();
   }
 
   @override
@@ -107,7 +109,6 @@ class _HomePageState extends State<HomePage> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   nutrientsDetailsSection(),
-                  const SizedBox(height: 10),
                   riskOverviewSection(),
                   const SizedBox(height: 10),
                 ],
@@ -116,45 +117,9 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        unselectedItemColor: blueColor, // Set the background color to blue
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.restaurant),
-            label: 'Meal',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.tune),
-            label: 'Custom',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.camera_alt,
-              size: 40,
-            ),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.insert_chart),
-            label: 'Reports',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.add_box),
-            label: 'Package',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.support_agent),
-            label: 'Support',
-          ),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: pinkColor, // Set the selected item color to pink
-        onTap: _onItemTapped,
-        showUnselectedLabels: true,
+      bottomNavigationBar: CustomNavigationBar(
+        selectedIndex: _selectedIndex,
+        onItemTapped: _onItemTapped,
       ),
     );
   }
@@ -165,7 +130,7 @@ class _HomePageState extends State<HomePage> {
       children: [
         Container(
           color: pinkColor, // Background color
-          height: 155.0,
+          height: 140.0,
           width: 420,
 
           child: Column(
@@ -180,9 +145,8 @@ class _HomePageState extends State<HomePage> {
 //suitable menu slider
   List<Widget> get menuSlider {
     return [
-      const SizedBox(height: 10),
       Padding(
-        padding: const EdgeInsets.only(left: 20),
+        padding: const EdgeInsets.only(left: 20, top: 3),
         child: Text(
           'Suitable Menu',
           style: TextStyle(
@@ -263,7 +227,7 @@ Column nutrientsDetailsSection() {
     children: [
       const SizedBox(height: 4),
       Container(
-        height: 200.0,
+        height: 195.0,
         width: 420,
         color: Color.fromARGB(217, 217, 217, 217),
         child: Column(
