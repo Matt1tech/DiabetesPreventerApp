@@ -1,11 +1,11 @@
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:frontend/models/suitable_menu_modal.dart';
+import 'package:frontend/models/chart.dart';
 import 'package:frontend/nutrition_container.dart';
 import '../user_header.dart';
 import '../utilities.dart';
-import '../charts.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({super.key});
@@ -14,11 +14,70 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
+// Example list of monthly risk values for diabetes
+List<double> monthlyRiskValues = [10, 15, 14, 34, 0, 22];
+// Function to convert the list of risk values into a list of FlSpot objects
+List<FlSpot> getMonthlySpots(List<double> values) {
+  return List.generate(
+      values.length, (index) => FlSpot(index.toDouble(), values[index]));
+}
+
+// Function to create bottom titles for the months of the year
+SideTitles monthOfYearBottomTitles() {
+  return SideTitles(
+    showTitles: true,
+    getTitlesWidget: (value, meta) {
+      const style = TextStyle(
+        color: Colors.black,
+        fontWeight: FontWeight.bold,
+        fontSize: 12,
+      );
+      Widget text;
+      switch (value.toInt()) {
+        case 0:
+          text = const Text('Jan', style: style);
+          break;
+        case 1:
+          text = const Text('Feb', style: style);
+          break;
+        case 2:
+          text = const Text('Mar', style: style);
+          break;
+        case 3:
+          text = const Text('Apr', style: style);
+          break;
+        case 4:
+          text = const Text('May', style: style);
+          break;
+        case 5:
+          text = const Text('Jun', style: style);
+          break;
+        default:
+          text = const Text('', style: style);
+          break;
+      }
+      return SideTitleWidget(
+        axisSide: meta.axisSide,
+        space: 5.0, // Reduce the space between the chart and the titles
+        child: text,
+      );
+    },
+    interval: 1,
+  );
+}
+
 class _HomePageState extends State<HomePage> {
   List<SuitableMenuModel> menu = [];
 
   void _getMenu() {
     menu = SuitableMenuModel.getMenu();
+  }
+
+  int _selectedIndex = 0; // Define the selected index variable
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
   }
 
   @override
@@ -51,13 +110,51 @@ class _HomePageState extends State<HomePage> {
                   const SizedBox(height: 10),
                   riskOverviewSection(),
                   const SizedBox(height: 10),
-                  healthInformationSection(),
-                  const SizedBox(height: 10),
                 ],
               ),
             ),
           ),
         ],
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        unselectedItemColor: blueColor, // Set the background color to blue
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.restaurant),
+            label: 'Meal',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.tune),
+            label: 'Custom',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(
+              Icons.camera_alt,
+              size: 40,
+            ),
+            label: '',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.insert_chart),
+            label: 'Reports',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.add_box),
+            label: 'Package',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.support_agent),
+            label: 'Support',
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: pinkColor, // Set the selected item color to pink
+        onTap: _onItemTapped,
+        showUnselectedLabels: true,
       ),
     );
   }
@@ -249,119 +346,175 @@ Column riskOverviewSection() {
           ),
         ),
       ),
-      SizedBox(height: 10),
-      Container(
-        height: 250.0,
-        width: 385,
-        decoration: BoxDecoration(
-          color: const Color.fromARGB(255, 255, 255, 255),
-          borderRadius: BorderRadius.circular(10),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.5),
-              spreadRadius: 5,
-              blurRadius: 7,
-              offset: Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [],
-        ),
-      ),
+      const SizedBox(height: 10),
+      monthlyRiskChart(),
+      const SizedBox(height: 30),
+      healthInformationSection(),
     ],
+  );
+}
+
+Container monthlyRiskChart() {
+  return Container(
+    width: 380,
+    height: 250,
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(10),
+      color: Colors.white,
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black26,
+          blurRadius: 10,
+          offset: Offset(0, 4),
+        ),
+      ],
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(top: 10.0, left: 25),
+          child: Text(
+            'Monthly Risk',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: pinkColor,
+            ),
+          ),
+        ),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.all(23.0),
+            child: LineChart(
+              LineChartData(
+                lineTouchData:
+                    LineTouchData(touchTooltipData: LineTouchTooltipData(
+                  getTooltipItems: (touchedSpots) {
+                    return touchedSpots.map((LineBarSpot touchedSpot) {
+                      final textStyle = TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      );
+                      return LineTooltipItem(
+                          touchedSpot.y.toString(), textStyle);
+                    }).toList();
+                  },
+                )),
+                lineBarsData: [
+                  LineChartBarData(
+                    color: blueColor,
+                    spots: getMonthlySpots(monthlyRiskValues),
+                    barWidth: 3,
+                    isCurved: true,
+                    dotData: FlDotData(
+                      show: true,
+                      getDotPainter: (spot, percent, bar, index) {
+                        return FlDotCirclePainter(
+                          radius: 6,
+                          color:
+                              pinkColor, // Change this color to your desired color
+                          strokeWidth: 2,
+                          strokeColor: const Color.fromARGB(255, 78, 70, 70),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+                titlesData: FlTitlesData(
+                  topTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: false,
+                    ),
+                  ),
+                  rightTitles: AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
+                  leftTitles: AxisTitles(
+                    axisNameWidget: Transform.translate(
+                      offset: Offset(26, -16),
+                      child: Text(
+                        'Risk Percentage (RP)',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: blueColor,
+                        ),
+                      ),
+                    ),
+                    sideTitles: SideTitles(
+                      showTitles: false,
+                      reservedSize: 60,
+                    ),
+                  ),
+                  bottomTitles: AxisTitles(
+                    axisNameWidget: Text('Month of the Year'),
+                    sideTitles: monthOfYearBottomTitles(),
+                  ),
+                ),
+                gridData: FlGridData(
+                  show: true,
+                  drawHorizontalLine: true,
+                  getDrawingHorizontalLine: (value) {
+                    return FlLine(
+                      color: Colors.grey,
+                      strokeWidth: 0.5,
+                    );
+                  },
+                  drawVerticalLine: true,
+                  getDrawingVerticalLine: (value) {
+                    return FlLine(
+                      color: Colors.grey,
+                      strokeWidth: 0.5,
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    ),
   );
 }
 
 //Health Information Section
-Column healthInformationSection() {
-  return Column(
-    children: [
-      Container(
-        height: 210.0,
-        width: 420,
-        color: pinkColor,
-        child: Row(
-          children: [],
+Container healthInformationSection() {
+  return Container(
+    width: 380,
+    height: 250,
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(10),
+      color: Colors.white,
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black26,
+          blurRadius: 10,
+          offset: Offset(0, 4),
         ),
-      ),
-    ],
+      ],
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(top: 10.0, left: 25),
+          child: Text(
+            'Overall Health Status',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: pinkColor,
+            ),
+          ),
+        ),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.all(23.0),
+            child: OverallHealthStatusPieChart(),
+          ),
+        ),
+      ],
+    ),
   );
 }
-
-
-
-
-
-
-
-/*riskOverviewSection()
-crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Text(
-          'Risk Overview',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.blue,
-            fontSize: 18.0,
-          ),
-        ),
-      ),
-      Container(
-        height: 250.0,
-        width: 420,
-        padding: const EdgeInsets.all(8.0),
-        color: Colors.white,
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              SizedBox(
-                height: 200,
-                child: LineChartSample(),
-              ),
-              SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(
-                    child: SizedBox(
-                      height: 150,
-                      child: BarChartSample(),
-                    ),
-                  ),
-                  SizedBox(width: 20),
-                  Container(
-                    width: 100,
-                    height: 100,
-                    child: PieChartSample(),
-                  ),
-                ],
-              ),
-              SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Text(
-                    'Glucose: 125 mg/dl',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.orange,
-                    ),
-                  ),
-                  Text(
-                    'Blood Pressure: 124/77 mm',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.red,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    ], */
