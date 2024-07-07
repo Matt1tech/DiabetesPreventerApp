@@ -14,77 +14,7 @@ class TestPage extends StatelessWidget {
 //Color
 const blueColor = Color.fromARGB(255, 30, 96, 195);
 const pinkColor = Color.fromARGB(255, 141, 87, 255);
-/*
-Widget header({required String imagePath, required String welcomeMessage}) {
-  return Column(
-    children: [
-      PreferredSize(
-        preferredSize: const Size.fromHeight(120.0),
-        child: Container(
-          margin: const EdgeInsets.only(top: 50.0),
-          child: AppBar(
-            backgroundColor: blueColor,
-            automaticallyImplyLeading: false, // Hides the default back arrow
-            flexibleSpace: Container(
-              alignment: Alignment.center,
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 20.0, vertical: 15.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircleAvatar(
-                    radius: 35,
-                    backgroundColor: Colors.white,
-                    child: ClipOval(
-                      child: Image.asset(
-                        imagePath,
-                        fit: BoxFit.cover,
-                        width: 60,
-                        height: 60,
-                      ),
-                    ),
-                  ),
-                  const Expanded(
-                    child: Text(
-                      'Diabetes Preventer',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 50),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-      Container(
-        color: pinkColor,
-        height: 50,
-        width: double.infinity, // Full width
-        child: Padding(
-          padding: const EdgeInsets.only(
-              left: 20.0), // Adjust left padding as needed
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              welcomeMessage,
-              style: const TextStyle(
-                fontSize: 22,
-                color: Colors.white,
-              ),
-            ),
-          ),
-        ),
-      ),
-    ],
-  );
-}
-*/
+
 Widget footer() {
   return Container(
     margin: const EdgeInsets.only(bottom: 00.0),
@@ -142,7 +72,7 @@ class _CustomToggleButtonsState extends State<CustomToggleButtons> {
         borderRadius: BorderRadius.circular(7),
         constraints: const BoxConstraints(
           minHeight: 40.0,
-          minWidth: 110.0,
+          minWidth: 95.0,
         ),
         isSelected: widget.isSelected,
         onPressed: (int index) {
@@ -274,6 +204,12 @@ class ReusableTextFormField extends StatelessWidget {
         ),
         floatingLabelBehavior: FloatingLabelBehavior.auto,
         floatingLabelAlignment: FloatingLabelAlignment.start,
+        errorStyle: TextStyle(
+          // Customize the error style here
+          fontSize: 12.0, // Set the font size for the validator message
+          color: const Color.fromARGB(
+              255, 184, 32, 21), // Set the color for the validator message
+        ),
       ),
       keyboardType: keyboardType,
       validator: validator ??
@@ -292,4 +228,53 @@ class ReusableTextFormField extends StatelessWidget {
       autovalidateMode: AutovalidateMode.onUserInteraction,
     );
   }
+}
+
+//Dialog Box
+
+void showErrorDialog(BuildContext context, String title, String message) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text(title),
+        content: Text(message),
+        actions: <Widget>[
+          TextButton(
+            child: Text('Continue'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+          TextButton(
+            child: Text('Cancel'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+
+Future<void> showConfirmationDialog(
+    BuildContext context, String title, String message) {
+  return showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text(title),
+        content: Text(message),
+        actions: <Widget>[
+          TextButton(
+            child: Text('OK'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      );
+    },
+  );
 }

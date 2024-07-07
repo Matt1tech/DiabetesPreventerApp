@@ -1,3 +1,66 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart'; // Secure storage for storing and retrieving data securely
+import 'package:jwt_decoder/jwt_decoder.dart'; // JWT decoder package
+
+// HomePage widget which accepts userData as a parameter
+class HomePage extends StatefulWidget {
+  final Map<String, dynamic> userData;
+
+  // Constructor for HomePage which takes userData as a required parameter
+  const HomePage({Key? key, required this.userData}) : super(key: key);
+
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+// State class for HomePage
+class _HomePageState extends State<HomePage> {
+  final storage = FlutterSecureStorage(); // Instance of secure storage
+  Map<String, dynamic>? userData; // Variable to hold user data
+
+  @override
+  void initState() {
+    super.initState();
+    userData = widget
+        .userData; // Initialize userData with the data passed to the widget
+    print(
+        'Init State User Data: $userData'); // Log user data during initialization
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    print('Build User Data: $userData'); // Log user data during build
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Home'),
+      ),
+      body: userData == null
+          ? Center(child: CircularProgressIndicator())
+          : Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Name: ${userData!['name']}'),
+                  Text('Email: ${userData!['email']}'),
+                  Text('Gender: ${userData!['gender']}'),
+                  Text('Marital Status: ${userData!['marital_status']}'),
+                  Text('Height: ${userData!['height']}'),
+                  Text('Birthdate: ${userData!['birthdate']}'),
+                  Text('Family History: ${userData!['family_history']}'),
+                  Text('Profile Picture: ${userData!['profile_picture']}'),
+                ],
+              ),
+            ),
+    );
+  }
+}
+
+
+
+
+/*
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -482,3 +545,4 @@ Container healthInformationSection() {
     ),
   );
 }
+*/

@@ -1,9 +1,12 @@
-# api/urls.py
+# In your urls.py
 from django.urls import path
-from . import views
+from .views import register, MyTokenObtainPairView
+
+from django.urls import path
+from .views import register, login
 
 urlpatterns = [
-    path('users/', views.UserListView.as_view(), name='user-list'),
-    path('users/create/', views.CreateUserView.as_view(), name='user-create'),
-    path('users/<pk>/', views.UserDetailView.as_view(), name='user-detail'),
+    path('register/', register, name='register'),
+    path('login/', login, name='login'),
+    path('api/token/', MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
 ]

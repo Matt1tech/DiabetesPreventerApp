@@ -17,6 +17,12 @@ class CustomNavigationBar extends StatelessWidget {
       backgroundColor: Colors.white, // Set the background color to white
       unselectedItemColor: blueColor, // Set the unselected item color to blue
       selectedItemColor: pinkColor, // Set the selected item color to pink
+      selectedLabelStyle: TextStyle(
+        fontSize: 10, // Set the desired font size for selected labels
+      ),
+      unselectedLabelStyle: TextStyle(
+        fontSize: 10, // Set the desired font size for unselected labels
+      ),
       items: const <BottomNavigationBarItem>[
         BottomNavigationBarItem(
           icon: Icon(Icons.home),

@@ -2,16 +2,18 @@ import 'package:flutter/material.dart';
 import 'utilities.dart';
 
 class CustomHeader extends StatelessWidget implements PreferredSizeWidget {
-  final String imagePath;
+  final String? imagePath;
+  final ImageProvider? imageProvider;
   final String welcomeMessage;
   final bool showWelcomeMessage;
   final double topPadding;
 
   CustomHeader({
-    required this.imagePath,
+    this.imagePath,
+    this.imageProvider,
     required this.welcomeMessage,
     this.showWelcomeMessage = true,
-    this.topPadding = 50.0, // Default top padding to lower the header
+    this.topPadding = 50.0,
   });
 
   @override
@@ -21,14 +23,16 @@ class CustomHeader extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    ImageProvider effectiveImage = imageProvider ??
+        (imagePath != null ? AssetImage(imagePath!) : AssetImage(''));
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          padding: EdgeInsets.only(top: topPadding), // Adjust top padding here
+          padding: EdgeInsets.only(top: topPadding),
           child: AppBar(
-            backgroundColor:
-                blueColor, // Replace `blueColor` with the actual color
+            backgroundColor: blueColor,
             automaticallyImplyLeading: false,
             flexibleSpace: Container(
               alignment: Alignment.center,
@@ -41,15 +45,15 @@ class CustomHeader extends StatelessWidget implements PreferredSizeWidget {
                     radius: 35,
                     backgroundColor: Colors.white,
                     child: ClipOval(
-                      child: Image.asset(
-                        imagePath,
+                      child: Image(
+                        image: effectiveImage,
                         fit: BoxFit.cover,
                         width: 60,
                         height: 60,
                       ),
                     ),
                   ),
-                  const SizedBox(width: 20), // Space between avatar and text
+                  const SizedBox(width: 20),
                   const Expanded(
                     child: Text(
                       'Diabetes Preventer',
@@ -70,7 +74,7 @@ class CustomHeader extends StatelessWidget implements PreferredSizeWidget {
           Container(
             color: pinkColor,
             height: 50,
-            width: double.infinity, // Full width
+            width: double.infinity,
             child: Padding(
               padding: const EdgeInsets.only(left: 20.0),
               child: Align(

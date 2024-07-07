@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../utilities.dart';
 import 'register_page.dart';
 import '../custom_header.dart';
+import '../utilities.dart';
 
 class FamilyHistoryPage extends StatefulWidget {
   const FamilyHistoryPage({super.key});
@@ -11,7 +11,6 @@ class FamilyHistoryPage extends StatefulWidget {
 }
 
 class _FamilyHistoryPageState extends State<FamilyHistoryPage> {
-  // State for toggle buttons
   List<bool> isSelected = [true, false];
 
   @override
@@ -21,16 +20,14 @@ class _FamilyHistoryPageState extends State<FamilyHistoryPage> {
       appBar: CustomHeader(
         imagePath: 'assets/images/diabetesLogo.png',
         welcomeMessage: 'Select Carefully!',
-        showWelcomeMessage:
-            true, // Set to false if you don't want the welcome message
+        showWelcomeMessage: true,
       ),
       body: Column(
         children: [
           Expanded(
-            child:
-                bodyFamilyHistory(), // Using the body specific to family history
+            child: bodyFamilyHistory(),
           ),
-          footer(), // Using footer widget
+          //footer(),
         ],
       ),
     );
@@ -43,21 +40,16 @@ class _FamilyHistoryPageState extends State<FamilyHistoryPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Top image
             Image.asset(
               'assets/images/diabetesLogo.png',
-              width: 120, // Adjust width as needed
-              height: 120, // Adjust height as needed
+              width: 120,
+              height: 120,
             ),
             const SizedBox(height: 20),
-            // Question text
             RichText(
               textAlign: TextAlign.center,
               text: const TextSpan(
-                style: TextStyle(
-                  fontSize: 20,
-                  color: Colors.white,
-                ),
+                style: TextStyle(fontSize: 20, color: Colors.white),
                 children: <TextSpan>[
                   TextSpan(text: 'Do you have '),
                   TextSpan(
@@ -74,7 +66,6 @@ class _FamilyHistoryPageState extends State<FamilyHistoryPage> {
               ),
             ),
             const SizedBox(height: 40),
-            // Using CustomToggleButtons for Yes/No selection
             CustomToggleButtons(
               options: const ['Yes', 'No'],
               isSelected: isSelected,
@@ -89,34 +80,29 @@ class _FamilyHistoryPageState extends State<FamilyHistoryPage> {
               },
             ),
             const SizedBox(height: 70),
-            // Navigation buttons
-
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // Back button
                 TextButton(
                   style: TextButton.styleFrom(
-                    minimumSize: const Size(120, 50), // Consistent button size
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16.0), // Padding inside the button
+                    minimumSize: const Size(120, 50),
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8.0),
                     ),
                     foregroundColor: Colors.white,
                   ).copyWith(
-                    overlayColor: WidgetStateProperty.resolveWith<Color?>(
-                      (Set<WidgetState> states) {
-                        if (states.contains(WidgetState.pressed)) {
-                          return Colors.white
-                              .withOpacity(0.2); // Lighter overlay when pressed
+                    overlayColor: MaterialStateProperty.resolveWith<Color?>(
+                      (Set<MaterialState> states) {
+                        if (states.contains(MaterialState.pressed)) {
+                          return Colors.white.withOpacity(0.2);
                         }
-                        return Colors.transparent; // Transparent by default
+                        return Colors.transparent;
                       },
                     ),
                   ),
                   onPressed: () {
-                    Navigator.pop(context); // Navigate back on button press
+                    Navigator.pop(context);
                   },
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -138,34 +124,33 @@ class _FamilyHistoryPageState extends State<FamilyHistoryPage> {
                     ],
                   ),
                 ),
-
-                // Continue button
                 TextButton(
                   style: TextButton.styleFrom(
-                    minimumSize: const Size(120, 50), // Consistent button size
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16.0), // Padding inside the button
+                    minimumSize: const Size(120, 50),
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8.0),
                     ),
-                    foregroundColor: Colors
-                        .white, // Replace with your color variable if needed
+                    foregroundColor: Colors.white,
                   ).copyWith(
-                    overlayColor: WidgetStateProperty.resolveWith<Color?>(
-                      (Set<WidgetState> states) {
-                        if (states.contains(WidgetState.pressed)) {
-                          return Colors.white
-                              .withOpacity(0.2); // Lighter overlay when pressed
+                    overlayColor: MaterialStateProperty.resolveWith<Color?>(
+                      (Set<MaterialState> states) {
+                        if (states.contains(MaterialState.pressed)) {
+                          return Colors.white.withOpacity(0.2);
                         }
-                        return Colors.transparent; // Transparent by default
+                        return Colors.transparent;
                       },
                     ),
                   ),
                   onPressed: () {
+                    bool familyHistory = isSelected[0];
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => const RegisterPage()),
+                        builder: (context) => RegisterPage(
+                          familyHistory: familyHistory,
+                        ),
+                      ),
                     );
                   },
                   child: Row(
