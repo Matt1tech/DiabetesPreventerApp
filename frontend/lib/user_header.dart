@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'utilities.dart';
 
 class UserHeader extends StatelessWidget implements PreferredSizeWidget {
-  final String imagePath;
+  final String? imagePath;
+  final ImageProvider? imageProvider;
   final String welcomeMessage; // Renamed for clarity (was pageName)
   final String? pageName; // Renamed for clarity (was welcomeMessage)
   final String? userName; // Optional argument for user's name
@@ -12,7 +13,8 @@ class UserHeader extends StatelessWidget implements PreferredSizeWidget {
   final double topPadding;
 
   UserHeader({
-    required this.imagePath,
+    this.imagePath,
+    this.imageProvider,
     required this.welcomeMessage, // Required welcome message
     this.pageName, // Optional page name
     this.userName,
@@ -29,6 +31,8 @@ class UserHeader extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    ImageProvider effectiveImage = imageProvider ??
+        (imagePath != null ? AssetImage(imagePath!) : AssetImage(''));
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -48,8 +52,8 @@ class UserHeader extends StatelessWidget implements PreferredSizeWidget {
                     radius: 35,
                     backgroundColor: Colors.white,
                     child: ClipOval(
-                      child: Image.asset(
-                        imagePath,
+                      child: Image(
+                        image: effectiveImage,
                         fit: BoxFit.cover,
                         width: 60,
                         height: 60,

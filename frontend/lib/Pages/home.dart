@@ -1,68 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart'; // Secure storage for storing and retrieving data securely
-import 'package:jwt_decoder/jwt_decoder.dart'; // JWT decoder package
-
-// HomePage widget which accepts userData as a parameter
-class HomePage extends StatefulWidget {
-  final Map<String, dynamic> userData;
-
-  // Constructor for HomePage which takes userData as a required parameter
-  const HomePage({Key? key, required this.userData}) : super(key: key);
-
-  @override
-  _HomePageState createState() => _HomePageState();
-}
-
-// State class for HomePage
-class _HomePageState extends State<HomePage> {
-  final storage = FlutterSecureStorage(); // Instance of secure storage
-  Map<String, dynamic>? userData; // Variable to hold user data
-
-  @override
-  void initState() {
-    super.initState();
-    userData = widget
-        .userData; // Initialize userData with the data passed to the widget
-    print(
-        'Init State User Data: $userData'); // Log user data during initialization
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    print('Build User Data: $userData'); // Log user data during build
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Home'),
-      ),
-      body: userData == null
-          ? Center(child: CircularProgressIndicator())
-          : Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Name: ${userData!['name']}'),
-                  Text('Email: ${userData!['email']}'),
-                  Text('Gender: ${userData!['gender']}'),
-                  Text('Marital Status: ${userData!['marital_status']}'),
-                  Text('Height: ${userData!['height']}'),
-                  Text('Birthdate: ${userData!['birthdate']}'),
-                  Text('Family History: ${userData!['family_history']}'),
-                  Text('Profile Picture: ${userData!['profile_picture']}'),
-                ],
-              ),
-            ),
-    );
-  }
-}
-
-
-
-
-/*
 import 'package:fl_chart/fl_chart.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:frontend/models/suitable_menu_modal.dart';
 import 'package:frontend/models/chart.dart';
@@ -70,12 +8,18 @@ import 'package:frontend/nutrition_container.dart';
 import '../user_header.dart';
 import '../utilities.dart';
 import '../customized_navigation_bar.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 
+// HomePage widget which accepts userData as a parameter
 class HomePage extends StatefulWidget {
-  HomePage({super.key});
+  final Map<String, dynamic>? userData;
+
+  // Constructor for HomePage which takes userData as a required parameter
+  const HomePage({Key? key, required this.userData}) : super(key: key);
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  _HomePageState createState() => _HomePageState();
 }
 
 // Example list of monthly risk values for diabetes
@@ -130,9 +74,14 @@ SideTitles monthOfYearBottomTitles() {
   );
 }
 
+// State class for HomePage
 class _HomePageState extends State<HomePage> {
+  XFile? _profilePicture;
+  final ImagePicker _picker = ImagePicker();
+  final storage = FlutterSecureStorage();
+  Map<String, dynamic>? userData; // Instance of secure storage
+  // Variable to hold user data
   List<SuitableMenuModel> menu = [];
-
   int _selectedIndex = 0;
 
   void _onItemTapped(int index) {
@@ -141,22 +90,49 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  // Function to pick a profile picture from the gallery
+  Future<void> _pickProfilePicture() async {
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      setState(() {
+        _profilePicture = image;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    userData = widget.userData;
+    _getMenu();
+  }
+
   void _getMenu() {
     menu = SuitableMenuModel.getMenu();
   }
 
   @override
   Widget build(BuildContext context) {
-    //suitable menu model
-    _getMenu();
+    // Fetch the profile picture URL from the user data and prepend the base URL
+    String profilePictureUrl =
+        'http://10.0.2.2:8000${userData!['profile_picture']}';
+    print('Build User Data: $userData');
+    ImageProvider<Object> imageProvider;
+    if (_profilePicture != null) {
+      imageProvider = FileImage(File(_profilePicture!.path));
+    } else {
+      imageProvider = NetworkImage(profilePictureUrl);
+    }
+
     return Scaffold(
       backgroundColor: Color.fromARGB(255, 217, 217, 217),
       appBar: UserHeader(
+        imageProvider: imageProvider,
         imagePath: 'assets/images/diabetesLogo.png',
         pageName: 'Home', // This will be shown as the page title
         welcomeMessage:
             'Hello Again!', // This will be shown as the welcome message
-        userName: 'MOHAMAD ALBUKAAI',
+        userName: '${userData!['name']}',
         userStatus: 'Active',
         rightIcon: Icons.notifications,
         showWelcomeMessage: true,
@@ -165,7 +141,7 @@ class _HomePageState extends State<HomePage> {
       body: Column(
         children: [
           lowerContainer(),
-          const SizedBox(height: 10),
+          const SizedBox(height: 00),
           Expanded(
             child: SingleChildScrollView(
               child: Column(
@@ -173,6 +149,8 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   nutrientsDetailsSection(),
                   riskOverviewSection(),
+                  const SizedBox(height: 20),
+                  healthRecordSection(),
                   const SizedBox(height: 10),
                 ],
               ),
@@ -296,8 +274,8 @@ Column nutrientsDetailsSection() {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 20),
+            const Padding(
+              padding: EdgeInsets.only(left: 20),
               child: Text(
                 'Nutrientation Details',
                 style: TextStyle(
@@ -362,8 +340,8 @@ Column riskOverviewSection() {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Padding(
-        padding: const EdgeInsets.only(left: 4),
+      const Padding(
+        padding: EdgeInsets.only(left: 4),
         child: Text(
           'Risk Overview',
           style: TextStyle(
@@ -376,9 +354,125 @@ Column riskOverviewSection() {
       const SizedBox(height: 10),
       monthlyRiskChart(),
       const SizedBox(height: 30),
-      healthInformationSection(),
+      diabetesInfectionStatus(),
     ],
   );
+}
+
+//Risk Overview Section
+Column healthRecordSection() {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      const Padding(
+        padding: EdgeInsets.only(left: 20),
+        child: Text(
+          'Health Records',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: blueColor,
+            fontSize: 18.0,
+          ),
+        ),
+      ),
+      const SizedBox(height: 10),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          glucoseRecord(),
+          const SizedBox(width: 10),
+          bloodPressureRecord(),
+        ],
+      ),
+    ],
+  );
+}
+
+Container glucoseRecord() {
+  return Container(
+      width: 180,
+      height: 90,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        color: Colors.white,
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black26,
+            blurRadius: 10,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Glucose Level:',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: pinkColor,
+              ),
+            ),
+            SizedBox(
+              width: 5,
+            ),
+            Text(
+              '125 mg/dl',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: Colors.red,
+              ),
+            ),
+          ],
+        ),
+      ));
+}
+
+Container bloodPressureRecord() {
+  return Container(
+      width: 180,
+      height: 90,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        color: Colors.white,
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black26,
+            blurRadius: 10,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: const Center(
+        child: Column(
+          mainAxisAlignment:
+              MainAxisAlignment.center, // Center the row's children
+          children: [
+            Text(
+              'Blood Pressure:',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: pinkColor,
+              ),
+            ),
+            SizedBox(
+              width: 5,
+            ),
+            Text(
+              '125 mg/dl',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: Colors.red,
+              ),
+            ),
+          ],
+        ),
+      ));
 }
 
 Container monthlyRiskChart() {
@@ -506,10 +600,10 @@ Container monthlyRiskChart() {
 }
 
 //Health Information Section
-Container healthInformationSection() {
+Container diabetesInfectionStatus() {
   return Container(
     width: 380,
-    height: 250,
+    height: 245,
     decoration: BoxDecoration(
       borderRadius: BorderRadius.circular(10),
       color: Colors.white,
@@ -545,4 +639,49 @@ Container healthInformationSection() {
     ),
   );
 }
+
+/*
+ 
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Home'),
+      ),
+      body: userData == null
+          ? Center(child: CircularProgressIndicator())
+          : Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Name: ${userData!['name']}'),
+                  Text('Email: ${userData!['email']}'),
+                  Text('Gender: ${userData!['gender']}'),
+                  Text('Marital Status: ${userData!['marital_status']}'),
+                  Text('Height: ${userData!['height']}'),
+                  Text('Birthdate: ${userData!['birthdate']}'),
+                  Text('Family History: ${userData!['family_history']}'),
+                  Text('Profile Picture: ${userData!['profile_picture']}'),
+                ],
+              ),
+            ),
+    );
+  }
+}
+
+*/
+
+/*
+
+class HomePage extends StatefulWidget {
+  HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+
+
+  @override
+  Widget build(BuildContext context) {
+   
 */
