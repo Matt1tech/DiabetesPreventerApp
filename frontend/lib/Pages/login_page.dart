@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../utilities.dart'; // Correct relative import for utilities
+import '../utils/utilities.dart'; // Correct relative import for utilities
 import 'family_history.dart'; // Import for the sign-up page
-import 'home.dart'; // Import for the home page after login
-import '../custom_header.dart'; // Import for the custom header widget
+import 'home_page.dart'; // Import for the home page after login
+import '../widgets/custom_header.dart'; // Import for the custom header widget
 import 'package:http/http.dart'
     as http; // HTTP package for making network requests
 import 'dart:convert'; // JSON encoding and decoding

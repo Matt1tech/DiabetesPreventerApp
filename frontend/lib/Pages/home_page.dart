@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart'; // Secure storage for storing and retrieving data securely
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:frontend/models/suitable_menu_modal.dart';
-import 'package:frontend/models/chart.dart';
-import 'package:frontend/nutrition_container.dart';
-import '../user_header.dart';
-import '../utilities.dart';
-import '../customized_navigation_bar.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+
+import '../models/models.dart'; // Barrel file for models
+import '../widgets/customized_widgets.dart'; // Barrel file for custom widgets
+import '../utils/utils.dart'; // Barrel file for utilities
+import '../components/components.dart'; // Barrel file for components
+import '../utils/navigation_util.dart';
 
 // HomePage widget which accepts userData as a parameter
 class HomePage extends StatefulWidget {
@@ -88,6 +88,7 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       _selectedIndex = index;
     });
+    navigateToPage(context, index, widget.userData);
   }
 
   // Function to pick a profile picture from the gallery
@@ -121,7 +122,7 @@ class _HomePageState extends State<HomePage> {
     if (_profilePicture != null) {
       imageProvider = FileImage(File(_profilePicture!.path));
     } else {
-      imageProvider = NetworkImage(profilePictureUrl);
+      imageProvider = NetworkImage('assets/images/diabetesLogo.png');
     }
 
     return Scaffold(
@@ -220,7 +221,7 @@ class _HomePageState extends State<HomePage> {
                 decoration: BoxDecoration(
                   color: menu[index].boxColor.withOpacity(0.7),
                   borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
+                  boxShadow: const [
                     BoxShadow(
                       color: Colors.black26,
                       blurRadius: 4,
@@ -234,7 +235,7 @@ class _HomePageState extends State<HomePage> {
                     Container(
                       width: 60,
                       height: 60,
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                         color: Colors.white,
                         shape: BoxShape.circle,
                       ),
@@ -245,7 +246,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                     Text(
                       menu[index].name,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontWeight: FontWeight.w400,
                         color: Colors.black,
                         fontSize: 14,

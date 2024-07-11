@@ -2,9 +2,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:image_picker/image_picker.dart';
-import '../utilities.dart';
+import '../utils/utilities.dart';
 import 'login_page.dart';
-import '../custom_header.dart';
+import '../widgets/custom_header.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 

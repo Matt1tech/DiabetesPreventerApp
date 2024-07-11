@@ -1,6 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import '../utilities.dart';
+import '../utils/utilities.dart';
 
 class OverallHealthStatusPieChart extends StatefulWidget {
   @override

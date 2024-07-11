@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'register_page.dart';
-import '../custom_header.dart';
-import '../utilities.dart';
+import '../widgets/custom_header.dart';
+import '../utils/utilities.dart';
 
 class FamilyHistoryPage extends StatefulWidget {
   const FamilyHistoryPage({super.key});

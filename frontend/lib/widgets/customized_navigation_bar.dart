@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'utilities.dart'; // Assuming you have colors defined in this file
+import '../utils/utilities.dart'; // Assuming you have colors defined in this file
 
 class CustomNavigationBar extends StatelessWidget {
   final int selectedIndex;
@@ -59,6 +59,7 @@ class CustomNavigationBar extends StatelessWidget {
       currentIndex: selectedIndex,
       onTap: onItemTapped,
       showUnselectedLabels: true,
+      elevation: 0,
     );
   }
 }
