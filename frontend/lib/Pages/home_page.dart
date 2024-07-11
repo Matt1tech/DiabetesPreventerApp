@@ -6,10 +6,9 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
 import '../models/models.dart'; // Barrel file for models
-import '../widgets/customized_widgets.dart'; // Barrel file for custom widgets
+import '../widgets/widgets.dart'; // Barrel file for custom widgets
 import '../utils/utils.dart'; // Barrel file for utilities
 import '../components/components.dart'; // Barrel file for components
-import '../utils/navigation_util.dart';
 
 // HomePage widget which accepts userData as a parameter
 class HomePage extends StatefulWidget {
@@ -122,7 +121,7 @@ class _HomePageState extends State<HomePage> {
     if (_profilePicture != null) {
       imageProvider = FileImage(File(_profilePicture!.path));
     } else {
-      imageProvider = NetworkImage('assets/images/diabetesLogo.png');
+      imageProvider = NetworkImage(profilePictureUrl);
     }
 
     return Scaffold(
@@ -150,9 +149,13 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   nutrientsDetailsSection(),
                   riskOverviewSection(),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 30),
                   healthRecordSection(),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 30),
+                  healthInformationLogsSection(),
+                  const SizedBox(height: 30),
+                  activityLogsSection(),
+                  const SizedBox(height: 30),
                 ],
               ),
             ),
@@ -184,7 +187,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-//suitable menu slider
+//suitable menu slider Section
   List<Widget> get menuSlider {
     return [
       Padding(
@@ -352,7 +355,7 @@ Column riskOverviewSection() {
           ),
         ),
       ),
-      const SizedBox(height: 10),
+      const SizedBox(height: 20),
       monthlyRiskChart(),
       const SizedBox(height: 30),
       diabetesInfectionStatus(),
@@ -360,7 +363,7 @@ Column riskOverviewSection() {
   );
 }
 
-//Risk Overview Section
+//Last Record Display Section
 Column healthRecordSection() {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
@@ -376,7 +379,7 @@ Column healthRecordSection() {
           ),
         ),
       ),
-      const SizedBox(height: 10),
+      const SizedBox(height: 20),
       Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
@@ -384,6 +387,65 @@ Column healthRecordSection() {
           const SizedBox(width: 10),
           bloodPressureRecord(),
         ],
+      ),
+    ],
+  );
+}
+
+//Health Records Receiver section
+Column healthInformationLogsSection() {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      const Padding(
+        padding: EdgeInsets.only(left: 20),
+        child: Text(
+          'Health Information Logs',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: blueColor,
+            fontSize: 18.0,
+          ),
+        ),
+      ),
+      const SizedBox(height: 20),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          HealthMeasurementLogsCard(
+            title: 'Blood Pressure',
+            name: 'bloodPressure',
+          ), // Use the HealthMeasurementLogsCard widget,
+          HealthMeasurementLogsCard(
+            title: 'Glucose Level',
+            name: 'glucoseLevel',
+          ), // Use the HealthMeasurementLogsCard widget
+        ],
+      ),
+    ],
+  );
+}
+
+//Risk Overview Section
+Column activityLogsSection() {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      const Padding(
+        padding: EdgeInsets.only(left: 20),
+        child: Text(
+          'Activity and Meal Logs',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: blueColor,
+            fontSize: 18.0,
+          ),
+        ),
+      ),
+      const SizedBox(height: 10),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [],
       ),
     ],
   );
