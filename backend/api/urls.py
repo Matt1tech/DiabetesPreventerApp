@@ -11,9 +11,7 @@ urlpatterns = [
     path('users/', views.getUsers),
     path('users/create/', views.createUser),
     path('users/<str:pk>/update/', views.updateUser),
+    path('users/<str:pk>/delete-profile-picture/', views.deleteUserProfilePicture),
     path('users/<str:pk>/', views.getUser),
     
 ]
-# path('register/', register, name='register'),
-    #path('login/', login, name='login'),
-    #path('api/token/', MyTokenObtainPairView.as_view(), name='token_obtain_pair'),  

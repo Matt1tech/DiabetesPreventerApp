@@ -119,9 +119,7 @@ def deleteUserProfilePicture(request, pk):
     user_data.profile_picture = None  # or "" if your field does not accept None
     
     user_data.save()
-    
-    serializer = UserSerializer(user_data, many=False)
-    return Response(serializer.data)
+    return Response('Profile Picture Successfully Deleted')
     
 
 
