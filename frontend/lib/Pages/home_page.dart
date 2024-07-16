@@ -113,6 +113,8 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final userData = widget.userData;
+    final bloodGlucose = userData?['blood_glucose'] ?? 'N/A';
     // Fetch the profile picture URL from the user data and prepend the base URL
     String profilePictureUrl =
         'http://10.0.2.2:8000${userData!['profile_picture']}';
@@ -150,7 +152,7 @@ class _HomePageState extends State<HomePage> {
                   nutrientsDetailsSection(),
                   riskOverviewSection(),
                   const SizedBox(height: 30),
-                  healthRecordSection(),
+                  healthRecordSection(bloodGlucose),
                   const SizedBox(height: 30),
                   healthInformationLogsSection(),
                   const SizedBox(height: 30),
@@ -364,7 +366,8 @@ Column riskOverviewSection() {
 }
 
 //Last Record Display Section
-Column healthRecordSection() {
+//Last Record Display Section
+Column healthRecordSection(String bloodGlucose) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
@@ -383,7 +386,7 @@ Column healthRecordSection() {
       Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          glucoseRecord(),
+          glucoseRecord(bloodGlucose),
           const SizedBox(width: 10),
           bloodPressureRecord(),
         ],
@@ -451,47 +454,48 @@ Column activityLogsSection() {
   );
 }
 
-Container glucoseRecord() {
+Container glucoseRecord(String bloodGlucose) {
   return Container(
-      width: 180,
-      height: 90,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        color: Colors.white,
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black26,
-            blurRadius: 10,
-            offset: Offset(0, 4),
+    width: 180,
+    height: 90,
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(10),
+      color: Colors.white,
+      boxShadow: const [
+        BoxShadow(
+          color: Colors.black26,
+          blurRadius: 10,
+          offset: Offset(0, 4),
+        ),
+      ],
+    ),
+    child: Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            'Glucose Level:',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: pinkColor,
+            ),
+          ),
+          SizedBox(
+            width: 5,
+          ),
+          Text(
+            '$bloodGlucose',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: Colors.red,
+            ),
           ),
         ],
       ),
-      child: const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'Glucose Level:',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: pinkColor,
-              ),
-            ),
-            SizedBox(
-              width: 5,
-            ),
-            Text(
-              '125 mg/dl',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: Colors.red,
-              ),
-            ),
-          ],
-        ),
-      ));
+    ),
+  );
 }
 
 Container bloodPressureRecord() {

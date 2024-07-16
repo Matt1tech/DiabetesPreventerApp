@@ -3,9 +3,8 @@ import '../utils/utilities.dart'; // Correct relative import for utilities
 import 'family_history.dart'; // Import for the sign-up page
 import 'home_page.dart'; // Import for the home page after login
 import '../widgets/custom_header.dart'; // Import for the custom header widget
-import 'package:http/http.dart'
-    as http; // HTTP package for making network requests
-import 'dart:convert'; // JSON encoding and decoding
+import 'package:frontend/services/auth_service.dart';
+import '../widgets/widgets.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart'; // Secure storage package for storing JWT token
 
 // Define form key, text controllers, and secure storage instance
@@ -13,6 +12,7 @@ final _formKey = GlobalKey<FormState>();
 final _emailController = TextEditingController();
 final _passwordController = TextEditingController();
 final storage = FlutterSecureStorage();
+final AuthService _authService = AuthService();
 
 // Validator function for email/username input
 String? emailUsernameValidator(String? value) {
@@ -134,11 +134,21 @@ Widget bodyLogin(BuildContext context) {
                 ),
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
-                    login(
+                    _authService
+                        .login(
+                      _emailController.text.trim(),
+                      _passwordController.text,
+                    )
+                        .then((userData) {
+                      Navigator.push(
                         context,
-                        _emailController.text.trim(),
-                        _passwordController
-                            .text); // Call login function on valid input
+                        MaterialPageRoute(
+                          builder: (context) => HomePage(userData: userData),
+                        ),
+                      );
+                    }).catchError((error) {
+                      showErrorDialog(context, 'Login Error', 'Error: $error');
+                    });
                   }
                 },
                 child: const Text(
@@ -178,50 +188,4 @@ Widget bodyLogin(BuildContext context) {
       ),
     ),
   );
-}
-
-// Login function to handle user authentication
-Future<void> login(BuildContext context, String email, String password) async {
-  try {
-    var response = await http.post(
-      Uri.parse('http://10.0.2.2:8000/api/login/'), // API endpoint for login
-      headers: {'Content-Type': 'application/json'}, // Set content type to JSON
-      body: json.encode({
-        'email': email,
-        'password': password,
-      }), // Request body with email and password
-    );
-
-    // Log the status code and response body for debugging
-    print('Login Status code: ${response.statusCode}');
-    print('Login Response body: ${response.body}');
-
-    var responseJson = json.decode(response.body); // Decode the JSON response
-
-    if (response.statusCode == 200) {
-      String token = responseJson['token'];
-      print('Storing Token: $token');
-      await storage.write(
-          key: 'jwt_token', value: token); // Store JWT token securely
-
-      var userData = responseJson['user'];
-      print('User Data: $userData'); // Log user data
-
-      // Handle successful login, navigate to home page
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => HomePage(
-                userData: userData)), // Navigate to home page with user data
-      );
-    } else {
-      print('Login failed');
-      showErrorDialog(context, 'Login Error',
-          responseJson['error']); // Show error dialog on login failure
-    }
-  } catch (e) {
-    print('Error: $e');
-    showErrorDialog(
-        context, 'Login Error', 'Error: $e'); // Show error dialog on exception
-  }
 }

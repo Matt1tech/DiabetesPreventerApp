@@ -146,7 +146,7 @@ Widget buildDatePickerField(
     ),
   );
 }
-
+/*
 /// A reusable TextFormField with validation.
 ///
 /// Parameters:
@@ -229,7 +229,7 @@ class ReusableTextFormField extends StatelessWidget {
     );
   }
 }
-
+*/
 //Dialog Box
 
 void showErrorDialog(BuildContext context, String title, String message) {
