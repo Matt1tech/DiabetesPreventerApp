@@ -25,11 +25,11 @@ def getUsers(request):
     return Response(serializer.data)
 
 
-@api_view(['GET'])
-def getUser(request, pk):
-    user_data = User.objects.get(userId=pk)
-    serializer = UserSerializer(user_data, many=False)
-    return Response(serializer.data)
+#@api_view(['GET'])
+#def getUser(request, pk):
+ #   user_data = User.objects.get(userId=pk)
+  #  serializer = UserSerializer(user_data, many=False)
+   # return Response(serializer.data)
 
 
 
@@ -67,6 +67,35 @@ def getUser(request, pk):
     except Exception as e:
         return Response({'error': str(e)}, status=500)
     
+
+
+@api_view(['POST'])
+def createUser(request):
+    data = request.data
+    user_data = User.objects.create(
+        name = data['name'],
+        email = data['email'],
+        password = make_password(data['password']),
+        gender = data['gender'],
+        marital_status=data['marital_status'],
+        height = data['height'],
+        birthdate = data['birthdate'],
+        family_history = data['family_history'],
+        profile_picture = data['profile_picture']
+    )
+    serializer = UserSerializer(user_data, many=False)
+    return Response(serializer.data)
+    
+
+        
+        
+    
+
+
+
+
+
+
 
 
 

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Preferences, HealthRecords, PhysicalActivity, PhysicalRecords, Meal, DailyRecord, MonthlyRecord, MealRecommendation, User
+from .models import Preferences, HealthRecords, PhysicalActivity, PhysicalRecords, Meal, MealRecommendation, User
 
 class PreferencesSerializer(serializers.ModelSerializer):
     class Meta:
@@ -28,19 +28,6 @@ class MealSerializer(serializers.ModelSerializer):
         model = Meal
         fields = '__all__'
 
-class DailyRecordSerializer(serializers.ModelSerializer):
-    health_record = HealthRecordsSerializer()
-    physical_record = PhysicalRecordsSerializer()
-    meals = MealSerializer(many=True)
-
-    class Meta:
-        model = DailyRecord
-        fields = '__all__'
-
-class MonthlyRecordSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = MonthlyRecord
-        fields = '__all__'
 
 class MealRecommendationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -48,13 +35,6 @@ class MealRecommendationSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class UserSerializer(serializers.ModelSerializer):
-    preferences = PreferencesSerializer()
-    health_records = HealthRecordsSerializer(many=True)
-    physical_records = PhysicalRecordsSerializer(many=True)
-    meal_recommendation = MealRecommendationSerializer()
-    daily_records = DailyRecordSerializer(many=True)
-    monthly_records = MonthlyRecordSerializer(many=True)
-
     class Meta:
         model = User
         fields = '__all__'
