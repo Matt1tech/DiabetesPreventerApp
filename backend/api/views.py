@@ -85,10 +85,43 @@ def createUser(request):
     )
     serializer = UserSerializer(user_data, many=False)
     return Response(serializer.data)
-    
 
+@api_view(['PUT'])
+def updateUser(request, pk):
+    try:
+        user_data = User.objects.get(userId=pk)
+    except User.DoesNotExist:
+        return Response({'error': 'User not found'}, status=404)
+
+    data = request.data
+
+    # Handle password separately if it's in the request
+    if 'password' in data:
+        data['password'] = make_password(data['password'])
+
+    serializer = UserSerializer(user_data, data=data, partial=True)
+    
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    else:
+        return Response(serializer.errors, status=400)
         
         
+@api_view(['DELETE'])
+def deleteUserProfilePicture(request, pk):
+    try:
+        user_data = User.objects.get(userId=pk)
+    except User.DoesNotExist:
+        return Response({'error': 'User not found'}, status=404)
+
+    # Set profile_picture field to None or an empty string to remove it
+    user_data.profile_picture = None  # or "" if your field does not accept None
+    
+    user_data.save()
+    
+    serializer = UserSerializer(user_data, many=False)
+    return Response(serializer.data)
     
 
 
