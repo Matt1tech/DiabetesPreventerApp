@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'Pages/login_page.dart'; // Correct relative import for login page
+import '../Pages/pages.dart';
 // Correct relative import for home
 
 void main() {

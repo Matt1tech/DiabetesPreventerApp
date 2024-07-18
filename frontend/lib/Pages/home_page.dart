@@ -3,19 +3,18 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart'; // Secure s
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/http.dart';
 import 'dart:io';
-
+import 'dart:convert';
+import '../urls.dart';
 import '../models/models.dart'; // Barrel file for models
 import '../widgets/widgets.dart'; // Barrel file for custom widgets
 import '../utils/utils.dart'; // Barrel file for utilities
 import '../components/components.dart'; // Barrel file for components
 
-// HomePage widget which accepts userData as a parameter
 class HomePage extends StatefulWidget {
-  final Map<String, dynamic>? userData;
-
-  // Constructor for HomePage which takes userData as a required parameter
-  const HomePage({Key? key, required this.userData}) : super(key: key);
+  const HomePage({Key? key}) : super(key: key);
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -78,16 +77,16 @@ class _HomePageState extends State<HomePage> {
   XFile? _profilePicture;
   final ImagePicker _picker = ImagePicker();
   final storage = FlutterSecureStorage();
-  Map<String, dynamic>? userData; // Instance of secure storage
+  // Instance of secure storage
   // Variable to hold user data
   List<SuitableMenuModel> menu = [];
   int _selectedIndex = 0;
-
+  User userService = User();
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
-    navigateToPage(context, index, widget.userData);
+    navigateToPage(context, index);
   }
 
   // Function to pick a profile picture from the gallery
@@ -103,8 +102,9 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    userData = widget.userData;
     _getMenu();
+
+    super.initState();
   }
 
   void _getMenu() {
@@ -113,10 +113,9 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final userData = widget.userData;
-    final bloodGlucose = userData?['blood_glucose'] ?? 'N/A';
+    final bloodGlucose = 'N/A';
     // Fetch the profile picture URL from the user data and prepend the base URL
-    String profilePictureUrl =
+    /* String profilePictureUrl =
         'http://10.0.2.2:8000${userData!['profile_picture']}';
     print('Build User Data: $userData');
     ImageProvider<Object> imageProvider;
@@ -125,16 +124,16 @@ class _HomePageState extends State<HomePage> {
     } else {
       imageProvider = NetworkImage(profilePictureUrl);
     }
-
+*/
     return Scaffold(
       backgroundColor: Color.fromARGB(255, 217, 217, 217),
       appBar: UserHeader(
-        imageProvider: imageProvider,
+        /* imageProvider: imageProvider,*/
         imagePath: 'assets/images/diabetesLogo.png',
         pageName: 'Home', // This will be shown as the page title
         welcomeMessage:
             'Hello Again!', // This will be shown as the welcome message
-        userName: '${userData!['name']}',
+        userName: 'matt',
         userStatus: 'Active',
         rightIcon: Icons.notifications,
         showWelcomeMessage: true,

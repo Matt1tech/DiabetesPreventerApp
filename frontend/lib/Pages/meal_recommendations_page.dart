@@ -4,9 +4,7 @@ import '../widgets/customized_navigation_bar.dart';
 import '../utils/navigation_util.dart';
 
 class MealRecommendationsPage extends StatefulWidget {
-  final Map<String, dynamic>? userData;
-
-  MealRecommendationsPage({Key? key, required this.userData}) : super(key: key);
+  MealRecommendationsPage({Key? key}) : super(key: key);
 
   @override
   _MealRecommendationsPageState createState() =>
@@ -20,12 +18,12 @@ class _MealRecommendationsPageState extends State<MealRecommendationsPage> {
     setState(() {
       _selectedIndex = index;
     });
-    navigateToPage(context, index, widget.userData);
+    navigateToPage(context, index);
   }
 
   @override
   Widget build(BuildContext context) {
-    String profilePictureUrl =
+    /* String profilePictureUrl =
         'http://10.0.2.2:8000${widget.userData!['profile_picture']}';
     ImageProvider<Object> imageProvider;
     if (widget.userData?['profile_picture'] != null) {
@@ -33,17 +31,17 @@ class _MealRecommendationsPageState extends State<MealRecommendationsPage> {
     } else {
       imageProvider = AssetImage('assets/images/default_profile.png');
     }
-
+*/
     return Scaffold(
       backgroundColor: Color.fromARGB(255, 217, 217, 217),
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(170.0),
         child: UserHeader(
-          imageProvider: imageProvider,
+          /*imageProvider: 'assets/images/diabetesLogo.png',*/
           imagePath: 'assets/images/diabetesLogo.png',
           pageName: 'Meal Recommendations',
           welcomeMessage: 'Hello Again!',
-          userName: '${widget.userData?['name']}',
+          userName: 'Matt',
           userStatus: 'Active',
           rightIcon: Icons.notifications,
           showWelcomeMessage: true,

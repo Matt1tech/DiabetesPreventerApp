@@ -4,9 +4,7 @@ import '../widgets/customized_navigation_bar.dart';
 import '../utils/navigation_util.dart';
 
 class ReportsViewPage extends StatefulWidget {
-  final Map<String, dynamic>? userData;
-
-  ReportsViewPage({Key? key, required this.userData}) : super(key: key);
+  ReportsViewPage({Key? key}) : super(key: key);
 
   @override
   _ReportsViewPageState createState() => _ReportsViewPageState();
@@ -19,12 +17,12 @@ class _ReportsViewPageState extends State<ReportsViewPage> {
     setState(() {
       _selectedIndex = index;
     });
-    navigateToPage(context, index, widget.userData);
+    navigateToPage(context, index);
   }
 
   @override
   Widget build(BuildContext context) {
-    String profilePictureUrl =
+    /*String profilePictureUrl =
         'http://10.0.2.2:8000${widget.userData?['profile_picture']}';
     ImageProvider<Object> imageProvider;
     if (widget.userData?['profile_picture'] != null) {
@@ -32,17 +30,17 @@ class _ReportsViewPageState extends State<ReportsViewPage> {
     } else {
       imageProvider = AssetImage('assets/images/default_profile.png');
     }
-
+*/
     return Scaffold(
       backgroundColor: Color.fromARGB(255, 217, 217, 217),
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(170.0),
         child: UserHeader(
-          imageProvider: imageProvider,
+          /*imageProvider: imageProvider,*/
           imagePath: 'assets/images/diabetesLogo.png',
           pageName: 'Reports View',
           welcomeMessage: 'Hello Again!',
-          userName: '${widget.userData?['name']}',
+          userName: 'Matt',
           userStatus: 'Active',
           rightIcon: Icons.notifications,
           showWelcomeMessage: true,

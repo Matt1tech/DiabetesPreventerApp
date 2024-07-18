@@ -16,7 +16,8 @@ from rest_framework.response import Response
 from .serializers import UserSerializer
 from .models import User
 
-
+from .models import User, Preferences, HealthRecords
+from .serializers import UserSerializer
 
 @api_view(['GET'])
 def getUsers(request):
@@ -67,6 +68,16 @@ def getUser(request, pk):
     except Exception as e:
         return Response({'error': str(e)}, status=500)
     
+
+
+@api_view(['GET'])
+def getUserEmail(request, pk):
+    try:
+        user = User.objects.get(userId=pk)
+    except User.DoesNotExist:
+        return Response({'error': 'User not found'}, status=404)
+    
+    return Response({'email': user.email})
 
 
 @api_view(['POST'])
@@ -125,7 +136,33 @@ def deleteUserProfilePicture(request, pk):
 
 
 
+@api_view(['POST'])
+def createUserData(request):
+    try:
+        # Extract user data from the request
+        user_data = request.data
 
+        # Create or get the Preferences object
+        preferences_data = user_data.pop('preferences', None)
+        if preferences_data:
+            preferences, created = Preferences.objects.get_or_create(**preferences_data)
+
+        # Create the User object
+        user = User.objects.create(**user_data)
+        if preferences_data:
+            user.preferences = preferences
+            user.save()
+
+        # Handle health records
+        health_records_data = user_data.pop('health_records', [])
+        for record_data in health_records_data:
+            HealthRecords.objects.create(user=user, **record_data)
+
+        # Serialize and return the created user
+        serializer = UserSerializer(user)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 

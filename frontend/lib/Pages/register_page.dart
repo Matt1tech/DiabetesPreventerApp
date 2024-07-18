@@ -14,9 +14,7 @@ final _passwordController = TextEditingController();
 final _confirmPasswordController = TextEditingController();
 
 class RegisterPage extends StatefulWidget {
-  final bool familyHistory;
-
-  const RegisterPage({Key? key, required this.familyHistory}) : super(key: key);
+  const RegisterPage({Key? key}) : super(key: key);
 
   @override
   _RegisterPageState createState() => _RegisterPageState();
@@ -30,7 +28,6 @@ class _RegisterPageState extends State<RegisterPage> {
 
   XFile? _profilePicture;
   final ImagePicker _picker = ImagePicker();
-  final AuthService _authService = AuthService();
 
   Future<void> _pickProfilePicture() async {
     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
@@ -238,51 +235,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                       ),
                     ),
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        print('Name: ${_nameController.text.trim()}');
-                        print('Email: ${_emailController.text.trim()}');
-                        print('Password: ${_passwordController.text}');
-                        print(
-                            'Gender: ${isSelectedGender[0] ? 'Male' : 'Female'}');
-                        print(
-                            'Marital Status: ${isSelectedMaritalStatus[0] ? 'Married' : 'Single'}');
-                        print('Height: ${_heightController.text.trim()}');
-                        print('Birthdate: ${_dateController.text.trim()}');
-                        print('Family History: ${widget.familyHistory}');
-                        print(
-                            'Profile Picture Path: ${_profilePicture?.path ?? 'null'}');
-
-                        _authService
-                            .register(
-                          _nameController.text.trim(),
-                          _emailController.text.trim(),
-                          _passwordController.text,
-                          isSelectedGender[0] ? 'Male' : 'Female',
-                          isSelectedMaritalStatus[0] ? 'Married' : 'Single',
-                          _heightController.text.trim(),
-                          _dateController.text.trim(),
-                          widget.familyHistory,
-                          _profilePicture?.path ?? '',
-                        )
-                            .then((_) {
-                          showConfirmationDialog(
-                                  context,
-                                  'Registration Successful',
-                                  'You have successfully registered.')
-                              .then((_) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => LoginPage()),
-                            );
-                          });
-                        }).catchError((error) {
-                          showErrorDialog(
-                              context, 'Registration Error', 'Error: $error');
-                        });
-                      }
-                    },
+                    onPressed: () {},
                     child: const Text(
                       'Register',
                       style: TextStyle(

@@ -147,9 +147,7 @@ class _FamilyHistoryPageState extends State<FamilyHistoryPage> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => RegisterPage(
-                          familyHistory: familyHistory,
-                        ),
+                        builder: (context) => RegisterPage(),
                       ),
                     );
                   },

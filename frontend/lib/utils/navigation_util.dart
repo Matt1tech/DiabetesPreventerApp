@@ -1,55 +1,48 @@
 import 'package:flutter/material.dart';
 import '../pages/pages.dart'; // Update this to your actual pages import path
 
-void navigateToPage(
-    BuildContext context, int index, Map<String, dynamic>? userData) {
+void navigateToPage(BuildContext context, int index) {
   switch (index) {
     case 0:
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => HomePage(userData: userData)),
+        MaterialPageRoute(builder: (context) => HomePage()),
       );
       break;
     case 1:
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(
-            builder: (context) => MealRecommendationsPage(userData: userData)),
+        MaterialPageRoute(builder: (context) => MealRecommendationsPage()),
       );
       break;
     case 2:
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(
-            builder: (context) => CustomizationsPage(userData: userData)),
+        MaterialPageRoute(builder: (context) => CustomizationsPage()),
       );
       break;
     case 3:
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(
-            builder: (context) => NutrientationPage(userData: userData)),
+        MaterialPageRoute(builder: (context) => NutrientationPage()),
       );
       break;
     case 4:
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(
-            builder: (context) => ReportsGenerationPage(userData: userData)),
+        MaterialPageRoute(builder: (context) => ReportsGenerationPage()),
       );
       break;
     case 5:
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(
-            builder: (context) => ReportsViewPage(userData: userData)),
+        MaterialPageRoute(builder: (context) => ReportsViewPage()),
       );
       break;
     case 6:
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(
-            builder: (context) => ProfileUpdatePage(userData: userData)),
+        MaterialPageRoute(builder: (context) => ProfileUpdatePage()),
       );
       break;
   }

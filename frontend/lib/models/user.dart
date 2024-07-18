@@ -1,4 +1,3 @@
-// lib/models/user.dart
 import 'package:json_annotation/json_annotation.dart';
 
 part 'user.g.dart';
@@ -20,12 +19,17 @@ class HealthRecords {
   String blood_pressure;
   double bmi;
   double weight;
+  double diabetes_risk;
+  DateTime created_at;
 
-  HealthRecords(
-      {required this.blood_glucose,
-      required this.blood_pressure,
-      required this.bmi,
-      required this.weight});
+  HealthRecords({
+    required this.blood_glucose,
+    required this.blood_pressure,
+    required this.bmi,
+    required this.weight,
+    required this.diabetes_risk,
+    required this.created_at,
+  });
 
   factory HealthRecords.fromJson(Map<String, dynamic> json) =>
       _$HealthRecordsFromJson(json);
@@ -48,9 +52,15 @@ class PhysicalActivity {
 class PhysicalRecords {
   PhysicalActivity physical_activity;
   int stress_level;
+  DateTime time;
+  DateTime created_at;
 
-  PhysicalRecords(
-      {required this.physical_activity, required this.stress_level});
+  PhysicalRecords({
+    required this.physical_activity,
+    required this.stress_level,
+    required this.time,
+    required this.created_at,
+  });
 
   factory PhysicalRecords.fromJson(Map<String, dynamic> json) =>
       _$PhysicalRecordsFromJson(json);
@@ -64,72 +74,15 @@ class Meal {
   double quantity;
   Map<String, dynamic> nutrients;
 
-  Meal(
-      {required this.number,
-      required this.name,
-      required this.quantity,
-      required this.nutrients});
+  Meal({
+    required this.number,
+    required this.name,
+    required this.quantity,
+    required this.nutrients,
+  });
 
   factory Meal.fromJson(Map<String, dynamic> json) => _$MealFromJson(json);
   Map<String, dynamic> toJson() => _$MealToJson(this);
-}
-
-@JsonSerializable()
-class DailyRecord {
-  DateTime date;
-  @JsonKey(fromJson: _healthRecordFromJson, toJson: _healthRecordToJson)
-  HealthRecords health_record;
-  @JsonKey(fromJson: _physicalRecordFromJson, toJson: _physicalRecordToJson)
-  PhysicalRecords physical_record;
-  List<Meal> meals;
-  double diabetes_risk;
-
-  DailyRecord(
-      {required this.date,
-      required this.health_record,
-      required this.physical_record,
-      required this.meals,
-      required this.diabetes_risk});
-
-  factory DailyRecord.fromJson(Map<String, dynamic> json) =>
-      _$DailyRecordFromJson(json);
-  Map<String, dynamic> toJson() => _$DailyRecordToJson(this);
-
-  static HealthRecords _healthRecordFromJson(Map<String, dynamic> json) =>
-      HealthRecords.fromJson(json);
-  static Map<String, dynamic> _healthRecordToJson(HealthRecords instance) =>
-      instance.toJson();
-
-  static PhysicalRecords _physicalRecordFromJson(Map<String, dynamic> json) =>
-      PhysicalRecords.fromJson(json);
-  static Map<String, dynamic> _physicalRecordToJson(PhysicalRecords instance) =>
-      instance.toJson();
-}
-
-@JsonSerializable()
-class MonthlyRecord {
-  DateTime month;
-  double avg_blood_glucose;
-  String avg_blood_pressure;
-  double avg_calories;
-  double avg_bmi;
-  double weight_increase;
-  double monthly_risk;
-  String overall_health_status;
-
-  MonthlyRecord(
-      {required this.month,
-      required this.avg_blood_glucose,
-      required this.avg_blood_pressure,
-      required this.avg_calories,
-      required this.avg_bmi,
-      required this.weight_increase,
-      required this.monthly_risk,
-      required this.overall_health_status});
-
-  factory MonthlyRecord.fromJson(Map<String, dynamic> json) =>
-      _$MonthlyRecordFromJson(json);
-  Map<String, dynamic> toJson() => _$MonthlyRecordToJson(this);
 }
 
 @JsonSerializable()
@@ -145,22 +98,18 @@ class MealRecommendation {
 
 @JsonSerializable()
 class User {
-  String id;
+  int id;
   String name;
   String email;
   String gender;
   String marital_status;
-  String height;
+  double height;
   String birthdate;
   bool family_history;
   String profile_picture;
   Preferences? preferences;
   List<HealthRecords>? health_records;
   List<PhysicalRecords>? physical_records;
-  MealRecommendation? meal_recommendation;
-  List<DailyRecord>? daily_records;
-  List<MonthlyRecord>? monthly_records;
-  String? user_notification;
   DateTime created_at;
 
   User({
@@ -176,10 +125,6 @@ class User {
     this.preferences,
     this.health_records,
     this.physical_records,
-    this.meal_recommendation,
-    this.daily_records,
-    this.monthly_records,
-    this.user_notification,
     required this.created_at,
   });
 

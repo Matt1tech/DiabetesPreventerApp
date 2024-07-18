@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/Pages/pages.dart';
 import '../utils/utilities.dart'; // Correct relative import for utilities
-import 'family_history.dart'; // Import for the sign-up page
-import 'home_page.dart'; // Import for the home page after login
-import '../widgets/custom_header.dart'; // Import for the custom header widget
-import 'package:frontend/services/auth_service.dart';
 import '../widgets/widgets.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart'; // Secure storage package for storing JWT token
 
@@ -12,7 +9,6 @@ final _formKey = GlobalKey<FormState>();
 final _emailController = TextEditingController();
 final _passwordController = TextEditingController();
 final storage = FlutterSecureStorage();
-final AuthService _authService = AuthService();
 
 // Validator function for email/username input
 String? emailUsernameValidator(String? value) {
@@ -49,23 +45,22 @@ class LoginPage extends StatelessWidget {
   }
 }
 
-// Widget for the login form body
 Widget bodyLogin(BuildContext context) {
   return Expanded(
     child: SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
-          key: _formKey, // Form key for validation
+          key: _formKey,
           child: Column(
             children: [
-              const SizedBox(height: 50), // Space at the top
+              const SizedBox(height: 50),
               const Text(
                 'Sign in',
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
-                  color: pinkColor,
+                  color: pinkColor, // Replace with your pinkColor variable
                 ),
               ),
               const SizedBox(height: 24),
@@ -82,7 +77,7 @@ Widget bodyLogin(BuildContext context) {
                 validatorMessage: 'Password is required',
                 validatorFormat: RegExp(r'.+'),
                 controller: _passwordController,
-                obscureText: true, // Hide password text
+                obscureText: true,
               ),
               const SizedBox(height: 12),
               Row(
@@ -106,50 +101,36 @@ Widget bodyLogin(BuildContext context) {
               const SizedBox(height: 16),
               ElevatedButton(
                 style: ButtonStyle(
-                  minimumSize: MaterialStateProperty.all(
-                      const Size(340, 50)), // Button size
+                  minimumSize: MaterialStateProperty.all(const Size(340, 50)),
                   backgroundColor: MaterialStateProperty.resolveWith<Color>(
                       (Set<MaterialState> states) {
                     if (states.contains(MaterialState.pressed)) {
-                      return Color.fromARGB(255, 68, 37, 135)
-                          .withOpacity(0.8); // Pressed color
+                      return Color.fromARGB(255, 68, 37, 135).withOpacity(0.8);
                     } else if (states.contains(MaterialState.hovered)) {
-                      return Color.fromARGB(255, 88, 71, 126)
-                          .withOpacity(0.9); // Hover color
+                      return Color.fromARGB(255, 88, 71, 126).withOpacity(0.9);
                     }
-                    return pinkColor; // Default color
+                    return pinkColor; // Replace with your pinkColor variable
                   }),
                   overlayColor: MaterialStateProperty.resolveWith<Color>(
                       (Set<MaterialState> states) {
                     if (states.contains(MaterialState.pressed)) {
-                      return Colors.black12; // Overlay color when pressed
+                      return Colors.black12;
                     }
-                    return Colors.transparent; // Default overlay color
+                    return Colors.transparent;
                   }),
                   shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                     RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0), // Button shape
+                      borderRadius: BorderRadius.circular(10.0),
                     ),
                   ),
                 ),
                 onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    _authService
-                        .login(
-                      _emailController.text.trim(),
-                      _passwordController.text,
-                    )
-                        .then((userData) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => HomePage(userData: userData),
-                        ),
-                      );
-                    }).catchError((error) {
-                      showErrorDialog(context, 'Login Error', 'Error: $error');
-                    });
-                  }
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const HomePage(),
+                    ),
+                  );
                 },
                 child: const Text(
                   'Login',
@@ -160,7 +141,7 @@ Widget bodyLogin(BuildContext context) {
                 ),
               ),
               const SizedBox(height: 30),
-              const Text('-OR-'), // Separator text
+              const Text('-OR-'),
               const Text('Don\'t have an account?'),
               const SizedBox(height: 8),
               Builder(
@@ -169,8 +150,8 @@ Widget bodyLogin(BuildContext context) {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) =>
-                              FamilyHistoryPage()), // Navigate to sign-up page
+                        builder: (context) => RegisterPage(),
+                      ),
                     );
                   },
                   child: const Text("Sign Up",
