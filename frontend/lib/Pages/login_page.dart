@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/Pages/pages.dart';
+import 'package:frontend/globals.dart';
 import '../utils/utilities.dart'; // Correct relative import for utilities
 import '../widgets/widgets.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart'; // Secure storage package for storing JWT token
@@ -150,7 +151,7 @@ Widget bodyLogin(BuildContext context) {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => RegisterPage(),
+                        builder: (context) => const FamilyHistoryPage(),
                       ),
                     );
                   },

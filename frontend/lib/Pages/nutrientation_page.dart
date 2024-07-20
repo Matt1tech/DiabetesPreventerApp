@@ -1,62 +1,152 @@
 import 'package:flutter/material.dart';
-import '../widgets/user_header.dart';
-import '../widgets/customized_navigation_bar.dart';
-import '../utils/navigation_util.dart';
+import 'package:frontend/utils/utilities.dart';
+import 'dart:io';
+import '../services/analyze_image.dart'; // Make sure to import your analyzeImage function
+import '../widgets/widgets.dart'; // Ensure this import path is correct
 
 class NutrientationPage extends StatefulWidget {
-  NutrientationPage({Key? key}) : super(key: key);
+  final File imageFile;
+  final String apiKey;
+
+  NutrientationPage({required this.imageFile, required this.apiKey});
 
   @override
   _NutrientationPageState createState() => _NutrientationPageState();
 }
 
 class _NutrientationPageState extends State<NutrientationPage> {
-  int _selectedIndex = 3;
+  Map<String, dynamic>? analysisData;
 
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-    navigateToPage(context, index);
+  @override
+  void initState() {
+    super.initState();
+    _analyzeImage();
+  }
+
+  Future<void> _analyzeImage() async {
+    try {
+      final data = await analyzeImage(widget.imageFile, widget.apiKey);
+      print(
+          'Full Response data: $data'); // Debug print to see the full response structure
+
+      // Ensure the data contains the expected fields
+      if (data['items'] != null && data['items'].isNotEmpty) {
+        final foodItem = data['items'][0]['food'][0];
+        final foodInfo = foodItem['food_info'] ?? {};
+        final nutrition = foodInfo['nutrition'] ?? {};
+
+        print('Food Item: $foodItem'); // Debug print to see the food item
+        print('Food Info: $foodInfo'); // Debug print to see the food info
+        print('Nutrition: $nutrition'); // Debug print to see the nutrition data
+
+        setState(() {
+          analysisData = {
+            'display_name': foodInfo['display_name'] ?? 'Unknown',
+            'proteins': nutrition['proteins_100g']?.toString() ?? 'N/A',
+            'fat': nutrition['fat_100g']?.toString() ?? 'N/A',
+            'cholesterol': nutrition['cholesterol_100g']?.toString() ?? 'N/A',
+            'calories': nutrition['calories_100g']?.toString() ?? 'N/A',
+            'fibers': nutrition['fibers_100g']?.toString() ?? 'N/A',
+          };
+        });
+      } else {
+        throw Exception('Invalid data structure: "items" not found or empty');
+      }
+    } catch (e) {
+      // Handle error
+      print('Error analyzing image: $e');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    /*String profilePictureUrl =
-        'http://10.0.2.2:8000${widget.userData?['profile_picture']}';
-    ImageProvider<Object> imageProvider;
-    if (widget.userData?['profile_picture'] != null) {
-      imageProvider = NetworkImage(profilePictureUrl);
-    } else {
-      imageProvider = AssetImage('assets/images/default_profile.png');
-    }
-*/
     return Scaffold(
-      backgroundColor: Color.fromARGB(255, 217, 217, 217),
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight(170.0),
-        child: UserHeader(
-          /*imageProvider: imageProvider,*/
-          imagePath: 'assets/images/diabetesLogo.png',
-          pageName: 'Nutrientation',
-          welcomeMessage: 'Hello Again!',
-          userName: 'Matt',
-          userStatus: 'Active',
-          rightIcon: Icons.notifications,
-          showWelcomeMessage: true,
-          topPadding: 50.0,
-        ),
+      appBar: UserHeader(
+        imagePath: 'assets/images/diabetesLogo.png',
+        pageName: 'Meal Recognition',
+        welcomeMessage: 'Hello Again!',
+        userName: 'matt',
+        userStatus: 'Active',
+        rightIcon: Icons.notifications,
+        showWelcomeMessage: true,
+        topPadding: 50.0,
       ),
       body: Center(
-        child: Text(
-          'Nutrientation Page',
-          style: TextStyle(fontSize: 24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              child: widget.imageFile != null
+                  ? SizedBox(
+                      width: 200, // Set the desired width
+                      height: 200, // Set the desired height
+                      child: Image.file(widget.imageFile),
+                    )
+                  : Text('No image selected'),
+            ),
+            if (analysisData != null)
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  children: [
+                    Text('Analysis Results:',
+                        style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: pinkColor)),
+                    SizedBox(height: 10),
+                    Text('Name: ${analysisData!['display_name']}',
+                        style: const TextStyle(color: blueColor)),
+                    Text('Proteins: ${analysisData!['proteins']} g',
+                        style: const TextStyle(color: blueColor)),
+                    Text('Fat: ${analysisData!['fat']} g'),
+                    Text('Cholesterol: ${analysisData!['cholesterol']} mg',
+                        style: const TextStyle(color: blueColor)),
+                    Text('Calories: ${analysisData!['calories']} kcal',
+                        style: const TextStyle(color: blueColor)),
+                    Text('Fibers: ${analysisData!['fibers']} g',
+                        style: const TextStyle(color: blueColor)),
+                    SizedBox(height: 30),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () {
+                            // Add functionality to save to database
+                            _saveToDatabase();
+                          },
+                          child: Text('Save'),
+                        ),
+                        ElevatedButton(
+                          onPressed: () {
+                            // Add functionality to retake the picture
+                            Navigator.pop(
+                                context); // Assuming it takes back to the camera
+                          },
+                          child: Text('Retake'),
+                        ),
+                        ElevatedButton(
+                          onPressed: () {
+                            // Add functionality to cancel
+                            Navigator.pop(context);
+                          },
+                          child: Text('Cancel'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+          ],
         ),
       ),
-      bottomNavigationBar: CustomNavigationBar(
-        selectedIndex: _selectedIndex,
-        onItemTapped: _onItemTapped,
-      ),
     );
+  }
+
+  void _saveToDatabase() {
+    // Implement your database saving logic here
+    print('Saving to database...');
+    // Example:
+    // DatabaseService.saveAnalysisData(analysisData);
   }
 }

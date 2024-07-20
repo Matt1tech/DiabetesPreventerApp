@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'register_page.dart';
 import '../widgets/custom_header.dart';
 import '../utils/utilities.dart';
+import '../globals.dart' as globals; // Import the globals file
 
 class FamilyHistoryPage extends StatefulWidget {
   const FamilyHistoryPage({super.key});
@@ -27,7 +28,6 @@ class _FamilyHistoryPageState extends State<FamilyHistoryPage> {
           Expanded(
             child: bodyFamilyHistory(),
           ),
-          //footer(),
         ],
       ),
     );
@@ -143,7 +143,7 @@ class _FamilyHistoryPageState extends State<FamilyHistoryPage> {
                     ),
                   ),
                   onPressed: () {
-                    bool familyHistory = isSelected[0];
+                    globals.familyHistory = isSelected[0];
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -179,6 +179,7 @@ class _FamilyHistoryPageState extends State<FamilyHistoryPage> {
     );
   }
 }
+
 
 
 
