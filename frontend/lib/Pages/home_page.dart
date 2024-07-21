@@ -77,11 +77,34 @@ class _HomePageState extends State<HomePage> {
   XFile? _profilePicture;
   final ImagePicker _picker = ImagePicker();
   final storage = FlutterSecureStorage();
+  // Variable to hold user data
+  String? userName;
+  String? userProfilePicture;
   // Instance of secure storage
   // Variable to hold user data
   List<SuitableMenuModel> menu = [];
   int _selectedIndex = 0;
   User userService = User();
+
+  @override
+  void initState() {
+    super.initState();
+    _getMenu();
+    _loadUserInfo();
+  }
+
+  Future<void> _loadUserInfo() async {
+    userName = await storage.read(key: 'user_name');
+    userProfilePicture = await storage.read(key: 'user_profile_picture');
+    print('User Name: $userName'); // Debug print
+    print('User Profile Picture: $userProfilePicture'); // Debug print
+    setState(() {});
+  }
+
+  void _getMenu() {
+    menu = SuitableMenuModel.getMenu();
+  }
+
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -100,40 +123,26 @@ class _HomePageState extends State<HomePage> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    _getMenu();
-
-    super.initState();
-  }
-
-  void _getMenu() {
-    menu = SuitableMenuModel.getMenu();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final bloodGlucose = 'N/A';
-    // Fetch the profile picture URL from the user data and prepend the base URL
-    /* String profilePictureUrl =
-        'http://10.0.2.2:8000${userData!['profile_picture']}';
-    print('Build User Data: $userData');
+
     ImageProvider<Object> imageProvider;
     if (_profilePicture != null) {
       imageProvider = FileImage(File(_profilePicture!.path));
+    } else if (userProfilePicture != null) {
+      imageProvider = NetworkImage(userProfilePicture!);
     } else {
-      imageProvider = NetworkImage(profilePictureUrl);
+      imageProvider = const AssetImage('assets/images/diabetesLogo.png');
     }
-*/
+
     return Scaffold(
-      backgroundColor: Color.fromARGB(255, 217, 217, 217),
+      backgroundColor: const Color.fromARGB(255, 217, 217, 217),
       appBar: UserHeader(
-        /* imageProvider: imageProvider,*/
-        imagePath: 'assets/images/diabetesLogo.png',
+        imageProvider: imageProvider,
         pageName: 'Home', // This will be shown as the page title
         welcomeMessage:
             'Hello Again!', // This will be shown as the welcome message
-        userName: 'matt',
+        userName: userName ?? 'User',
         userStatus: 'Active',
         rightIcon: Icons.notifications,
         showWelcomeMessage: true,
@@ -142,7 +151,7 @@ class _HomePageState extends State<HomePage> {
       body: Column(
         children: [
           lowerContainer(),
-          const SizedBox(height: 00),
+          const SizedBox(height: 0),
           Expanded(
             child: SingleChildScrollView(
               child: Column(
@@ -170,7 +179,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-//suitable menu sections
+  // Suitable menu sections
   Column lowerContainer() {
     return Column(
       children: [
@@ -178,7 +187,6 @@ class _HomePageState extends State<HomePage> {
           color: pinkColor, // Background color
           height: 140.0,
           width: 420,
-
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: menuSlider,
@@ -188,7 +196,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-//suitable menu slider Section
+  // Suitable menu slider Section
   List<Widget> get menuSlider {
     return [
       Padding(
@@ -208,11 +216,8 @@ class _HomePageState extends State<HomePage> {
         child: ListView.separated(
           itemCount: menu.length,
           scrollDirection: Axis.horizontal,
-          padding: EdgeInsets.only(
-            left: 20,
-            right: 20,
-          ),
-          separatorBuilder: (context, index) => SizedBox(width: 15),
+          padding: const EdgeInsets.only(left: 20, right: 20),
+          separatorBuilder: (context, index) => const SizedBox(width: 15),
           itemBuilder: (context, index) {
             return InkWell(
               onTap: () {
@@ -265,240 +270,235 @@ class _HomePageState extends State<HomePage> {
       ),
     ];
   }
-}
 
-//nutrientsDetails Section
-Column nutrientsDetailsSection() {
-  return Column(
-    children: [
-      const SizedBox(height: 4),
-      Container(
-        height: 195.0,
-        width: 420,
-        color: Color.fromARGB(217, 217, 217, 217),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Padding(
-              padding: EdgeInsets.only(left: 20),
-              child: Text(
-                'Nutrientation Details',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: blueColor,
-                  fontSize: 18.0,
+  // Nutrients Details Section
+  Column nutrientsDetailsSection() {
+    return Column(
+      children: [
+        const SizedBox(height: 4),
+        Container(
+          height: 195.0,
+          width: 420,
+          color: const Color.fromARGB(217, 217, 217, 217),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Padding(
+                padding: EdgeInsets.only(left: 20),
+                child: Text(
+                  'Nutrientation Details',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: blueColor,
+                    fontSize: 18.0,
+                  ),
                 ),
               ),
-            ),
-            SizedBox(height: 10),
-            Center(
-              child: AnimatedHorizontalContainer(
-                title: 'Total Calories',
-                calories: 1000, // Specific calories
-                maxCalories: 2000,
-                fillColor: pinkColor,
-                textColor: pinkColor,
-              ),
-            ),
-            const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                AnimatedNutritionContainer(
-                  title: 'Protein',
-                  calories: 100, // Specific calories for Protein
-                  maxCalories: 200,
-                  textColor: const Color.fromARGB(255, 164, 103, 12),
-                ),
-                AnimatedNutritionContainer(
-                  title: 'Fats',
-                  calories: 150, // Specific calories for Fats
-                  maxCalories: 300,
+              const SizedBox(height: 10),
+              Center(
+                child: AnimatedHorizontalContainer(
+                  title: 'Total Calories',
+                  calories: 1000, // Specific calories
+                  maxCalories: 2000,
+                  fillColor: pinkColor,
                   textColor: pinkColor,
                 ),
-                AnimatedNutritionContainer(
-                  title: 'Carbs',
-                  calories: 200, // Specific calories for Carbs
-                  maxCalories: 400,
-                  textColor: Color.fromARGB(255, 227, 204, 32),
-                ),
-                AnimatedNutritionContainer(
-                  title: 'Fiber',
-                  calories: 50, // Specific calories for Fiber
-                  maxCalories: 100,
-                  textColor: Color.fromARGB(255, 3, 58, 16),
-                ),
-              ],
+              ),
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  AnimatedNutritionContainer(
+                    title: 'Protein',
+                    calories: 100, // Specific calories for Protein
+                    maxCalories: 200,
+                    textColor: const Color.fromARGB(255, 164, 103, 12),
+                  ),
+                  AnimatedNutritionContainer(
+                    title: 'Fats',
+                    calories: 150, // Specific calories for Fats
+                    maxCalories: 300,
+                    textColor: pinkColor,
+                  ),
+                  AnimatedNutritionContainer(
+                    title: 'Carbs',
+                    calories: 200, // Specific calories for Carbs
+                    maxCalories: 400,
+                    textColor: const Color.fromARGB(255, 227, 204, 32),
+                  ),
+                  AnimatedNutritionContainer(
+                    title: 'Fiber',
+                    calories: 50, // Specific calories for Fiber
+                    maxCalories: 100,
+                    textColor: const Color.fromARGB(255, 3, 58, 16),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Risk Overview Section
+  Column riskOverviewSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.only(left: 4),
+          child: Text(
+            'Risk Overview',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: blueColor,
+              fontSize: 18.0,
+            ),
+          ),
+        ),
+        const SizedBox(height: 20),
+        monthlyRiskChart(),
+        const SizedBox(height: 30),
+        diabetesInfectionStatus(),
+      ],
+    );
+  }
+
+  // Health Record Section
+  Column healthRecordSection(String bloodGlucose) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.only(left: 20),
+          child: Text(
+            'Health Records',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: blueColor,
+              fontSize: 18.0,
+            ),
+          ),
+        ),
+        const SizedBox(height: 20),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            glucoseRecord(bloodGlucose),
+            const SizedBox(width: 10),
+            bloodPressureRecord(),
+          ],
+        ),
+      ],
+    );
+  }
+
+  // Health Information Logs Section
+  Column healthInformationLogsSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.only(left: 20),
+          child: Text(
+            'Health Information Logs',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: blueColor,
+              fontSize: 18.0,
+            ),
+          ),
+        ),
+        const SizedBox(height: 20),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            HealthMeasurementLogsCard(
+              title: 'Blood Pressure',
+              name: 'bloodPressure',
+            ), // Use the HealthMeasurementLogsCard widget,
+            HealthMeasurementLogsCard(
+              title: 'Glucose Level',
+              name: 'glucoseLevel',
+            ), // Use the HealthMeasurementLogsCard widget
+          ],
+        ),
+      ],
+    );
+  }
+
+  // Activity Logs Section
+  Column activityLogsSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.only(left: 20),
+          child: Text(
+            'Activity and Meal Logs',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: blueColor,
+              fontSize: 18.0,
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [],
+        ),
+      ],
+    );
+  }
+
+  // Glucose Record Widget
+  Container glucoseRecord(String bloodGlucose) {
+    return Container(
+      width: 180,
+      height: 90,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        color: Colors.white,
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black26,
+            blurRadius: 10,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Glucose Level:',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: pinkColor,
+              ),
+            ),
+            const SizedBox(width: 5),
+            Text(
+              '$bloodGlucose',
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: Colors.red,
+              ),
             ),
           ],
         ),
-      )
+      ),
+    );
+  }
 
-// Declare the variable somewhere in class
-//int calories = 250; // Example variable for calories
-    ],
-  );
-}
-
-//Risk Overview Section
-Column riskOverviewSection() {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      const Padding(
-        padding: EdgeInsets.only(left: 4),
-        child: Text(
-          'Risk Overview',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: blueColor,
-            fontSize: 18.0,
-          ),
-        ),
-      ),
-      const SizedBox(height: 20),
-      monthlyRiskChart(),
-      const SizedBox(height: 30),
-      diabetesInfectionStatus(),
-    ],
-  );
-}
-
-//Last Record Display Section
-//Last Record Display Section
-Column healthRecordSection(String bloodGlucose) {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      const Padding(
-        padding: EdgeInsets.only(left: 20),
-        child: Text(
-          'Health Records',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: blueColor,
-            fontSize: 18.0,
-          ),
-        ),
-      ),
-      const SizedBox(height: 20),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          glucoseRecord(bloodGlucose),
-          const SizedBox(width: 10),
-          bloodPressureRecord(),
-        ],
-      ),
-    ],
-  );
-}
-
-//Health Records Receiver section
-Column healthInformationLogsSection() {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      const Padding(
-        padding: EdgeInsets.only(left: 20),
-        child: Text(
-          'Health Information Logs',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: blueColor,
-            fontSize: 18.0,
-          ),
-        ),
-      ),
-      const SizedBox(height: 20),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          HealthMeasurementLogsCard(
-            title: 'Blood Pressure',
-            name: 'bloodPressure',
-          ), // Use the HealthMeasurementLogsCard widget,
-          HealthMeasurementLogsCard(
-            title: 'Glucose Level',
-            name: 'glucoseLevel',
-          ), // Use the HealthMeasurementLogsCard widget
-        ],
-      ),
-    ],
-  );
-}
-
-//Risk Overview Section
-Column activityLogsSection() {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      const Padding(
-        padding: EdgeInsets.only(left: 20),
-        child: Text(
-          'Activity and Meal Logs',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: blueColor,
-            fontSize: 18.0,
-          ),
-        ),
-      ),
-      const SizedBox(height: 10),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [],
-      ),
-    ],
-  );
-}
-
-Container glucoseRecord(String bloodGlucose) {
-  return Container(
-    width: 180,
-    height: 90,
-    decoration: BoxDecoration(
-      borderRadius: BorderRadius.circular(10),
-      color: Colors.white,
-      boxShadow: const [
-        BoxShadow(
-          color: Colors.black26,
-          blurRadius: 10,
-          offset: Offset(0, 4),
-        ),
-      ],
-    ),
-    child: Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            'Glucose Level:',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: pinkColor,
-            ),
-          ),
-          SizedBox(
-            width: 5,
-          ),
-          Text(
-            '$bloodGlucose',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: Colors.red,
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
-}
-
-Container bloodPressureRecord() {
-  return Container(
+  // Blood Pressure Record Widget
+  Container bloodPressureRecord() {
+    return Container(
       width: 180,
       height: 90,
       decoration: BoxDecoration(
@@ -514,8 +514,7 @@ Container bloodPressureRecord() {
       ),
       child: const Center(
         child: Column(
-          mainAxisAlignment:
-              MainAxisAlignment.center, // Center the row's children
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
               'Blood Pressure:',
@@ -525,9 +524,7 @@ Container bloodPressureRecord() {
                 color: pinkColor,
               ),
             ),
-            SizedBox(
-              width: 5,
-            ),
+            SizedBox(width: 5),
             Text(
               '125 mg/dl',
               style: TextStyle(
@@ -538,216 +535,169 @@ Container bloodPressureRecord() {
             ),
           ],
         ),
-      ));
-}
+      ),
+    );
+  }
 
-Container monthlyRiskChart() {
-  return Container(
-    width: 380,
-    height: 250,
-    decoration: BoxDecoration(
-      borderRadius: BorderRadius.circular(10),
-      color: Colors.white,
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black26,
-          blurRadius: 10,
-          offset: Offset(0, 4),
-        ),
-      ],
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(top: 10.0, left: 25),
-          child: Text(
-            'Monthly Risk',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: pinkColor,
+  // Monthly Risk Chart Widget
+  Container monthlyRiskChart() {
+    return Container(
+      width: 380,
+      height: 250,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        color: Colors.white,
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black26,
+            blurRadius: 10,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.only(top: 10.0, left: 25),
+            child: Text(
+              'Monthly Risk',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: pinkColor,
+              ),
             ),
           ),
-        ),
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.all(23.0),
-            child: LineChart(
-              LineChartData(
-                lineTouchData:
-                    LineTouchData(touchTooltipData: LineTouchTooltipData(
-                  getTooltipItems: (touchedSpots) {
-                    return touchedSpots.map((LineBarSpot touchedSpot) {
-                      final textStyle = TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      );
-                      return LineTooltipItem(
-                          touchedSpot.y.toString(), textStyle);
-                    }).toList();
-                  },
-                )),
-                lineBarsData: [
-                  LineChartBarData(
-                    color: blueColor,
-                    spots: getMonthlySpots(monthlyRiskValues),
-                    barWidth: 3,
-                    isCurved: true,
-                    dotData: FlDotData(
-                      show: true,
-                      getDotPainter: (spot, percent, bar, index) {
-                        return FlDotCirclePainter(
-                          radius: 6,
-                          color:
-                              pinkColor, // Change this color to your desired color
-                          strokeWidth: 2,
-                          strokeColor: const Color.fromARGB(255, 78, 70, 70),
-                        );
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(23.0),
+              child: LineChart(
+                LineChartData(
+                  lineTouchData: LineTouchData(
+                    touchTooltipData: LineTouchTooltipData(
+                      getTooltipItems: (touchedSpots) {
+                        return touchedSpots.map((LineBarSpot touchedSpot) {
+                          final textStyle = const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          );
+                          return LineTooltipItem(
+                              touchedSpot.y.toString(), textStyle);
+                        }).toList();
                       },
                     ),
                   ),
-                ],
-                titlesData: FlTitlesData(
-                  topTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: false,
-                    ),
-                  ),
-                  rightTitles: AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
-                  ),
-                  leftTitles: AxisTitles(
-                    axisNameWidget: Transform.translate(
-                      offset: Offset(26, -16),
-                      child: Text(
-                        'Risk Percentage (RP)',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: blueColor,
-                        ),
+                  lineBarsData: [
+                    LineChartBarData(
+                      color: blueColor,
+                      spots: getMonthlySpots(monthlyRiskValues),
+                      barWidth: 3,
+                      isCurved: true,
+                      dotData: FlDotData(
+                        show: true,
+                        getDotPainter: (spot, percent, bar, index) {
+                          return FlDotCirclePainter(
+                            radius: 6,
+                            color:
+                                pinkColor, // Change this color to your desired color
+                            strokeWidth: 2,
+                            strokeColor: const Color.fromARGB(255, 78, 70, 70),
+                          );
+                        },
                       ),
                     ),
-                    sideTitles: SideTitles(
-                      showTitles: false,
-                      reservedSize: 60,
+                  ],
+                  titlesData: FlTitlesData(
+                    topTitles: AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    rightTitles: AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    leftTitles: AxisTitles(
+                      axisNameWidget: Transform.translate(
+                        offset: const Offset(26, -16),
+                        child: const Text(
+                          'Risk Percentage (RP)',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: blueColor,
+                          ),
+                        ),
+                      ),
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    bottomTitles: AxisTitles(
+                      axisNameWidget: const Text('Month of the Year'),
+                      sideTitles: monthOfYearBottomTitles(),
                     ),
                   ),
-                  bottomTitles: AxisTitles(
-                    axisNameWidget: Text('Month of the Year'),
-                    sideTitles: monthOfYearBottomTitles(),
+                  gridData: FlGridData(
+                    show: true,
+                    drawHorizontalLine: true,
+                    getDrawingHorizontalLine: (value) {
+                      return FlLine(
+                        color: Colors.grey,
+                        strokeWidth: 0.5,
+                      );
+                    },
+                    drawVerticalLine: true,
+                    getDrawingVerticalLine: (value) {
+                      return FlLine(
+                        color: Colors.grey,
+                        strokeWidth: 0.5,
+                      );
+                    },
                   ),
                 ),
-                gridData: FlGridData(
-                  show: true,
-                  drawHorizontalLine: true,
-                  getDrawingHorizontalLine: (value) {
-                    return FlLine(
-                      color: Colors.grey,
-                      strokeWidth: 0.5,
-                    );
-                  },
-                  drawVerticalLine: true,
-                  getDrawingVerticalLine: (value) {
-                    return FlLine(
-                      color: Colors.grey,
-                      strokeWidth: 0.5,
-                    );
-                  },
-                ),
               ),
             ),
           ),
-        ),
-      ],
-    ),
-  );
-}
-
-//Health Information Section
-Container diabetesInfectionStatus() {
-  return Container(
-    width: 380,
-    height: 245,
-    decoration: BoxDecoration(
-      borderRadius: BorderRadius.circular(10),
-      color: Colors.white,
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black26,
-          blurRadius: 10,
-          offset: Offset(0, 4),
-        ),
-      ],
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(top: 10.0, left: 25),
-          child: Text(
-            'Overall Health Status',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: pinkColor,
-            ),
-          ),
-        ),
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.all(23.0),
-            child: OverallHealthStatusPieChart(),
-          ),
-        ),
-      ],
-    ),
-  );
-}
-
-/*
- 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Home'),
+        ],
       ),
-      body: userData == null
-          ? Center(child: CircularProgressIndicator())
-          : Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Name: ${userData!['name']}'),
-                  Text('Email: ${userData!['email']}'),
-                  Text('Gender: ${userData!['gender']}'),
-                  Text('Marital Status: ${userData!['marital_status']}'),
-                  Text('Height: ${userData!['height']}'),
-                  Text('Birthdate: ${userData!['birthdate']}'),
-                  Text('Family History: ${userData!['family_history']}'),
-                  Text('Profile Picture: ${userData!['profile_picture']}'),
-                ],
+    );
+  }
+
+  // Health Information Section
+  Container diabetesInfectionStatus() {
+    return Container(
+      width: 380,
+      height: 245,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        color: Colors.white,
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black26,
+            blurRadius: 10,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.only(top: 10.0, left: 25),
+            child: Text(
+              'Overall Health Status',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: pinkColor,
               ),
             ),
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(23.0),
+              child: OverallHealthStatusPieChart(),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
-
-*/
-
-/*
-
-class HomePage extends StatefulWidget {
-  HomePage({super.key});
-
-  @override
-  State<HomePage> createState() => _HomePageState();
-}
-
-
-
-  @override
-  Widget build(BuildContext context) {
-   
-*/

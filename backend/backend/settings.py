@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'api.apps.ApiConfig',
     'rest_framework',
+    'rest_framework_simplejwt',
     'rest_framework_mongoengine',
     'corsheaders',
 ]
@@ -78,16 +79,22 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+#DATABASES = {
+ #  'default': {
+  #      'ENGINE': 'djongo',
+   #     'NAME': 'DiabetesPreventer_db',  # database name
+    #    'CLIENT': {
+     #       'host': 'mongodb://localhost:27017',
+      #      'username': 'new_test',  # username 
+       #     'password': 'newtest_1',  # password 
+        #    'authSource': 'admin',  # authentication source
+        #}        
+    #}
+#}
 DATABASES = {
    'default': {
-        'ENGINE': 'djongo',
-        'NAME': 'DiabetesPreventer_db',  # database name
-        'CLIENT': {
-            'host': 'mongodb://localhost:27017',
-            'username': 'new_test',  # username 
-            'password': 'newtest_1',  # password 
-            'authSource': 'admin',  # authentication source
-        }        
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 

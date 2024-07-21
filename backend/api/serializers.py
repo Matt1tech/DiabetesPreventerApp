@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Preferences, HealthRecords, PhysicalActivity, PhysicalRecords, Meal, MealRecommendation, User
+from .models import Preferences, HealthRecord, PhysicalActivity, PhysicalRecord, Meal, MealRecommendation, User
 
 class PreferencesSerializer(serializers.ModelSerializer):
     class Meta:
@@ -8,7 +8,7 @@ class PreferencesSerializer(serializers.ModelSerializer):
 
 class HealthRecordsSerializer(serializers.ModelSerializer):
     class Meta:
-        model = HealthRecords
+        model = HealthRecord
         fields = '__all__'
 
 class PhysicalActivitySerializer(serializers.ModelSerializer):
@@ -20,7 +20,7 @@ class PhysicalRecordsSerializer(serializers.ModelSerializer):
     physical_activity = PhysicalActivitySerializer()
 
     class Meta:
-        model = PhysicalRecords
+        model = PhysicalRecord
         fields = '__all__'
 
 class MealSerializer(serializers.ModelSerializer):

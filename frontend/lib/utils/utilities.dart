@@ -140,12 +140,13 @@ Widget buildDatePickerField(
         if (pickedDate != null) {
           // Update the controller directly, no need to call setState here
           controller.text =
-              "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
+              "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
         }
       },
     ),
   );
 }
+
 /*
 /// A reusable TextFormField with validation.
 ///
@@ -258,9 +259,9 @@ void showErrorDialog(BuildContext context, String title, String message) {
   );
 }
 
-Future<void> showConfirmationDialog(
+Future<bool> showConfirmationDialog(
     BuildContext context, String title, String message) {
-  return showDialog(
+  return showDialog<bool>(
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
@@ -268,15 +269,22 @@ Future<void> showConfirmationDialog(
         content: Text(message),
         actions: <Widget>[
           TextButton(
+            child: Text('Cancel'),
+            onPressed: () {
+              Navigator.of(context)
+                  .pop(false); // Return false when Cancel is pressed
+            },
+          ),
+          TextButton(
             child: Text('OK'),
             onPressed: () {
-              Navigator.of(context).pop();
+              Navigator.of(context).pop(true); // Return true when OK is pressed
             },
           ),
         ],
       );
     },
-  );
+  ).then((value) => value ?? false); // Ensure it returns false if value is null
 }
 
 class HealthPulseCard extends StatefulWidget {

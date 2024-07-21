@@ -6,6 +6,7 @@ import '../utils/utilities.dart';
 import 'login_page.dart';
 import '../widgets/widgets.dart';
 import 'package:frontend/services/auth_service.dart';
+import '../globals.dart' as globals; // Import the globals file
 
 final _formKey = GlobalKey<FormState>();
 final _nameController = TextEditingController();
@@ -41,6 +42,49 @@ class _RegisterPageState extends State<RegisterPage> {
     _dateController.dispose();
     _heightController.dispose();
     super.dispose();
+  }
+
+  void _register() async {
+    if (_formKey.currentState!.validate()) {
+      String name = _nameController.text;
+      String email = _emailController.text;
+      String password = _passwordController.text;
+      String gender = isSelectedGender[0] ? 'Male' : 'Female';
+      String maritalStatus = isSelectedMaritalStatus[0] ? 'Married' : 'Single';
+      String height = _heightController.text;
+      String birthdate = _dateController.text;
+      bool familyHistory = globals.familyHistory; // Use the global variable
+
+      var response = await AuthService().registerUser(
+        name,
+        email,
+        password,
+        gender,
+        maritalStatus,
+        height,
+        birthdate,
+        familyHistory,
+        _profilePicture != null ? File(_profilePicture!.path) : null,
+      );
+
+      if (response.statusCode == 201) {
+        bool confirmed = await showConfirmationDialog(
+          context,
+          'Registration Successful',
+          'Your account has been successfully created. Do you want to proceed to login?',
+        );
+        if (confirmed) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => LoginPage()),
+          );
+        }
+      } else {
+        final snackBar =
+            SnackBar(content: Text('Registration failed: ${response.body}'));
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      }
+    }
   }
 
   @override
@@ -199,7 +243,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       width: 145,
                       child: buildDatePickerField(
                           context, 'Birthday', Icons.cake,
-                          width: 150, controller: _dateController),
+                          width: 160, controller: _dateController),
                     ),
                   ],
                 ),
@@ -224,9 +268,13 @@ class _RegisterPageState extends State<RegisterPage> {
                       overlayColor: MaterialStateProperty.resolveWith<Color>(
                         (Set<MaterialState> states) {
                           if (states.contains(MaterialState.pressed)) {
-                            return Colors.black12;
+                            return Color.fromARGB(255, 68, 37, 135)
+                                .withOpacity(0.8);
+                          } else if (states.contains(MaterialState.hovered)) {
+                            return Color.fromARGB(255, 88, 71, 126)
+                                .withOpacity(0.9);
                           }
-                          return Colors.transparent;
+                          return pinkColor;
                         },
                       ),
                       shape: MaterialStateProperty.all<RoundedRectangleBorder>(
@@ -235,7 +283,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                       ),
                     ),
-                    onPressed: () {},
+                    onPressed: _register,
                     child: const Text(
                       'Register',
                       style: TextStyle(
@@ -295,14 +343,6 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 }
-
-
-
-
-
-
-
-
 
 
 

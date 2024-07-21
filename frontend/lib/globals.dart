@@ -1,2 +1,3 @@
-// globals.dart
+library globals;
+
 bool familyHistory = false;

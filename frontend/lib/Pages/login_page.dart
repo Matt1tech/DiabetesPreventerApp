@@ -4,12 +4,15 @@ import 'package:frontend/globals.dart';
 import '../utils/utilities.dart'; // Correct relative import for utilities
 import '../widgets/widgets.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart'; // Secure storage package for storing JWT token
+import '../services/auth_service.dart'; // Import AuthService
 
 // Define form key, text controllers, and secure storage instance
 final _formKey = GlobalKey<FormState>();
 final _emailController = TextEditingController();
 final _passwordController = TextEditingController();
 final storage = FlutterSecureStorage();
+final AuthService authService =
+    AuthService(); // Create an instance of AuthService
 
 // Validator function for email/username input
 String? emailUsernameValidator(String? value) {
@@ -21,17 +24,79 @@ String? emailUsernameValidator(String? value) {
   return null;
 }
 
-// Login page widget
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
+
+  @override
+  _LoginPageState createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  String? userName;
+  String? userProfilePicture;
+  bool isLoading = false; // Define isLoading as a state variable
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserInfo();
+  }
+
+  Future<void> _loadUserInfo() async {
+    userName = await storage.read(key: 'user_name');
+    userProfilePicture = await storage.read(key: 'user_profile_picture');
+    setState(() {});
+  }
+
+  Future<void> _handleLogin() async {
+    setState(() {
+      isLoading = true;
+    });
+    try {
+      await authService.login(_emailController.text, _passwordController.text);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Login Successful')),
+      );
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomePage()),
+      );
+    } catch (e) {
+      // Show error message if login fails
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Login Failed'),
+            content: const Text('Please check your email and password.'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color.fromARGB(227, 249, 243, 243), // Background color
+      backgroundColor:
+          const Color.fromARGB(227, 249, 243, 243), // Background color
       appBar: CustomHeader(
-        imagePath: 'assets/images/diabetesLogo.png', // Logo image path
-        welcomeMessage: 'Welcome to Diabetes Preventer!', // Welcome message
+        imagePath: userProfilePicture ??
+            'assets/images/diabetesLogo.png', // Default profile picture if not available
+        welcomeMessage:
+            'Welcome ${userName ?? 'to Diabetes Preventer'}!', // Welcome message with user's name
         showWelcomeMessage: true, // Display the welcome message
       ),
       body: Column(
@@ -44,11 +109,9 @@ class LoginPage extends StatelessWidget {
       ),
     );
   }
-}
 
-Widget bodyLogin(BuildContext context) {
-  return Expanded(
-    child: SingleChildScrollView(
+  Widget bodyLogin(BuildContext context) {
+    return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -100,47 +163,47 @@ Widget bodyLogin(BuildContext context) {
                 ],
               ),
               const SizedBox(height: 16),
-              ElevatedButton(
-                style: ButtonStyle(
-                  minimumSize: MaterialStateProperty.all(const Size(340, 50)),
-                  backgroundColor: MaterialStateProperty.resolveWith<Color>(
-                      (Set<MaterialState> states) {
-                    if (states.contains(MaterialState.pressed)) {
-                      return Color.fromARGB(255, 68, 37, 135).withOpacity(0.8);
-                    } else if (states.contains(MaterialState.hovered)) {
-                      return Color.fromARGB(255, 88, 71, 126).withOpacity(0.9);
-                    }
-                    return pinkColor; // Replace with your pinkColor variable
-                  }),
-                  overlayColor: MaterialStateProperty.resolveWith<Color>(
-                      (Set<MaterialState> states) {
-                    if (states.contains(MaterialState.pressed)) {
-                      return Colors.black12;
-                    }
-                    return Colors.transparent;
-                  }),
-                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                    RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
+              isLoading
+                  ? const CircularProgressIndicator()
+                  : ElevatedButton(
+                      style: ButtonStyle(
+                        minimumSize:
+                            MaterialStateProperty.all(const Size(340, 50)),
+                        backgroundColor:
+                            MaterialStateProperty.resolveWith<Color>(
+                                (Set<MaterialState> states) {
+                          if (states.contains(MaterialState.pressed)) {
+                            return const Color.fromARGB(255, 68, 37, 135)
+                                .withOpacity(0.8);
+                          } else if (states.contains(MaterialState.hovered)) {
+                            return const Color.fromARGB(255, 88, 71, 126)
+                                .withOpacity(0.9);
+                          }
+                          return pinkColor; // Replace with your pinkColor variable
+                        }),
+                        overlayColor: MaterialStateProperty.resolveWith<Color>(
+                            (Set<MaterialState> states) {
+                          if (states.contains(MaterialState.pressed)) {
+                            return Colors.black12;
+                          }
+                          return Colors.transparent;
+                        }),
+                        shape:
+                            MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                        ),
+                      ),
+                      onPressed: _handleLogin,
+                      child: const Text(
+                        'Login',
+                        style: TextStyle(
+                          fontSize: 20,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const HomePage(),
-                    ),
-                  );
-                },
-                child: const Text(
-                  'Login',
-                  style: TextStyle(
-                    fontSize: 20,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
               const SizedBox(height: 30),
               const Text('-OR-'),
               const Text('Don\'t have an account?'),
@@ -168,6 +231,6 @@ Widget bodyLogin(BuildContext context) {
           ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }

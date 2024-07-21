@@ -143,7 +143,8 @@ class _FamilyHistoryPageState extends State<FamilyHistoryPage> {
                     ),
                   ),
                   onPressed: () {
-                    globals.familyHistory = isSelected[0];
+                    globals.familyHistory =
+                        isSelected[0]; // Set the global variable
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -179,8 +180,6 @@ class _FamilyHistoryPageState extends State<FamilyHistoryPage> {
     );
   }
 }
-
-
 
 
 /*from mongoengine import Document, EmbeddedDocument, EmbeddedDocumentListField, StringField, BooleanField, EmbeddedDocumentField, FloatField, DateTimeField, DictField, IntField

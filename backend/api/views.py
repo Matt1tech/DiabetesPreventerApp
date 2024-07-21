@@ -1,40 +1,116 @@
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.hashers import check_password, make_password
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
-
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.views import TokenObtainPairView
-#from .utils import MyTokenObtainPairSerializer
-import json
-import logging
-#from .serializers import MyTokenObtainPairSerializer
-
+from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .serializers import UserSerializer
 from .models import User
+from .models import User, Preferences, HealthRecord
+from .serializers import UserSerializer, PreferencesSerializer, HealthRecordsSerializer
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.decorators import parser_classes
+from django.contrib.auth import authenticate
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.tokens import RefreshToken
 
-from .models import User, Preferences, HealthRecords
-from .serializers import UserSerializer
+@api_view(['POST'])
+@parser_classes([MultiPartParser, FormParser])
+def create_user(request):
+    if request.method == 'POST':
+        data = request.data.dict()
+        image = request.FILES.get('profile_picture')
+        if image:
+            image_path = default_storage.save('profile_pictures/' + image.name, ContentFile(image.read()))
+            data['profile_picture'] = image_path
+
+        serializer = UserSerializer(data=data)
+        if serializer.is_valid():
+            serializer.validated_data['password'] = make_password(serializer.validated_data['password'])
+            user = serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+def login(request):
+    email = request.data.get("email")
+    password = request.data.get("password")
+    try:
+        user = User.objects.get(email=email)
+    except User.DoesNotExist:
+        return Response({"error": "Invalid Credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+    
+    if check_password(password, user.password):
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+        })
+    else:
+        return Response({"error": "Invalid Credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+    
+    
+    
+    
+    
+@api_view(['GET'])
+def user_details(request):
+    user = request.user
+    serializer = UserSerializer(user)
+    return Response(serializer.data)
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+@api_view(['POST'])
+def create_preferences(request):
+    if request.method == 'POST':
+        serializer = PreferencesSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
-def getUsers(request):
-    user_data = User.objects.all()
-    serializer = UserSerializer(user_data, many=True)
-    return Response(serializer.data)
+def list_users(request):
+    if request.method == 'GET':
+        users = User.objects.all()
+        serializer = UserSerializer(users, many=True)
+        return Response(serializer.data)
 
 
-#@api_view(['GET'])
-#def getUser(request, pk):
- #   user_data = User.objects.get(userId=pk)
-  #  serializer = UserSerializer(user_data, many=False)
-   # return Response(serializer.data)
+@api_view(['GET'])
+def list_user_preferences(request, pk):
+    try:
+        user = User.objects.get(pk=pk)
+    except User.DoesNotExist:
+        return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    preferences = Preferences.objects.filter(user=user)
+    serializer = PreferencesSerializer(preferences, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 
 
+
+
+
+
+
+
+    """
+    
+    
 @api_view(['GET'])
 def getUser(request, pk):
     try:
@@ -79,25 +155,24 @@ def getUserEmail(request, pk):
     
     return Response({'email': user.email})
 
-
-@api_view(['POST'])
-def createUser(request):
-    data = request.data
-    user_data = User.objects.create(
-        name = data['name'],
-        email = data['email'],
-        password = make_password(data['password']),
-        gender = data['gender'],
-        marital_status=data['marital_status'],
-        height = data['height'],
-        birthdate = data['birthdate'],
-        family_history = data['family_history'],
-        profile_picture = data['profile_picture']
-    )
-    serializer = UserSerializer(user_data, many=False)
-    return Response(serializer.data)
-
-@api_view(['PUT'])
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    @api_view(['PUT'])
 def updateUser(request, pk):
     try:
         user_data = User.objects.get(userId=pk)
@@ -119,7 +194,21 @@ def updateUser(request, pk):
         return Response(serializer.errors, status=400)
         
         
-@api_view(['DELETE'])
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    @api_view(['DELETE'])
 def deleteUserProfilePicture(request, pk):
     try:
         user_data = User.objects.get(userId=pk)
@@ -132,11 +221,28 @@ def deleteUserProfilePicture(request, pk):
     user_data.save()
     return Response('Profile Picture Successfully Deleted')
     
-
-
-
-
-@api_view(['POST'])
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    @api_view(['POST'])
 def createUserData(request):
     try:
         # Extract user data from the request
@@ -156,21 +262,61 @@ def createUserData(request):
         # Handle health records
         health_records_data = user_data.pop('health_records', [])
         for record_data in health_records_data:
-            HealthRecords.objects.create(user=user, **record_data)
+            HealthRecord.objects.create(user=user, **record_data)
 
         # Serialize and return the created user
         serializer = UserSerializer(user)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    @api_view(['GET'])
+def getUsers(request):
+    user_data = User.objects.all()
+    serializer = UserSerializer(user_data, many=True)
+    return Response(serializer.data)
 
 
-
-
-
-
-
-@api_view(['GET'])
+#@api_view(['GET'])
+#def getUser(request, pk):
+ #   user_data = User.objects.get(userId=pk)
+  #  serializer = UserSerializer(user_data, many=False)
+   # return Response(serializer.data)
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    @api_view(['GET'])
 def getRoutes(request):
     routes = [
             {
@@ -207,6 +353,7 @@ def getRoutes(request):
     return Response(routes)
 
 
+    """
 
 
 
