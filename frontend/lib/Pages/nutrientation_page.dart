@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/utils/utilities.dart';
+import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../services/analyze_image.dart'; // Make sure to import your analyzeImage function
 import '../widgets/widgets.dart'; // Ensure this import path is correct
+import '../utils/utils.dart';
+import '../models/models.dart';
 
 class NutrientationPage extends StatefulWidget {
   final File imageFile;
@@ -16,11 +19,16 @@ class NutrientationPage extends StatefulWidget {
 
 class _NutrientationPageState extends State<NutrientationPage> {
   Map<String, dynamic>? analysisData;
-
+  //handle the image
+  XFile? _profilePicture;
+  final ImagePicker _picker = ImagePicker();
+  String? userName;
+  String? userProfilePicture;
   @override
   void initState() {
     super.initState();
     _analyzeImage();
+    _loadUserInfo();
   }
 
   Future<void> _analyzeImage() async {
@@ -58,14 +66,34 @@ class _NutrientationPageState extends State<NutrientationPage> {
     }
   }
 
+//handle the image of the profile picture
+  Future<void> _loadUserInfo() async {
+    final userInfo = await loadUserInfo();
+    setState(() {
+      userName = userInfo['userName'];
+      userProfilePicture = userInfo['userProfilePicture'];
+    });
+  }
+
+  Future<void> _pickProfilePicture() async {
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      setState(() {
+        _profilePicture = image;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    ImageProvider<Object> imageProvider =
+        getImageProvider(_profilePicture, userProfilePicture);
     return Scaffold(
       appBar: UserHeader(
-        imagePath: 'assets/images/diabetesLogo.png',
+        imageProvider: imageProvider,
         pageName: 'Meal Recognition',
         welcomeMessage: 'Hello Again!',
-        userName: 'matt',
+        userName: userName ?? 'user name',
         userStatus: 'Active',
         rightIcon: Icons.notifications,
         showWelcomeMessage: true,

@@ -9,11 +9,9 @@ from django.urls import path
 urlpatterns = [
 
     path('create_user/', views.create_user, name='create_user'),
-    path('create_preferences/', views.create_preferences, name='create_preferences'),
-    path('list_users/', views.list_users, name='list_users'),
-    path('list_user_preferences/<int:pk>/', views.list_user_preferences, name='list_user_preferences'),
     path('login/', views.login, name='login'),
     path('user_details/', views.user_details, name='user_details'),
+    path('logout/', views.logout, name='logout'),
 ]
     #path('latest-record/', views.latest_record, name='latest_record'),
     

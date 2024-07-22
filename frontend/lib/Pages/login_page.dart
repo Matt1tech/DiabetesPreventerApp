@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/Pages/pages.dart';
-import 'package:frontend/globals.dart';
 import '../utils/utilities.dart'; // Correct relative import for utilities
 import '../widgets/widgets.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart'; // Secure storage package for storing JWT token
@@ -53,7 +52,8 @@ class _LoginPageState extends State<LoginPage> {
       isLoading = true;
     });
     try {
-      await authService.login(_emailController.text, _passwordController.text);
+      await authService.login(
+          _emailController.text.toLowerCase(), _passwordController.text);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Login Successful')),
       );

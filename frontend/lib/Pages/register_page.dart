@@ -47,7 +47,7 @@ class _RegisterPageState extends State<RegisterPage> {
   void _register() async {
     if (_formKey.currentState!.validate()) {
       String name = _nameController.text;
-      String email = _emailController.text;
+      String email = _emailController.text.toLowerCase();
       String password = _passwordController.text;
       String gender = isSelectedGender[0] ? 'Male' : 'Female';
       String maritalStatus = isSelectedMaritalStatus[0] ? 'Married' : 'Single';
@@ -343,17 +343,6 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 }
-
-
-
-
-
-
-
-
-
-
-
 
 
 

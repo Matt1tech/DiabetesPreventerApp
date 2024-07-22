@@ -2,12 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart'; // Secure storage for storing and retrieving data securely
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:frontend/Pages/login_page.dart';
+import 'package:frontend/services/auth_service.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:http/http.dart' as http;
-import 'package:http/http.dart';
-import 'dart:io';
-import 'dart:convert';
-import '../urls.dart';
 import '../models/models.dart'; // Barrel file for models
 import '../widgets/widgets.dart'; // Barrel file for custom widgets
 import '../utils/utils.dart'; // Barrel file for utilities
@@ -74,6 +71,8 @@ SideTitles monthOfYearBottomTitles() {
 
 // State class for HomePage
 class _HomePageState extends State<HomePage> {
+  final AuthService _authService = AuthService();
+  bool isLoading = false;
   XFile? _profilePicture;
   final ImagePicker _picker = ImagePicker();
   final storage = FlutterSecureStorage();
@@ -84,7 +83,6 @@ class _HomePageState extends State<HomePage> {
   // Variable to hold user data
   List<SuitableMenuModel> menu = [];
   int _selectedIndex = 0;
-  User userService = User();
 
   @override
   void initState() {
@@ -93,12 +91,22 @@ class _HomePageState extends State<HomePage> {
     _loadUserInfo();
   }
 
+//handle the image of the profile picture
   Future<void> _loadUserInfo() async {
-    userName = await storage.read(key: 'user_name');
-    userProfilePicture = await storage.read(key: 'user_profile_picture');
-    print('User Name: $userName'); // Debug print
-    print('User Profile Picture: $userProfilePicture'); // Debug print
-    setState(() {});
+    final userInfo = await loadUserInfo();
+    setState(() {
+      userName = userInfo['userName'];
+      userProfilePicture = userInfo['userProfilePicture'];
+    });
+  }
+
+  Future<void> _pickProfilePicture() async {
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      setState(() {
+        _profilePicture = image;
+      });
+    }
   }
 
   void _getMenu() {
@@ -112,12 +120,39 @@ class _HomePageState extends State<HomePage> {
     navigateToPage(context, index);
   }
 
-  // Function to pick a profile picture from the gallery
-  Future<void> _pickProfilePicture() async {
-    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
-    if (image != null) {
+  Future<void> _handleLogout() async {
+    setState(() {
+      isLoading = true;
+    });
+    try {
+      await _authService.logout();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Logout Successful')),
+      );
+      Navigator.pushReplacementNamed(context, '/login');
+    } catch (e) {
+      // Show error message if logout fails
+      print('Logout error: $e');
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Logout Failed'),
+            content: const Text('An error occurred during logout.'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+    } finally {
       setState(() {
-        _profilePicture = image;
+        isLoading = false;
       });
     }
   }
@@ -126,15 +161,8 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     final bloodGlucose = 'N/A';
 
-    ImageProvider<Object> imageProvider;
-    if (_profilePicture != null) {
-      imageProvider = FileImage(File(_profilePicture!.path));
-    } else if (userProfilePicture != null) {
-      imageProvider = NetworkImage(userProfilePicture!);
-    } else {
-      imageProvider = const AssetImage('assets/images/diabetesLogo.png');
-    }
-
+    ImageProvider<Object> imageProvider =
+        getImageProvider(_profilePicture, userProfilePicture);
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 217, 217, 217),
       appBar: UserHeader(
@@ -142,11 +170,61 @@ class _HomePageState extends State<HomePage> {
         pageName: 'Home', // This will be shown as the page title
         welcomeMessage:
             'Hello Again!', // This will be shown as the welcome message
-        userName: userName ?? 'User',
+        userName: userName, // Use Text widget to display the user name
         userStatus: 'Active',
         rightIcon: Icons.notifications,
         showWelcomeMessage: true,
         topPadding: 50.0,
+      ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.blue,
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircleAvatar(
+                    radius: 35,
+                    backgroundColor: Colors.white,
+                    child: ClipOval(
+                      child: Image(
+                        image: imageProvider,
+                        fit: BoxFit.cover,
+                        width: 60,
+                        height: 60,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    userName ?? 'User Name',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            ListTile(
+              leading: Icon(Icons.settings),
+              title: Text('Profile Settings'),
+              onTap: () {
+                // Navigate to profile settings page
+                Navigator.pushNamed(context, '/profile');
+              },
+            ),
+            const Spacer(),
+            ListTile(
+                leading: Icon(Icons.logout),
+                title: Text('Logout'),
+                onTap: _handleLogout),
+          ],
+        ),
       ),
       body: Column(
         children: [

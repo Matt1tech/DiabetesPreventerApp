@@ -22,15 +22,6 @@ class _ReportsGenerationPageState extends State<ReportsGenerationPage> {
 
   @override
   Widget build(BuildContext context) {
-    /* String profilePictureUrl =
-        'http://10.0.2.2:8000${widget.userData?['profile_picture']}';
-    ImageProvider<Object> imageProvider;
-    if (widget.userData?['profile_picture'] != null) {
-      imageProvider = NetworkImage(profilePictureUrl);
-    } else {
-      imageProvider = AssetImage('assets/images/default_profile.png');
-    }
-*/
     return Scaffold(
       backgroundColor: Color.fromARGB(255, 217, 217, 217),
       appBar: PreferredSize(
@@ -40,7 +31,7 @@ class _ReportsGenerationPageState extends State<ReportsGenerationPage> {
           imagePath: 'assets/images/diabetesLogo.png',
           pageName: 'Reports Generation',
           welcomeMessage: 'Hello Again!',
-          userName: 'Matt',
+          userName: 'user name',
           userStatus: 'Active',
           rightIcon: Icons.notifications,
           showWelcomeMessage: true,

@@ -14,6 +14,7 @@ class CustomHeader extends StatelessWidget implements PreferredSizeWidget {
     required this.welcomeMessage,
     this.showWelcomeMessage = true,
     this.topPadding = 50.0,
+    String? userName,
   });
 
   @override

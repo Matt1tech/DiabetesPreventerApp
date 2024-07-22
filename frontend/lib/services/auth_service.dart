@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../models/user.dart' as userModel;
 
 final storage = FlutterSecureStorage();
 
@@ -59,89 +60,62 @@ class AuthService {
       }),
     );
 
+    print('Login response status: ${response.statusCode}');
+    print('Login response body: ${response.body}');
+
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       final accessToken = data['access'];
       final refreshToken = data['refresh'];
+      final user = userModel.User.fromJson(data['user']);
 
-      // Retrieve user details
-      final userDetailsUrl = Uri.parse('$baseUrl/user_details/');
-      final userDetailsResponse = await http.get(
-        userDetailsUrl,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-        },
-      );
+      // Print statement for debugging
+      print('Access Token: $accessToken');
+      print('Refresh Token: $refreshToken');
+      print('User Data: ${jsonEncode(user.toJson())}');
 
-      if (userDetailsResponse.statusCode == 200) {
-        final userDetails = jsonDecode(userDetailsResponse.body);
-        final userName = userDetails['name'];
-        final userProfilePicture = userDetails['profile_picture'];
-
-        // Store the tokens and user information securely
-        await storage.write(key: 'access_token', value: accessToken);
-        await storage.write(key: 'refresh_token', value: refreshToken);
-        await storage.write(key: 'user_name', value: userName);
-        await storage.write(
-            key: 'user_profile_picture', value: userProfilePicture);
-      }
+      // Store the tokens and user information securely
+      await storage.write(key: 'access_token', value: accessToken);
+      await storage.write(key: 'refresh_token', value: refreshToken);
+      await storage.write(key: 'user_data', value: jsonEncode(user.toJson()));
     } else {
       // Handle login failure
       print('Login failed: ${response.body}');
       throw Exception('Login failed');
     }
   }
-}
 
+  Future<void> logout() async {
+    final url = Uri.parse('$baseUrl/logout/');
+    final accessToken = await storage.read(key: 'access_token');
 
+    // Debugging statement to confirm token retrieval
+    print('Retrieved Access Token: $accessToken');
 
-
-
-/*/*
-
-
-*import 'dart:convert';
-import 'dart:io';
-import 'package:http/http.dart' as http;
-import 'package:path/path.dart';
-import '../models/user.dart'; // Import the user model
-
-class UserService {
-  final String baseUrl = 'http://10.0.2.2:8000/users/create_user';
-
-  Future<User?> createUser(User user) async {
-    final url = Uri.parse(baseUrl);
-    final request = http.MultipartRequest('POST', url);
-
-    request.fields['name'] = user.name;
-    request.fields['email'] = user.email;
-    request.fields['password'] = user.password;
-    request.fields['gender'] = user.gender;
-    request.fields['marital_status'] = user.marital_status;
-    request.fields['height'] = user.height.toString();
-    request.fields['birthdate'] = user.birthdate;
-    request.fields['family_history'] = user.family_history.toString();
-
-    if (user.profile_picture.isNotEmpty) {
-      request.files.add(await http.MultipartFile.fromPath(
-        'profile_picture',
-        user.profile_picture,
-        filename: basename(user.profile_picture),
-      ));
+    if (accessToken == null) {
+      throw Exception('No access token found');
     }
 
-    final response = await request.send();
+    final response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $accessToken',
+      },
+    );
 
-    if (response.statusCode == 201) {
-      final responseData = await http.Response.fromStream(response);
-      final data = jsonDecode(responseData.body);
-      return User.fromJson(data);
+    print('Logout response status: ${response.statusCode}');
+    print('Logout response body: ${response.body}');
+
+    if (response.statusCode == 200) {
+      // Clear stored tokens and user information
+      await storage.delete(key: 'access_token');
+      await storage.delete(key: 'refresh_token');
+      await storage.delete(key: 'user_data');
     } else {
-      final responseData = await http.Response.fromStream(response);
-      print('Failed to create user. Status code: ${response.statusCode}');
-      print('Response body: ${responseData.body}');
-      throw Exception('Failed to create user');
+      // Handle logout failure
+      print('Logout failed: ${response.body}');
+      throw Exception('Logout failed');
     }
   }
 }
-*/ */

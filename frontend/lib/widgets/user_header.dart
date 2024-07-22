@@ -44,23 +44,34 @@ class UserHeader extends StatelessWidget implements PreferredSizeWidget {
             flexibleSpace: Container(
               alignment: Alignment.center,
               padding:
-                  const EdgeInsets.symmetric(horizontal: 20.0, vertical: 15.0),
+                  const EdgeInsets.symmetric(horizontal: 5.0, vertical: 15.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  CircleAvatar(
-                    radius: 35,
-                    backgroundColor: Colors.white,
-                    child: ClipOval(
-                      child: Image(
-                        image: effectiveImage,
-                        fit: BoxFit.cover,
-                        width: 60,
-                        height: 60,
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.menu, color: Colors.white),
+                        onPressed: () {
+                          Scaffold.of(context).openDrawer();
+                        },
                       ),
-                    ),
+                      const SizedBox(width: 5),
+                      CircleAvatar(
+                        radius: 35,
+                        backgroundColor: Colors.white,
+                        child: ClipOval(
+                          child: Image(
+                            image: effectiveImage,
+                            fit: BoxFit.cover,
+                            width: 60,
+                            height: 60,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 20), // Space between avatar and text
+                  const SizedBox(width: 30), // Space between avatar and text
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,

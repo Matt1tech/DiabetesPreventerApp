@@ -72,15 +72,6 @@ class MealRecommendation(models.Model):
     user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='meal_recommendations')  # One-to-Many relationship with User
     created_at = models.DateTimeField(default=timezone.now)
 
-class CustomUserManager(BaseUserManager):
-    def create_user(self, email, password=None, **extra_fields):
-        if not email:
-            raise ValueError('The Email field must be set')
-        email = self.normalize_email(email)
-        user = self.model(email=email, **extra_fields)
-        user.set_password(password)
-        user.save(using=self._db)
-        return user
 
 class User(AbstractBaseUser):
     id = models.AutoField(primary_key=True)
@@ -95,10 +86,6 @@ class User(AbstractBaseUser):
     profile_picture = models.CharField(max_length=255)  # Store the path to the profile picture
     created_at = models.DateTimeField(default=timezone.now)  # Ensure this field is timezone-aware
 
-    objects = CustomUserManager()
-
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = []
 
     def __str__(self):
         return f"{self.name} ({self.email})"
