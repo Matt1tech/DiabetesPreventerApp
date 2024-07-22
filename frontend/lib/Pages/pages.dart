@@ -8,3 +8,4 @@ export 'reports_generation_page.dart';
 export 'reports_view_page.dart';
 export 'nutrientation_page.dart';
 export 'profile_update_page.dart';
+export 'meal_record_page.dart';

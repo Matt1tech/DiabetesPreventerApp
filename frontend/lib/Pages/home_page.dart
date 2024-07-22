@@ -79,6 +79,7 @@ class _HomePageState extends State<HomePage> {
   // Variable to hold user data
   String? userName;
   String? userProfilePicture;
+  int? user_id;
   // Instance of secure storage
   // Variable to hold user data
   List<SuitableMenuModel> menu = [];

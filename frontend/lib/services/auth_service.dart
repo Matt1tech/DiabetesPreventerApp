@@ -69,11 +69,6 @@ class AuthService {
       final refreshToken = data['refresh'];
       final user = userModel.User.fromJson(data['user']);
 
-      // Print statement for debugging
-      print('Access Token: $accessToken');
-      print('Refresh Token: $refreshToken');
-      print('User Data: ${jsonEncode(user.toJson())}');
-
       // Store the tokens and user information securely
       await storage.write(key: 'access_token', value: accessToken);
       await storage.write(key: 'refresh_token', value: refreshToken);

@@ -2,6 +2,7 @@ from django.http import JsonResponse
 from django.contrib.auth.hashers import check_password, make_password
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
+from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
@@ -90,12 +91,46 @@ def logout(request):
         print(f"Error during logout: {str(e)}")
         return Response({"error": "An error occurred during logout"}, status=status.HTTP_400_BAD_REQUEST)
 
+@api_view(['GET'])
+def get_last_health_record(request, user_id):
+    # Retrieve the user
+    user = get_object_or_404(User, pk=user_id)
+    print(f"User found: {user}")
 
+    # Retrieve the last health record for the user
+    last_health_record = HealthRecord.objects.filter(user=user).order_by('-created_at').first()
+    print(f"Last Health Record: {last_health_record}")
 
-
-
-
-
+    if last_health_record:
+        data = {
+            'blood_glucose': last_health_record.blood_glucose,
+            'blood_pressure': last_health_record.blood_pressure,
+            'bmi': last_health_record.bmi,
+            'weight': last_health_record.weight,
+            'diabetes_risk': last_health_record.diabetes_risk,
+            'created_at': last_health_record.created_at,
+        }
+        print(f"Retrieved data: {data}")
+        return Response(data)
+    else:
+        print("No health records found for this user.")
+        return Response({'error': 'No health records found for this user.'}, status=404)
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     """
     
     

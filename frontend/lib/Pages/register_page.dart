@@ -240,7 +240,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                     const SizedBox(width: 25),
                     Container(
-                      width: 145,
+                      width: 150,
                       child: buildDatePickerField(
                           context, 'Birthday', Icons.cake,
                           width: 160, controller: _dateController),
