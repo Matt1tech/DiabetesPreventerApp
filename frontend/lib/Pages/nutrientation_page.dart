@@ -3,6 +3,7 @@ import 'package:frontend/utils/utilities.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../services/analyze_image.dart'; // Make sure to import your analyzeImage function
+import '../utils/image_handler.dart';
 import '../widgets/widgets.dart'; // Ensure this import path is correct
 import '../utils/utils.dart';
 import '../models/models.dart';
@@ -19,6 +20,7 @@ class NutrientationPage extends StatefulWidget {
 
 class _NutrientationPageState extends State<NutrientationPage> {
   Map<String, dynamic>? analysisData;
+
   //handle the image
   XFile? _profilePicture;
   final ImagePicker _picker = ImagePicker();
@@ -140,7 +142,6 @@ class _NutrientationPageState extends State<NutrientationPage> {
                       children: [
                         ElevatedButton(
                           onPressed: () {
-                            // Add functionality to save to database
                             _saveToDatabase();
                           },
                           child: Text('Save'),
@@ -148,8 +149,7 @@ class _NutrientationPageState extends State<NutrientationPage> {
                         ElevatedButton(
                           onPressed: () {
                             // Add functionality to retake the picture
-                            Navigator.pop(
-                                context); // Assuming it takes back to the camera
+                            Navigator.pop(context);
                           },
                           child: Text('Retake'),
                         ),

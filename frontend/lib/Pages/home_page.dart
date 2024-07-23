@@ -4,6 +4,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:frontend/Pages/login_page.dart';
 import 'package:frontend/services/auth_service.dart';
+import 'package:frontend/utils/image_handler.dart';
 import 'package:image_picker/image_picker.dart';
 import '../models/models.dart'; // Barrel file for models
 import '../widgets/widgets.dart'; // Barrel file for custom widgets

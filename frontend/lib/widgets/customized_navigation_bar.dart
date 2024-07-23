@@ -48,8 +48,8 @@ class CustomNavigationBar extends StatelessWidget {
           label: 'Reports',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.add_box),
-          label: 'Package',
+          icon: Icon(Icons.recommend),
+          label: 'For You',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.support_agent),

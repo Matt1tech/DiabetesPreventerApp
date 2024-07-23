@@ -29,8 +29,7 @@ class _CustomizationsPageState extends State<CustomizationsPage> {
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(170.0),
         child: UserHeader(
-          imagePath: 'assets/images/diabetesLogo.png',
-          pageName: 'Customizations',
+          /*  imagePath: 'assets/images/diabetesLogo.png',*/
           welcomeMessage: 'Hello Again!',
           userName: 'Matt',
           userStatus: 'Active',

@@ -3,14 +3,14 @@ import '../widgets/user_header.dart';
 import '../widgets/customized_navigation_bar.dart';
 import '../utils/navigation_util.dart';
 
-class ReportsViewPage extends StatefulWidget {
-  ReportsViewPage({Key? key}) : super(key: key);
+class RecommendationsPage extends StatefulWidget {
+  RecommendationsPage({Key? key}) : super(key: key);
 
   @override
-  _ReportsViewPageState createState() => _ReportsViewPageState();
+  _RecommendationsState createState() => _RecommendationsState();
 }
 
-class _ReportsViewPageState extends State<ReportsViewPage> {
+class _RecommendationsState extends State<RecommendationsPage> {
   int _selectedIndex = 5;
 
   void _onItemTapped(int index) {
@@ -37,8 +37,8 @@ class _ReportsViewPageState extends State<ReportsViewPage> {
         preferredSize: Size.fromHeight(170.0),
         child: UserHeader(
           /*imageProvider: imageProvider,*/
-          imagePath: 'assets/images/diabetesLogo.png',
-          pageName: 'Reports View',
+          /*  imagePath: 'assets/images/diabetesLogo.png',*/
+          pageName: 'Recommendations',
           welcomeMessage: 'Hello Again!',
           userName: 'Matt',
           userStatus: 'Active',
@@ -49,7 +49,7 @@ class _ReportsViewPageState extends State<ReportsViewPage> {
       ),
       body: Center(
         child: Text(
-          'Reports View Page',
+          'Recommendations Page',
           style: TextStyle(fontSize: 24),
         ),
       ),

@@ -8,7 +8,7 @@ final storage = FlutterSecureStorage();
 
 class AuthService {
   final String baseUrl =
-      "http://10.0.2.2:8000"; // Update this to your Django server URL
+      "http://10.0.2.2:8000"; // Update this to  Django server URL
 
   Future<http.Response> registerUser(
       String name,
@@ -113,4 +113,6 @@ class AuthService {
       throw Exception('Logout failed');
     }
   }
+
+  updateUserProfile(String email, String password, String weight, File? file) {}
 }

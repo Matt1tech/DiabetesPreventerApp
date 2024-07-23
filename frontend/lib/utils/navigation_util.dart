@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
-import '../pages/pages.dart'; // Update this to your actual pages import path
+import '../Pages/profile_update_page.dart';
+import '../pages/pages.dart';
 
 const String apiKey =
-    'uPsCgdLq.jIrKCQePQaXday8iQYsqEgzpcHT1r7Tr'; // Replace with your actual API key
+    'uPsCgdLq.jIrKCQePQaXday8iQYsqEgzpcHT1r7Tr'; // Replace with  API key
 
 Future<void> navigateToPage(BuildContext context, int index) async {
   switch (index) {
@@ -17,7 +18,7 @@ Future<void> navigateToPage(BuildContext context, int index) async {
     case 1:
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => MealRecommendationsPage()),
+        MaterialPageRoute(builder: (context) => MealRecordsPage()),
       );
       break;
     case 2:
@@ -55,13 +56,13 @@ Future<void> navigateToPage(BuildContext context, int index) async {
     case 5:
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => ReportsViewPage()),
+        MaterialPageRoute(builder: (context) => RecommendationsPage()),
       );
       break;
     case 6:
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => ProfileUpdatePage()),
+        MaterialPageRoute(builder: (context) => UpdateProfilePage()),
       );
       break;
   }

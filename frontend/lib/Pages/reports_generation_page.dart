@@ -16,7 +16,7 @@ class ReportsGenerationPage extends StatefulWidget {
 }
 
 class _ReportsGenerationPageState extends State<ReportsGenerationPage> {
-  int _selectedIndex = 1; // Ensure this is declared properly
+  int _selectedIndex = 4; // Ensure this is declared properly
   final AuthService _authService = AuthService();
   bool isLoading = false;
   XFile? _profilePicture;
@@ -91,14 +91,14 @@ class _ReportsGenerationPageState extends State<ReportsGenerationPage> {
 
   @override
   Widget build(BuildContext context) {
-    ImageProvider<Object> imageProvider =
-        getImageProvider(_profilePicture, userProfilePicture);
+    /* ImageProvider<Object> imageProvider =
+        getImageProvider(_profilePicture, userProfilePicture);*/
     return Scaffold(
       backgroundColor: Color.fromARGB(255, 217, 217, 217),
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(170.0),
         child: UserHeader(
-          imageProvider: imageProvider,
+          /*   imageProvider: imageProvider,*/
           pageName: 'Reports Generation',
           welcomeMessage: 'Hello Again!',
           userName: userName,
