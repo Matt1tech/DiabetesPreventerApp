@@ -1,3 +1,4 @@
+from datetime import date
 from django.http import JsonResponse
 from django.contrib.auth.hashers import check_password, make_password
 from django.core.files.storage import default_storage
@@ -94,38 +95,102 @@ def logout(request):
 @api_view(['GET'])
 def get_last_health_record(request, user_id):
     # Retrieve the user
-    user = get_object_or_404(User, pk=user_id)
-    print(f"User found: {user}")
+    try:
+        user = get_object_or_404(User, pk=user_id)
+        print(f"User found: {user}")
+    except Exception as e:
+        print(f"Error retrieving user: {e}")
+        return Response({'error': 'User not found.'}, status=404)
 
     # Retrieve the last health record for the user
-    last_health_record = HealthRecord.objects.filter(user=user).order_by('-created_at').first()
-    print(f"Last Health Record: {last_health_record}")
+    try:
+        last_health_record = HealthRecord.objects.filter(user=user).order_by('-created_at').first()
+        print(f"Last Health Record: {last_health_record}")
 
-    if last_health_record:
-        data = {
-            'blood_glucose': last_health_record.blood_glucose,
-            'blood_pressure': last_health_record.blood_pressure,
-            'bmi': last_health_record.bmi,
-            'weight': last_health_record.weight,
-            'diabetes_risk': last_health_record.diabetes_risk,
-            'created_at': last_health_record.created_at,
-        }
-        print(f"Retrieved data: {data}")
-        return Response(data)
-    else:
-        print("No health records found for this user.")
-        return Response({'error': 'No health records found for this user.'}, status=404)
+        if last_health_record:
+            data = {
+                'blood_glucose': last_health_record.blood_glucose,
+                'blood_pressure': last_health_record.blood_pressure,
+                'weight': last_health_record.weight,
+                'bmi': last_health_record.weight,
+            }
+            print(f"Retrieved data: {data}")
+            return Response(data)
+        else:
+            print("No health records found for this user.")
+            return Response({'error': 'No health records found for this user.'}, status=404)
+    except Exception as e:
+        print(f"Error retrieving health records: {e}")
+        return Response({'error': 'Error retrieving health records.'}, status=500)
     
     
     
+
+@api_view(['POST'])
+def create_or_update_health_record(request):
+    today = date.today()
+    data = request.data
+
+    user_id = data.get('user')
+    if not user_id:
+        return Response({'user': 'This field is required.'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return Response({'user': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+    weight = data.get('weight')
+    blood_glucose = data.get('blood_glucose')
+    blood_pressure = data.get('blood_pressure')
+
+    # Ensure at least one of the optional fields is provided
+    if not any([weight, blood_glucose, blood_pressure]):
+        return Response({'error': 'At least one of weight, blood_glucose, or blood_pressure must be provided.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    bmi = None
+    diabetes_risk = None
+
+    if weight is not None:
+        try:
+            weight = float(weight)
+        except ValueError:
+            return Response({'weight': 'Invalid value'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Calculate BMI
+        height = user.height / 100  # Assuming height is in centimeters
+        bmi = weight / (height * height)
+
+        # Predict diabetes risk using the machine learning model
+        # features = [weight, height, bmi, blood_glucose, blood_pressure, user.age, user.family_history]  # Add other necessary features
+        # diabetes_risk = predict_diabetes_risk(features)
+
+    # Validate the input data using the serializer
+    serializer = HealthRecordsSerializer(data=data)
+    if serializer.is_valid():
+        # Check if a record exists for the user for today
+        existing_record = HealthRecord.objects.filter(user=user, created_at__date=today).first()
+        if existing_record:
+            # Update the existing record with new values if provided
+            existing_record.blood_glucose = blood_glucose if blood_glucose is not None else existing_record.blood_glucose
+            existing_record.blood_pressure = blood_pressure if blood_pressure is not None else existing_record.blood_pressure
+            existing_record.bmi = bmi if bmi is not None else existing_record.bmi
+            existing_record.weight = weight if weight is not None else existing_record.weight
+            existing_record.diabetes_risk = diabetes_risk if diabetes_risk is not None else existing_record.diabetes_risk
+            existing_record.save()
+            return Response(HealthRecordsSerializer(existing_record).data, status=status.HTTP_200_OK)
+        else:
+            # Create a new record
+            serializer.save(user=user, bmi=bmi)  # diabetes_risk=diabetes_risk)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     
     
-    
-    
-    
-    
-    
+@api_view(['GET'])
+def monthely_risk(request):
+    pass 
+
     
     
     

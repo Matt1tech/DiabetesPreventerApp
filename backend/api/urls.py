@@ -12,10 +12,10 @@ urlpatterns = [
     path('login/', views.login, name='login'),
     path('user_details/', views.user_details, name='user_details'),
     path('logout/', views.logout, name='logout'),
-    path('user/<int:user_id>/last_health_record/', views.get_last_health_record, name='last_health_record'),
-    path('api/user/<int:user_id>/last_health_record/', views.get_last_health_record, name='last_health_record'),
+    path('health-record/', views.create_or_update_health_record, name='create_or_update_health_record'),
+    path('health-record/last/<int:user_id>/', views.get_last_health_record, name='get_last_health_record'),
 ]
-    #path('latest-record/', views.latest_record, name='latest_record'),
+    
     
 
     #path('',views.getRoutes),

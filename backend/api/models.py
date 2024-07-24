@@ -35,13 +35,13 @@ class Preferences(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
 
 class HealthRecord(models.Model):
-    blood_glucose = models.FloatField()
-    blood_pressure = models.CharField(max_length=20)  # Format: '120/80'
-    bmi = models.FloatField()
-    weight = models.FloatField()
-    diabetes_risk = models.FloatField(default=0.0)  # Assuming risk is a percentage
-    created_at = models.DateTimeField(default=timezone.now)  # Ensure this field is timezone-aware
-    user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='health_records')  # One-to-Many relationship with User
+    blood_glucose = models.FloatField(null=True, blank=True)
+    blood_pressure = models.CharField(max_length=20, null=True, blank=True)
+    bmi = models.FloatField(null=True, blank=True)
+    weight = models.FloatField(null=True, blank=True)
+    diabetes_risk = models.FloatField(default=0.0)
+    created_at = models.DateTimeField(default=timezone.now)
+    user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='health_records')
 
 class PhysicalActivity(models.Model):
     duration = models.CharField(max_length=50)  # Format: '30 minutes'
@@ -63,7 +63,7 @@ class Meal(models.Model):
     fats = models.FloatField(default=0.0)
     carbs = models.FloatField(default=0.0)
     fiber = models.FloatField(default=0.0)
-    nutrients = models.JSONField()  # Store detailed nutrients info in Dict format
+    nutrients = models.JSONField()  # Store detailed nutrients info in Dict format//TODO this should be removed if not necessary after testing 
     user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='meals')  # One-to-Many relationship with User
     created_at = models.DateTimeField(default=timezone.now)
 
