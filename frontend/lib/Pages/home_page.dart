@@ -3,13 +3,15 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart'; // Secure s
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:frontend/Pages/login_page.dart';
+import 'package:frontend/Pages/profile_update_page.dart';
 import 'package:frontend/services/auth_service.dart';
-import 'package:frontend/utils/image_handler.dart';
 import 'package:image_picker/image_picker.dart';
 import '../models/models.dart'; // Barrel file for models
+import '../services/fetch_user_data_service.dart';
 import '../widgets/widgets.dart'; // Barrel file for custom widgets
 import '../utils/utils.dart'; // Barrel file for utilities
 import '../components/components.dart'; // Barrel file for components
+import '../services/user_health_records_service.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -91,6 +93,7 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     _getMenu();
     _loadUserInfo();
+    _loadUserData();
   }
 
 //handle the image of the profile picture
@@ -100,6 +103,17 @@ class _HomePageState extends State<HomePage> {
       userName = userInfo['userName'];
       userProfilePicture = userInfo['userProfilePicture'];
       user_id = userInfo['id'];
+    });
+  }
+
+  Future<void> _loadUserData() async {
+    final userName = await storage.read(key: 'user_name');
+    final userId = await storage.read(key: 'user_id');
+
+    setState(() {
+      this.userName = userName;
+      this.userProfilePicture = userProfilePicture;
+      this.user_id = userId;
     });
   }
 
@@ -132,7 +146,10 @@ class _HomePageState extends State<HomePage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Logout Successful')),
       );
-      Navigator.pushReplacementNamed(context, '/login');
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => LoginPage()),
+      );
     } catch (e) {
       // Show error message if logout fails
       print('Logout error: $e');
@@ -185,7 +202,7 @@ class _HomePageState extends State<HomePage> {
           children: <Widget>[
             DrawerHeader(
               decoration: BoxDecoration(
-                color: Colors.blue,
+                color: blueColor,
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -218,7 +235,10 @@ class _HomePageState extends State<HomePage> {
               title: Text('Profile Settings'),
               onTap: () {
                 // Navigate to profile settings page
-                Navigator.pushNamed(context, '/profile');
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => UpdateProfilePage()),
+                );
               },
             ),
             const Spacer(),
@@ -496,12 +516,24 @@ class _HomePageState extends State<HomePage> {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             HealthMeasurementLogsCard(
-              title: 'Blood Pressure',
-              name: 'bloodPressure',
-            ), // Use the HealthMeasurementLogsCard widget,
+                title: 'Blood Pressure',
+                name: 'bloodPressure',
+                onPressed: (int value) {
+                  // Implement your backend sending logic here
+                  if (user_id != null) {
+                    UserHealthRecordsService.inputBloodPressure(
+                        int.parse(user_id!), value.toString());
+                  }
+                }), // Use the HealthMeasurementLogsCard widget,
             HealthMeasurementLogsCard(
               title: 'Glucose Level',
               name: 'glucoseLevel',
+              onPressed: (int value) {
+                if (user_id != null) {
+                  UserHealthRecordsService.inputBloodGlucose(
+                      int.parse(user_id!), value);
+                }
+              },
             ), // Use the HealthMeasurementLogsCard widget
           ],
         ),

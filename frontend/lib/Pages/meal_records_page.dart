@@ -1,11 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:image/image.dart' as img;
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import '../utils/image_handler.dart';
+import '../services/fetch_user_data_service.dart';
 import '../widgets/user_header.dart';
 import '../widgets/customized_navigation_bar.dart';
 import '../utils/utils.dart';

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:frontend/services/auth_service.dart';
-import 'package:frontend/utils/image_handler.dart';
 import 'package:image_picker/image_picker.dart';
+import '../services/fetch_user_data_service.dart';
 import '../widgets/user_header.dart';
 import '../widgets/customized_navigation_bar.dart';
 import '../utils/navigation_util.dart';

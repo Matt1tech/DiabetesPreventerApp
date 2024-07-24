@@ -7,6 +7,8 @@ import '../widgets/widgets.dart';
 import 'package:frontend/services/auth_service.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import 'home_page.dart';
+
 final _formKey = GlobalKey<FormState>();
 final _emailController = TextEditingController();
 final _passwordController = TextEditingController();
@@ -130,7 +132,10 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
-            Navigator.pop(context);
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => HomePage()),
+            );
           },
         ),
         title: Text('Update Profile'),
@@ -175,7 +180,8 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
                   readOnly: true, // Disable editing
                   decoration: InputDecoration(
                     labelText: 'Name',
-                    icon: Icon(Icons.person),
+                    prefixIcon:
+                        Icon(Icons.person), // Use prefixIcon instead of icon
                     filled: true,
                     fillColor: Colors.grey[200],
                   ),
@@ -281,7 +287,10 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
                 Center(
                   child: TextButton(
                     onPressed: () {
-                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => HomePage()),
+                      );
                     },
                     child: const Text(
                       'Back',

@@ -8,8 +8,21 @@ final storage = FlutterSecureStorage();
 
 class AuthService {
   final String baseUrl =
-      "http://10.0.2.2:8000"; // Update this to  Django server URL
+      "http://10.0.2.2:8000"; // Update this to your Django server URL
 
+  /// Registers a new user with the given information.
+  ///
+  /// [name]: User's name
+  /// [email]: User's email address
+  /// [password]: User's password
+  /// [gender]: User's gender
+  /// [maritalStatus]: User's marital status
+  /// [height]: User's height
+  /// [birthdate]: User's birth date
+  /// [familyHistory]: Boolean indicating family history of diabetes
+  /// [profilePicture]: Optional profile picture file
+  ///
+  /// Returns the HTTP response from the server.
   Future<http.Response> registerUser(
       String name,
       String email,
@@ -47,6 +60,13 @@ class AuthService {
     return await http.Response.fromStream(response);
   }
 
+  /// Logs in a user with the given email and password.
+  ///
+  /// [email]: User's email address
+  /// [password]: User's password
+  ///
+  /// Stores the access token, refresh token, user name, profile picture, user ID, and user data in secure storage.
+  /// Throws an exception if login fails.
   Future<void> login(String email, String password) async {
     final url = Uri.parse('$baseUrl/login/');
     final response = await http.post(
@@ -67,52 +87,61 @@ class AuthService {
       final data = jsonDecode(response.body);
       final accessToken = data['access'];
       final refreshToken = data['refresh'];
-      final user = userModel.User.fromJson(data['user']);
+      final user = data['user'];
+      final profilePicture = user['profile_picture'];
 
       // Store the tokens and user information securely
       await storage.write(key: 'access_token', value: accessToken);
       await storage.write(key: 'refresh_token', value: refreshToken);
-      await storage.write(key: 'user_data', value: jsonEncode(user.toJson()));
+      await storage.write(key: 'user_name', value: user['name']);
+      await storage.write(key: 'user_profile_picture', value: profilePicture);
+      await storage.write(key: 'user_id', value: user['id'].toString());
+      await storage.write(key: 'user_data', value: jsonEncode(user));
+
+      print('Stored user_name: ${user['name']}');
     } else {
-      // Handle login failure
       print('Login failed: ${response.body}');
       throw Exception('Login failed');
     }
   }
 
+  /// Logs out the user.
+  ///
+  /// Sends a request to the server to invalidate the refresh token and clears all stored data from secure storage.
   Future<void> logout() async {
-    final url = Uri.parse('$baseUrl/logout/');
-    final accessToken = await storage.read(key: 'access_token');
+    try {
+      final refreshToken = await storage.read(key: 'refresh_token');
+      if (refreshToken != null) {
+        final url = Uri.parse('$baseUrl/logout/');
+        final response = await http.post(
+          url,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode({
+            'refresh': refreshToken,
+          }),
+        );
 
-    // Debugging statement to confirm token retrieval
-    print('Retrieved Access Token: $accessToken');
-
-    if (accessToken == null) {
-      throw Exception('No access token found');
+        if (response.statusCode != 205) {
+          throw Exception('Failed to logout from server');
+        }
+      }
+    } catch (e) {
+      // Handle any errors that might occur during the HTTP request
+      print('Logout error: $e');
     }
-
-    final response = await http.post(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $accessToken',
-      },
-    );
-
-    print('Logout response status: ${response.statusCode}');
-    print('Logout response body: ${response.body}');
-
-    if (response.statusCode == 200) {
-      // Clear stored tokens and user information
-      await storage.delete(key: 'access_token');
-      await storage.delete(key: 'refresh_token');
-      await storage.delete(key: 'user_data');
-    } else {
-      // Handle logout failure
-      print('Logout failed: ${response.body}');
-      throw Exception('Logout failed');
-    }
+    // Always clear the local storage
+    await storage.deleteAll();
   }
 
-  updateUserProfile(String email, String password, String weight, File? file) {}
+  /// Updates the user profile with the given information.
+  ///
+  /// [email]: User's email address
+  /// [password]: User's password
+  /// [weight]: User's weight
+  /// [file]: Optional file for updating profile picture
+  updateUserProfile(String email, String password, String weight, File? file) {
+    // Implement the update user profile logic here
+  }
 }

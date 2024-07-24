@@ -3,10 +3,9 @@ import 'package:frontend/utils/utilities.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../services/analyze_image.dart'; // Make sure to import your analyzeImage function
-import '../utils/image_handler.dart';
+import '../services/fetch_user_data_service.dart';
 import '../widgets/widgets.dart'; // Ensure this import path is correct
 import '../utils/utils.dart';
-import '../models/models.dart';
 
 class NutrientationPage extends StatefulWidget {
   final File imageFile;

@@ -31,20 +31,17 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  String? userName;
-  String? userProfilePicture;
   bool isLoading = false; // Define isLoading as a state variable
 
   @override
   void initState() {
     super.initState();
-    _loadUserInfo();
+    _clearFields(); // Clear the text fields
   }
 
-  Future<void> _loadUserInfo() async {
-    userName = await storage.read(key: 'user_name');
-    userProfilePicture = await storage.read(key: 'user_profile_picture');
-    setState(() {});
+  void _clearFields() {
+    _emailController.clear();
+    _passwordController.clear();
   }
 
   Future<void> _handleLogin() async {
@@ -93,10 +90,9 @@ class _LoginPageState extends State<LoginPage> {
       backgroundColor:
           const Color.fromARGB(227, 249, 243, 243), // Background color
       appBar: CustomHeader(
-        imagePath: userProfilePicture ??
+        imagePath:
             'assets/images/diabetesLogo.png', // Default profile picture if not available
-        welcomeMessage:
-            'Welcome ${userName ?? 'to Diabetes Preventer'}!', // Welcome message with user's name
+        welcomeMessage: 'Welcome back..', // Welcome message with user's name
         showWelcomeMessage: true, // Display the welcome message
       ),
       body: Column(

@@ -4,8 +4,13 @@ import 'package:frontend/utils/utils.dart';
 class HealthMeasurementLogsCard extends StatefulWidget {
   final String title;
   final String name;
+  final void Function(int) onPressed;
 
-  HealthMeasurementLogsCard({required this.title, required this.name});
+  HealthMeasurementLogsCard({
+    required this.title,
+    required this.name,
+    required this.onPressed,
+  });
 
   @override
   _HealthMeasurementLogsCardState createState() =>
@@ -25,13 +30,6 @@ class _HealthMeasurementLogsCardState extends State<HealthMeasurementLogsCard> {
     setState(() {
       _value--;
     });
-  }
-
-  void _sendValueToBackend() {
-    // Prepare the value to send to the backend
-    int value = _value;
-    // Code to send the value to the backend would go here
-    print("Sending ${widget.name} value to backend: $value");
   }
 
   @override
@@ -111,7 +109,7 @@ class _HealthMeasurementLogsCardState extends State<HealthMeasurementLogsCard> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: pinkColor, // Background color
                 ),
-                onPressed: _sendValueToBackend,
+                onPressed: () => widget.onPressed(_value),
                 child: Text(
                   'Save',
                   style: TextStyle(

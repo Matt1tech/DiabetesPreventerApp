@@ -19,7 +19,6 @@ Future<Map<String, String?>> loadUserInfo() async {
     // Construct the full URL for the profile picture
     final userProfilePicture =
         '${'http://10.0.2.2:8000'}/media/${user.profile_picture}';
-    print('User Name: $userName'); // Debug statement
     print('User Profile Picture: $userProfilePicture'); // Debug statement
     return {
       'userName': userName,
@@ -41,7 +40,7 @@ ImageProvider<Object> getImageProvider(
     {String defaultAssetPath = 'assets/images/diabetesLogo.png'}) {
   if (profilePicture != null) {
     return FileImage(File(profilePicture.path));
-  } else if (userProfilePicture != null) {
+  } else if (userProfilePicture != null && userProfilePicture.isNotEmpty) {
     print(
         'Loading profile picture from network: $userProfilePicture'); // Debug statement
     return NetworkImage(userProfilePicture);
