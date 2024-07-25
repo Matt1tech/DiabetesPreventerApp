@@ -191,7 +191,7 @@ def get_last_health_record(request, user_id):
 
 @api_view(['POST'])
 def create_or_update_health_record(request):
-    today = timezone.now().date()  # Ensure we only get the date part
+    today = date.today()
     data = request.data
 
     user_id = data.get('user')
@@ -228,40 +228,25 @@ def create_or_update_health_record(request):
         # features = [weight, height, bmi, blood_glucose, blood_pressure, user.age, user.family_history]  # Add other necessary features
         # diabetes_risk = predict_diabetes_risk(features)
 
-    # Debug: Print information about the existing record search
-    print(f"Searching for existing records for user {user.id} on date {today}")
-    
-    # Check if a record exists for the user for today
-    existing_record = HealthRecord.objects.filter(user=user, created_at__date=today).first()
-    if existing_record:
-        print(f"Found existing record for user {user.id} on date {today}: {existing_record.id}")
-        # Update the existing record with new values if provided
-        if blood_glucose is not None:
-            existing_record.blood_glucose = blood_glucose
-        if blood_pressure is not None:
-            existing_record.blood_pressure = blood_pressure
-        if bmi is not None:
-            existing_record.bmi = bmi
-        if weight is not None:
-            existing_record.weight = weight
-        if diabetes_risk is not None:
-            existing_record.diabetes_risk = diabetes_risk
-        existing_record.save()
-        return Response(HealthRecordsSerializer(existing_record).data, status=status.HTTP_200_OK)
-    else:
-        print(f"No existing record found for user {user.id} on date {today}, creating a new record")
-        # Create a new record
-        data['user'] = user.id
-        if bmi is not None:
-            data['bmi'] = bmi
-        if diabetes_risk is not None:
-            data['diabetes_risk'] = diabetes_risk
-        serializer = HealthRecordsSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save(user=user)
+    # Validate the input data using the serializer
+    serializer = HealthRecordsSerializer(data=data)
+    if serializer.is_valid():
+        # Check if a record exists for the user for today
+        existing_record = HealthRecord.objects.filter(user=user, created_at__date=today).first()
+        if existing_record:
+            # Update the existing record with new values if provided
+            existing_record.blood_glucose = blood_glucose if blood_glucose is not None else existing_record.blood_glucose
+            existing_record.blood_pressure = blood_pressure if blood_pressure is not None else existing_record.blood_pressure
+            existing_record.bmi = bmi if bmi is not None else existing_record.bmi
+            existing_record.weight = weight if weight is not None else existing_record.weight
+            existing_record.diabetes_risk = diabetes_risk if diabetes_risk is not None else existing_record.diabetes_risk
+            existing_record.save()
+            return Response(HealthRecordsSerializer(existing_record).data, status=status.HTTP_200_OK)
+        else:
+            # Create a new record
+            serializer.save(user=user, bmi=bmi)  # diabetes_risk=diabetes_risk)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        print(f"Failed to create record for user {user.id}: {serializer.errors}")
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     
     

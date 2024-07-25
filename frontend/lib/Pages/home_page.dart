@@ -411,13 +411,13 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   AnimatedNutritionContainer(
                     title: 'Protein',
-                    calories: 100, // Specific calories for Protein
+                    calories: 150, // Specific calories for Protein
                     maxCalories: 200,
                     textColor: const Color.fromARGB(255, 164, 103, 12),
                   ),
                   AnimatedNutritionContainer(
                     title: 'Fats',
-                    calories: 150, // Specific calories for Fats
+                    calories: 90, // Specific calories for Fats
                     maxCalories: 300,
                     textColor: pinkColor,
                   ),
