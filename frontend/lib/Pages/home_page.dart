@@ -298,7 +298,7 @@ class _HomePageState extends State<HomePage> {
                   nutrientsDetailsSection(),
                   riskOverviewSection(),
                   const SizedBox(height: 30),
-                  healthRecordSection(bloodGlucose),
+                  healthRecordSection(),
                   const SizedBox(height: 30),
                   healthInformationLogsSection(),
                   const SizedBox(height: 30),
@@ -504,7 +504,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   // Health Record Section
-  Column healthRecordSection(String bloodGlucose) {
+  Column healthRecordSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -523,9 +523,9 @@ class _HomePageState extends State<HomePage> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            glucoseRecord(bloodGlucose),
-            const SizedBox(width: 10),
             bloodPressureRecord(),
+            const SizedBox(width: 10),
+            glucoseRecord(),
           ],
         ),
       ],
@@ -604,7 +604,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   // Glucose Record Widget
-  Container glucoseRecord(String bloodGlucose) {
+  Container glucoseRecord() {
     return Container(
       width: 180,
       height: 90,
