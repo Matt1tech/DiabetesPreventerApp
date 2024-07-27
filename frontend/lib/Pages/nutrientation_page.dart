@@ -7,6 +7,10 @@ import '../services/fetch_user_data_service.dart';
 import '../widgets/widgets.dart'; // Ensure this import path is correct
 import '../utils/utils.dart';
 
+//TODO need to add isloading
+//TODO need to handle the button to save and cancel
+//TODO need to fix the output
+// If click save save should store the data in the user meal record
 class NutrientationPage extends StatefulWidget {
   final File imageFile;
   final String apiKey;

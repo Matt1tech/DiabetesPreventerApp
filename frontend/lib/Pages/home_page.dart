@@ -6,6 +6,7 @@ import 'package:frontend/Pages/login_page.dart';
 import 'package:frontend/Pages/profile_update_page.dart';
 import 'package:frontend/services/auth_service.dart';
 import 'package:image_picker/image_picker.dart';
+import '../models/health_record.dart';
 import '../models/models.dart'; // Barrel file for models
 import '../services/fetch_user_data_service.dart';
 import '../widgets/widgets.dart'; // Barrel file for custom widgets
@@ -82,6 +83,8 @@ class _HomePageState extends State<HomePage> {
   // Variable to hold user data
   String? userName;
   String? userProfilePicture;
+  late FetchHealthRecordService fetchHealthRecordService;
+  HealthRecord? lastHealthRecord;
   String? user_id;
   // Instance of secure storage
   // Variable to hold user data
@@ -94,6 +97,38 @@ class _HomePageState extends State<HomePage> {
     _getMenu();
     _loadUserInfo();
     _loadUserData();
+    fetchHealthRecordService = FetchHealthRecordService();
+    fetchLastHealthRecord();
+  }
+
+  Future<void> fetchLastHealthRecord() async {
+    print('fetchLastHealthRecord called');
+    if (user_id != null) {
+      print('user_id is not null: $user_id');
+      final int? userIdInt = int.tryParse(user_id!);
+      if (userIdInt != null) {
+        print('Parsed user_id to int: $userIdInt');
+        try {
+          final record =
+              await fetchHealthRecordService.fetchLastHealthRecord(userIdInt);
+          print('Received record: $record');
+          if (record != null) {
+            setState(() {
+              lastHealthRecord = record;
+              print('Set lastHealthRecord: $lastHealthRecord');
+            });
+          } else {
+            print('No health record found for user');
+          }
+        } catch (e) {
+          print('Error fetching health record: $e');
+        }
+      } else {
+        print('Failed to parse user_id to int: $user_id');
+      }
+    } else {
+      print('user_id is null');
+    }
   }
 
 //handle the image of the profile picture
@@ -115,6 +150,7 @@ class _HomePageState extends State<HomePage> {
       this.userProfilePicture = userProfilePicture;
       this.user_id = userId;
     });
+    fetchLastHealthRecord();
   }
 
   Future<void> _pickProfilePicture() async {
@@ -179,6 +215,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    print('Building HomePage. lastHealthRecord: $lastHealthRecord');
     final bloodGlucose = 'N/A';
 
     ImageProvider<Object> imageProvider =
@@ -399,8 +436,8 @@ class _HomePageState extends State<HomePage> {
               Center(
                 child: AnimatedHorizontalContainer(
                   title: 'Total Calories',
-                  calories: 1000, // Specific calories
-                  maxCalories: 2000,
+                  calories: 2900, // Specific calories
+                  maxCalories: 3000,
                   fillColor: pinkColor,
                   textColor: pinkColor,
                 ),
@@ -423,7 +460,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                   AnimatedNutritionContainer(
                     title: 'Carbs',
-                    calories: 200, // Specific calories for Carbs
+                    calories: 300, // Specific calories for Carbs
                     maxCalories: 400,
                     textColor: const Color.fromARGB(255, 227, 204, 32),
                   ),
@@ -596,7 +633,9 @@ class _HomePageState extends State<HomePage> {
             ),
             const SizedBox(width: 5),
             Text(
-              '$bloodGlucose',
+              lastHealthRecord != null
+                  ? '${lastHealthRecord!.blood_glucose?.toString()}'
+                  : 'N/A',
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
@@ -625,7 +664,7 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      child: const Center(
+      child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -639,7 +678,9 @@ class _HomePageState extends State<HomePage> {
             ),
             SizedBox(width: 5),
             Text(
-              '125 mg/dl',
+              lastHealthRecord != null
+                  ? '${lastHealthRecord!.blood_pressure}/d'
+                  : 'N/A',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,

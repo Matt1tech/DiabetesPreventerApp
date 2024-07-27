@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../models/health_record.dart';
 
 class UserHealthRecordsService {
   static const String _baseUrl =
@@ -47,6 +48,34 @@ class UserHealthRecordsService {
       }
     } catch (e) {
       print('Error submitting blood pressure data: $e');
+    }
+  }
+}
+
+class FetchHealthRecordService {
+  static const _baseUrl = 'http://10.0.2.2:8000/health-record/last';
+
+  Future<HealthRecord?> fetchLastHealthRecord(int userId) async {
+    print(
+        'FetchHealthRecordService.fetchLastHealthRecord called with userId: $userId');
+    try {
+      final url = Uri.parse('$_baseUrl/$userId');
+      print('Requesting URL: $url');
+      final response = await http.get(url);
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = jsonDecode(response.body);
+        print('Parsed JSON data: $data');
+        return HealthRecord.fromJson(data);
+      } else {
+        print('Error fetching health record: ${response.statusCode}');
+        return null;
+      }
+    } catch (e) {
+      print('Exception in fetchLastHealthRecord: $e');
+      return null;
     }
   }
 }
