@@ -206,13 +206,14 @@ def create_or_update_health_record(request):
     weight = data.get('weight')
     blood_glucose = data.get('blood_glucose')
     blood_pressure = data.get('blood_pressure')
+    diabetes_risk = data.get('diabetes_risk')
 
     # Ensure at least one of the optional fields is provided
     if not any([weight, blood_glucose, blood_pressure]):
         return Response({'error': 'At least one of weight, blood_glucose, or blood_pressure must be provided.'}, status=status.HTTP_400_BAD_REQUEST)
 
     bmi = None
-    diabetes_risk = None
+   
 
     if weight is not None:
         try:

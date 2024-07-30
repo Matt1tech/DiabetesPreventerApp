@@ -49,8 +49,7 @@ class PhysicalActivity(models.Model):
 
 class PhysicalRecord(models.Model):
     physical_activity = models.ForeignKey(PhysicalActivity, on_delete=models.CASCADE)  # Link to PhysicalActivity
-    stress_level = models.IntegerField()  # Assuming a scale of 1-10
-    time = models.DateTimeField(default=timezone.now)  # Time of the physical activity record
+    stress_level = models.IntegerField()  # Assuming a scale of 1-7
     created_at = models.DateTimeField(default=timezone.now)  # Ensure this field is timezone-aware
     user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='physical_records')  # One-to-Many relationship with User
 

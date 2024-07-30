@@ -1,0 +1,159 @@
+import 'package:flutter/material.dart';
+import 'package:frontend/utils/utilities.dart';
+
+class ExerciseRecord extends StatefulWidget {
+  @override
+  _ExerciseRecordState createState() => _ExerciseRecordState();
+}
+
+class _ExerciseRecordState extends State<ExerciseRecord> {
+  String selectedExercise = '';
+  double duration = 0.5;
+  TextEditingController durationController = TextEditingController();
+
+  final List<String> exercises = [
+    "Gym",
+    "Daily Work",
+    "Cardio",
+    "Yoga",
+    "Running",
+    "Dance"
+  ];
+
+  void submitExercise() {
+    if (selectedExercise.isNotEmpty && duration >= 0.5 && duration <= 24) {
+      print('Selected Exercise: $selectedExercise, Duration: $duration hrs');
+      // Add further handling logic here, e.g., sending the values to a server
+    } else {
+      print('No exercise selected or invalid duration');
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    durationController.text = duration.toString();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Container(
+        padding: const EdgeInsets.all(30.0),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8.0),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black26,
+              blurRadius: 10,
+              offset: Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Exercise Record',
+              style: TextStyle(
+                fontSize: 22,
+                color: pinkColor,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 20),
+            Wrap(
+              spacing: 15,
+              runSpacing: 15,
+              children: exercises.map((exercise) {
+                bool isSelected = selectedExercise == exercise;
+                return GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      selectedExercise = exercise;
+                    });
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 10, horizontal: 15),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? pinkColor.withOpacity(0.3)
+                          : Colors.grey[200],
+                      borderRadius: BorderRadius.circular(20.0),
+                      border: Border.all(
+                        color: isSelected ? pinkColor : Colors.grey,
+                        width: 2.0,
+                      ),
+                    ),
+                    child: Text(
+                      exercise,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: isSelected ? pinkColor : Colors.grey,
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+            SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 80,
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child: TextField(
+                    controller: durationController,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: 'hrs',
+                      isDense: true, // Reduce height
+                      contentPadding: EdgeInsets.all(10), // Reduce padding
+                    ),
+                    onChanged: (value) {
+                      setState(() {
+                        duration = double.tryParse(value) ?? 0.5;
+                      });
+                    },
+                  ),
+                ),
+                SizedBox(width: 15),
+                Text(
+                  'hrs',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.red,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 10),
+            Center(
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: pinkColor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20.0),
+                  ),
+                ),
+                onPressed: submitExercise,
+                child: Text(
+                  'Submit',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

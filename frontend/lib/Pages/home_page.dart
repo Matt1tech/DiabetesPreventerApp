@@ -9,6 +9,8 @@ import 'package:image_picker/image_picker.dart';
 import '../models/health_record.dart';
 import '../models/models.dart'; // Barrel file for models
 import '../services/fetch_user_data_service.dart';
+import '../widgets/exercise_record.dart';
+import '../widgets/stress_level.dart';
 import '../widgets/widgets.dart'; // Barrel file for custom widgets
 import '../utils/utils.dart'; // Barrel file for utilities
 import '../components/components.dart'; // Barrel file for components
@@ -295,13 +297,14 @@ class _HomePageState extends State<HomePage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
+                  const SizedBox(height: 10),
                   nutrientsDetailsSection(),
                   riskOverviewSection(),
                   const SizedBox(height: 30),
                   healthRecordSection(),
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 40),
                   healthInformationLogsSection(),
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 40),
                   activityLogsSection(),
                   const SizedBox(height: 30),
                 ],
@@ -413,67 +416,12 @@ class _HomePageState extends State<HomePage> {
   Column nutrientsDetailsSection() {
     return Column(
       children: [
-        const SizedBox(height: 4),
-        Container(
-          height: 195.0,
-          width: 420,
-          color: const Color.fromARGB(217, 217, 217, 217),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Padding(
-                padding: EdgeInsets.only(left: 20),
-                child: Text(
-                  'Nutrientation Details',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: blueColor,
-                    fontSize: 18.0,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 10),
-              Center(
-                child: AnimatedHorizontalContainer(
-                  title: 'Total Calories',
-                  calories: 2900, // Specific calories
-                  maxCalories: 3000,
-                  fillColor: pinkColor,
-                  textColor: pinkColor,
-                ),
-              ),
-              const SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  AnimatedNutritionContainer(
-                    title: 'Protein',
-                    calories: 150, // Specific calories for Protein
-                    maxCalories: 200,
-                    textColor: const Color.fromARGB(255, 164, 103, 12),
-                  ),
-                  AnimatedNutritionContainer(
-                    title: 'Fats',
-                    calories: 90, // Specific calories for Fats
-                    maxCalories: 300,
-                    textColor: pinkColor,
-                  ),
-                  AnimatedNutritionContainer(
-                    title: 'Carbs',
-                    calories: 300, // Specific calories for Carbs
-                    maxCalories: 400,
-                    textColor: const Color.fromARGB(255, 227, 204, 32),
-                  ),
-                  AnimatedNutritionContainer(
-                    title: 'Fiber',
-                    calories: 50, // Specific calories for Fiber
-                    maxCalories: 100,
-                    textColor: const Color.fromARGB(255, 3, 58, 16),
-                  ),
-                ],
-              ),
-            ],
-          ),
+        NutritionDetails(
+          totalCalories: 250,
+          proteinCalories: 150,
+          fatsCalories: 90,
+          carbsCalories: 300,
+          fiberCalories: 50,
         ),
       ],
     );
@@ -484,6 +432,7 @@ class _HomePageState extends State<HomePage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        const SizedBox(height: 30),
         const Padding(
           padding: EdgeInsets.only(left: 4),
           child: Text(
@@ -491,13 +440,13 @@ class _HomePageState extends State<HomePage> {
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: blueColor,
-              fontSize: 18.0,
+              fontSize: 22.0,
             ),
           ),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 15),
         monthlyRiskChart(),
-        const SizedBox(height: 30),
+        const SizedBox(height: 40),
         diabetesInfectionStatus(),
       ],
     );
@@ -508,6 +457,7 @@ class _HomePageState extends State<HomePage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        const SizedBox(height: 10),
         const Padding(
           padding: EdgeInsets.only(left: 20),
           child: Text(
@@ -515,7 +465,7 @@ class _HomePageState extends State<HomePage> {
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: blueColor,
-              fontSize: 18.0,
+              fontSize: 22.0,
             ),
           ),
         ),
@@ -544,7 +494,7 @@ class _HomePageState extends State<HomePage> {
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: blueColor,
-              fontSize: 18.0,
+              fontSize: 22.0,
             ),
           ),
         ),
@@ -583,21 +533,60 @@ class _HomePageState extends State<HomePage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        const SizedBox(height: 5),
         const Padding(
           padding: EdgeInsets.only(left: 20),
           child: Text(
-            'Activity and Meal Logs',
+            'Activity Logs',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: blueColor,
-              fontSize: 18.0,
+              fontSize: 22.0,
             ),
           ),
         ),
         const SizedBox(height: 10),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [],
+        Column(
+          children: [
+            Container(
+              width: 390, // Adjusted width for better alignment
+              height: 380,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(1),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color.fromARGB(21, 18, 18, 18),
+                    blurRadius: 10,
+                    offset: Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: ExerciseRecord(),
+              ),
+            ),
+            SizedBox(height: 20),
+            Container(
+              width: 360, // Adjusted width for better alignment
+              height: 380,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: Color.fromARGB(255, 255, 255, 255),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 10,
+                    offset: Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: StressLevelSelector(),
+              ),
+            ),
+          ],
         ),
       ],
     );
