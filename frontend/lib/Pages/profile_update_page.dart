@@ -228,16 +228,6 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
                 Row(
                   children: [
                     const SizedBox(width: 16),
-                    Expanded(
-                      child: ReusableTextFormField(
-                        labelText: 'Weight',
-                        icon: null,
-                        validatorMessage: 'Invalid Weight',
-                        validatorFormat: RegExp(r'^\d+(\.\d+)?$'),
-                        controller: _weightController,
-                        suffixText: 'kg',
-                      ),
-                    ),
                   ],
                 ),
                 const SizedBox(height: 16),
