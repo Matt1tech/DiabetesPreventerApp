@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import '../models/user.dart' as userModel;
-import '../globals.dart' as globals;
 
 final storage = FlutterSecureStorage();
 

@@ -10,8 +10,8 @@ from rest_framework.response import Response
 from .serializers import UserSerializer
 from .models import User
 from rest_framework.permissions import AllowAny
-from .models import User, Preferences, HealthRecord
-from .serializers import UserSerializer, PreferencesSerializer, HealthRecordsSerializer
+from .models import *
+from .serializers import *
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.decorators import parser_classes
 from django.contrib.auth import authenticate

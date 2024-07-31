@@ -3,8 +3,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:frontend/services/auth_service.dart';
 import 'package:image_picker/image_picker.dart';
 import '../services/fetch_user_data_service.dart';
-import '../widgets/user_header.dart';
-import '../widgets/customized_navigation_bar.dart';
+import '../widgets/widgets.dart';
 import '../utils/navigation_util.dart';
 import '../utils/utilities.dart'; // Assuming utilities.dart contains the buildDatePickerField function
 
@@ -38,6 +37,15 @@ class _ReportsGenerationPageState extends State<ReportsGenerationPage> {
       TextEditingController();
   final TextEditingController healthEndDateController = TextEditingController();
 
+  bool _validateDates(String startDate, String endDate) {
+    if (startDate.isEmpty || endDate.isEmpty) {
+      return false; // Prevent generation if any date is not selected
+    }
+    DateTime start = DateTime.parse(startDate);
+    DateTime end = DateTime.parse(endDate);
+    return end.isAfter(start);
+  }
+
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -46,14 +54,32 @@ class _ReportsGenerationPageState extends State<ReportsGenerationPage> {
   }
 
   void _generateReport(String reportName, String startDate, String endDate) {
-    // Send data to backend
+    if (!_validateDates(startDate, endDate)) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text("Invalid Date Selection"),
+          content: Text("The end date must be after the start date."),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text("OK"),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
+    // Send data to backend if dates are valid
     final Map<String, String> reportData = {
       'userId': userId,
       'reportName': reportName,
       'startDate': startDate,
       'endDate': endDate,
     };
-
     // TODO: Implement backend call here
     print('Report data: $reportData');
   }
@@ -158,7 +184,7 @@ class _ReportsGenerationPageState extends State<ReportsGenerationPage> {
       child: Text(
         title,
         style: TextStyle(
-          fontSize: 20.0,
+          fontSize: 22.0,
           fontWeight: FontWeight.bold,
           color: blueColor,
         ),
@@ -223,11 +249,31 @@ class _ReportsGenerationPageState extends State<ReportsGenerationPage> {
                       color: pinkColor,
                     ),
                     onPressed: () {
-                      _generateReport(
-                        reportName,
-                        startDateController.text,
-                        endDateController.text,
-                      );
+                      if (startDateController.text.isNotEmpty &&
+                          endDateController.text.isNotEmpty) {
+                        _generateReport(
+                          reportName,
+                          startDateController.text,
+                          endDateController.text,
+                        );
+                      } else {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: Text("Date Required"),
+                            content:
+                                Text("Please select both start and end dates."),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                child: Text("OK"),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
                     },
                   ),
                 ],

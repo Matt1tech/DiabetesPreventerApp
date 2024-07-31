@@ -1,6 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 
-part 'health_record.g.dart';
+part 'health_records.g.dart';
 
 @JsonSerializable()
 class HealthRecord {

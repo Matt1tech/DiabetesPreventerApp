@@ -1,20 +1,21 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'physical_activity.dart';
 
-part 'physical_record.g.dart';
+part 'physical_records.g.dart';
 
 @JsonSerializable()
 class PhysicalRecord {
-  PhysicalActivity physical_activity;
+  int duration;
+  String type;
   int stress_level;
-  DateTime time;
   DateTime created_at;
+  String user; // Assuming user is referenced by an ID (String)
 
   PhysicalRecord({
-    required this.physical_activity,
+    required this.duration,
+    required this.type,
     required this.stress_level,
-    required this.time,
     required this.created_at,
+    required this.user,
   });
 
   factory PhysicalRecord.fromJson(Map<String, dynamic> json) =>

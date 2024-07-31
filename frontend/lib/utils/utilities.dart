@@ -104,52 +104,6 @@ class _CustomToggleButtonsState extends State<CustomToggleButtons> {
   }
 }
 
-Widget buildDatePickerField(
-    BuildContext context, String labelText, IconData icon,
-    {double? width, required TextEditingController controller}) {
-  return SizedBox(
-    width: width,
-    child: TextFormField(
-      controller: controller,
-      decoration: InputDecoration(
-        labelText: labelText,
-        prefixIcon: Icon(icon),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10.0),
-        ),
-        filled: true,
-        fillColor: Colors.white,
-        contentPadding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
-        labelStyle: TextStyle(
-          fontSize: 16.0,
-          color: Colors.grey,
-        ),
-        floatingLabelStyle: TextStyle(
-          fontSize: 20.0,
-          color: Color.fromARGB(255, 141, 87, 255),
-        ),
-        floatingLabelBehavior: FloatingLabelBehavior.auto,
-        floatingLabelAlignment: FloatingLabelAlignment.start,
-      ),
-      readOnly: true, // Prevent the user from directly editing the date
-      onTap: () async {
-        FocusScope.of(context).requestFocus(FocusNode()); // Hide keyboard
-        DateTime? pickedDate = await showDatePicker(
-          context: context,
-          initialDate: DateTime.now(),
-          firstDate: DateTime(1900),
-          lastDate: DateTime(2101),
-        );
-        if (pickedDate != null) {
-          // Update the controller directly, no need to call setState here
-          controller.text =
-              "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
-        }
-      },
-    ),
-  );
-}
-
 /*
 /// A reusable TextFormField with validation.
 ///

@@ -161,7 +161,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   labelText: 'Password',
                   icon: Icons.lock,
                   validatorMessage:
-                      'Must include 6 numbers, a capital letter, a small letter, and a special character',
+                      'At least 6 digits, 1 capital char, 1 small char, 1 special char',
                   validatorFormat: RegExp(
                       r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$'),
                   controller: _passwordController,
@@ -241,9 +241,9 @@ class _RegisterPageState extends State<RegisterPage> {
                     const SizedBox(width: 25),
                     Container(
                       width: 150,
-                      child: buildDatePickerField(
+                      child: buildDatePickerFieldBirthDate(
                           context, 'Birthday', Icons.cake,
-                          width: 160, controller: _dateController),
+                          width: 180, controller: _dateController),
                     ),
                   ],
                 ),

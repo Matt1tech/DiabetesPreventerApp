@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'meal_recommendation.dart';
+part of 'meals_recommendations.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator

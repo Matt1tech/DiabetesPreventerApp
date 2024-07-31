@@ -32,7 +32,9 @@ class UserHeader extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     ImageProvider effectiveImage = imageProvider ??
-        (imagePath != null ? AssetImage(imagePath!) : AssetImage(''));
+        (imagePath != null
+            ? AssetImage(imagePath!)
+            : AssetImage('assets/images/diabetesLogo.png'));
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [

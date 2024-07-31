@@ -6,7 +6,6 @@ import 'package:frontend/Pages/login_page.dart';
 import 'package:frontend/Pages/profile_update_page.dart';
 import 'package:frontend/services/auth_service.dart';
 import 'package:image_picker/image_picker.dart';
-import '../models/health_record.dart';
 import '../models/models.dart'; // Barrel file for models
 import '../services/fetch_user_data_service.dart';
 import '../widgets/exercise_record.dart';

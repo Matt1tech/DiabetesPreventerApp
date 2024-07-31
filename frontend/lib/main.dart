@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(fontFamily: 'Poppins'),
-      home: const HomePage(), // Set the initial route to LoginPage
+      home: HomePage(), // Set the initial route to LoginPage
     );
   }
 }

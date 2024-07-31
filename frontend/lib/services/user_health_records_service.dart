@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../models/health_record.dart';
+import '../models/models.dart';
 
 class UserHealthRecordsService {
   static const String _baseUrl =
