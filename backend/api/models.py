@@ -43,16 +43,36 @@ class HealthRecord(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
     user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='health_records')
 
-class PhysicalActivity(models.Model):
-    duration = models.CharField(max_length=50)  # Format: '30 minutes'
-    type = models.CharField(max_length=50)  # Format: 'Gym'
 
 class PhysicalRecord(models.Model):
-    physical_activity = models.ForeignKey(PhysicalActivity, on_delete=models.CASCADE)  # Link to PhysicalActivity
-    stress_level = models.IntegerField()  # Assuming a scale of 1-7
-    created_at = models.DateTimeField(default=timezone.now)  # Ensure this field is timezone-aware
-    user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='physical_records')  # One-to-Many relationship with User
+    TYPE_CHOICES = [
+        ('Gym', 'Gym'),
+        ('Daily Work', 'Daily Work'),
+        ('Cardio', 'Cardio'),
+        ('Yoga', 'Yoga'),
+        ('Running', 'Running'),
+        ('Dance', 'Dance'),
+    ]
 
+    STRESS_LEVEL_CHOICES = [
+        (0, 'No Stress'),
+        (1, 'Low'),
+        (2, 'Mild'),
+        (3, 'Moderate'),
+        (4, 'High'),
+        (5, 'Very High'),
+        (6, 'Severe'),
+        (7, 'Max Stress')
+    ]
+
+    duration = models.IntegerField(default=0)  # Default duration in minutes
+    type = models.CharField(max_length=50, choices=TYPE_CHOICES, default='Gym')  # Default type
+    stress_level = models.IntegerField(choices=STRESS_LEVEL_CHOICES)
+    created_at = models.DateTimeField(default=timezone.now)
+    user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='physical_records')
+
+
+ 
 class Meal(models.Model):
     number = models.IntegerField()
     name = models.CharField(max_length=100)
