@@ -53,6 +53,7 @@ class _ExerciseRecordState extends State<ExerciseRecord> {
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               'Exercise Record',
@@ -102,15 +103,23 @@ class _ExerciseRecordState extends State<ExerciseRecord> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                Text(
+                  'Duration',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: pinkColor,
+                  ),
+                ),
+                SizedBox(width: 10),
                 Container(
                   width: 80,
-                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  padding: const EdgeInsets.symmetric(vertical: 5),
                   child: TextField(
                     controller: durationController,
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(),
-                      labelText: 'hrs',
+                      labelText: 'mins',
                       isDense: true, // Reduce height
                       contentPadding: EdgeInsets.all(10), // Reduce padding
                     ),
@@ -121,9 +130,9 @@ class _ExerciseRecordState extends State<ExerciseRecord> {
                     },
                   ),
                 ),
-                SizedBox(width: 15),
+                SizedBox(width: 10),
                 Text(
-                  'hrs',
+                  'mins',
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.red,

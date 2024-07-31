@@ -63,96 +63,101 @@ class _StressLevelSelectorState extends State<StressLevelSelector> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Center(
-          child: Text(
-            'Stress Level',
-            style: TextStyle(
-              fontSize: 20,
-              color: pinkColor,
-              fontWeight: FontWeight.bold,
+    return Center(
+      child: Container(
+        padding: const EdgeInsets.all(25.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Stress Level',
+              style: TextStyle(
+                fontSize: 22,
+                color: pinkColor,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
-        ),
-        SizedBox(height: 10),
-        Expanded(
-          child: ListView.builder(
-            itemCount: stressDescriptions.length,
-            itemBuilder: (context, index) {
-              return GestureDetector(
-                onTap: () {
-                  setState(() {
-                    selectedStressLevel = index;
-                  });
-                },
-                child: Container(
-                  margin: const EdgeInsets.symmetric(vertical: 4.0),
-                  padding: const EdgeInsets.all(2.0),
-                  decoration: BoxDecoration(
-                    color: selectedStressLevel == index
-                        ? stressColors[index].withOpacity(0.3)
-                        : Colors.white,
-                    border: Border.all(
-                      color: selectedStressLevel == index
-                          ? stressColors[index]
-                          : const Color.fromARGB(255, 158, 158, 158),
-                      width: 2.0,
+            SizedBox(height: 30),
+            Expanded(
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: stressDescriptions.length,
+                itemBuilder: (context, index) {
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        selectedStressLevel = index;
+                      });
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(vertical: 4.0),
+                      padding: const EdgeInsets.all(2.0),
+                      decoration: BoxDecoration(
+                        color: selectedStressLevel == index
+                            ? stressColors[index].withOpacity(0.3)
+                            : Colors.white,
+                        border: Border.all(
+                          color: selectedStressLevel == index
+                              ? stressColors[index]
+                              : const Color.fromARGB(255, 158, 158, 158),
+                          width: 2.0,
+                        ),
+                        borderRadius: BorderRadius.circular(20.0),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          CircleAvatar(
+                            backgroundColor: Colors.white,
+                            radius: 20, // Make the CircleAvatar slightly larger
+                            child: Icon(
+                              stressIcons[index],
+                              color: selectedStressLevel == index
+                                  ? stressColors[index]
+                                  : Color.fromARGB(255, 235, 200, 6),
+                              size: 30, // Make the emoji icon slightly larger
+                            ),
+                          ),
+                          SizedBox(width: 10),
+                          Text(
+                            stressDescriptions[index],
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: selectedStressLevel == index
+                                  ? stressColors[index]
+                                  : Colors.grey,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
+                  );
+                },
+              ),
+            ),
+            SizedBox(height: 20),
+            Center(
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: pinkColor, // Background color
+                  shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20.0),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      CircleAvatar(
-                        backgroundColor: Colors.white,
-                        radius: 20, // Make the CircleAvatar slightly larger
-                        child: Icon(
-                          stressIcons[index],
-                          color: selectedStressLevel == index
-                              ? stressColors[index]
-                              : Color.fromARGB(255, 235, 200, 6),
-                          size: 30, // Make the emoji icon slightly larger
-                        ),
-                      ),
-                      SizedBox(width: 10),
-                      Text(
-                        stressDescriptions[index],
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: selectedStressLevel == index
-                              ? stressColors[index]
-                              : Colors.grey,
-                        ),
-                      ),
-                    ],
+                ),
+                onPressed: saveStressLevel,
+                child: Text(
+                  'Submit',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.white, // Text color
                   ),
                 ),
-              );
-            },
-          ),
-        ),
-        SizedBox(height: 10),
-        Center(
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: pinkColor, // Background color
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20.0),
               ),
             ),
-            onPressed: saveStressLevel,
-            child: Text(
-              'Submit',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.white, // Text color
-              ),
-            ),
-          ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }
