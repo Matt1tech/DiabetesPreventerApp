@@ -6,6 +6,7 @@ import 'package:frontend/Pages/login_page.dart';
 import 'package:frontend/Pages/profile_update_page.dart';
 import 'package:frontend/services/auth_service.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import '../models/models.dart'; // Barrel file for models
 import '../services/fetch_user_data_service.dart';
 import '../widgets/exercise_record.dart';
@@ -14,6 +15,7 @@ import '../widgets/widgets.dart'; // Barrel file for custom widgets
 import '../utils/utils.dart'; // Barrel file for utilities
 import '../components/components.dart'; // Barrel file for components
 import '../services/user_health_records_service.dart';
+import '../widgets/monthly_risk_chart.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -26,51 +28,44 @@ class HomePage extends StatefulWidget {
 List<double> monthlyRiskValues = [10, 15, 14, 34, 0, 22];
 // Function to convert the list of risk values into a list of FlSpot objects
 List<FlSpot> getMonthlySpots(List<double> values) {
+  // Ensure this list generates spots with x-values matching the intended month indexes
   return List.generate(
       values.length, (index) => FlSpot(index.toDouble(), values[index]));
 }
 
 // Function to create bottom titles for the months of the year
 SideTitles monthOfYearBottomTitles() {
+  DateTime now = DateTime.now();
+
+  List<String> lastSixMonths = List.generate(6, (index) {
+    DateTime month =
+        DateTime(now.year, now.month - 5 + index, 1); // Start from 6 months ago
+    return DateFormat('MMM').format(month);
+  });
+
   return SideTitles(
     showTitles: true,
+    reservedSize: 40, // Reserve more space for titles if necessary
     getTitlesWidget: (value, meta) {
-      const style = TextStyle(
-        color: Colors.black,
-        fontWeight: FontWeight.bold,
-        fontSize: 12,
-      );
-      Widget text;
-      switch (value.toInt()) {
-        case 0:
-          text = const Text('Jan', style: style);
-          break;
-        case 1:
-          text = const Text('Feb', style: style);
-          break;
-        case 2:
-          text = const Text('Mar', style: style);
-          break;
-        case 3:
-          text = const Text('Apr', style: style);
-          break;
-        case 4:
-          text = const Text('May', style: style);
-          break;
-        case 5:
-          text = const Text('Jun', style: style);
-          break;
-        default:
-          text = const Text('', style: style);
-          break;
+      print("Value received: $value"); // See what values are being passed
+      int index = value.toInt();
+      if (index < lastSixMonths.length) {
+        return SideTitleWidget(
+          axisSide: meta.axisSide,
+          space: 16.0,
+          child: Text(lastSixMonths[index],
+              style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12)),
+        );
+      } else {
+        return SideTitleWidget(
+            axisSide: meta.axisSide, space: 16.0, child: Text(''));
       }
-      return SideTitleWidget(
-        axisSide: meta.axisSide,
-        space: 5.0, // Reduce the space between the chart and the titles
-        child: text,
-      );
     },
-    interval: 1,
+
+    interval: 1, // Confirm this matches the data point intervals
   );
 }
 
@@ -444,7 +439,7 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         const SizedBox(height: 15),
-        monthlyRiskChart(),
+        MonthlyRiskChart(monthlyRiskValues: [1, 1, 1, 1, 5, 22]),
         const SizedBox(height: 40),
         diabetesInfectionStatus(),
       ],
@@ -677,127 +672,6 @@ class _HomePageState extends State<HomePage> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  // Monthly Risk Chart Widget
-  Container monthlyRiskChart() {
-    return Container(
-      width: 380,
-      height: 250,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        color: Colors.white,
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black26,
-            blurRadius: 10,
-            offset: Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Padding(
-            padding: EdgeInsets.only(top: 10.0, left: 25),
-            child: Text(
-              'Monthly Risk',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: pinkColor,
-              ),
-            ),
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(23.0),
-              child: LineChart(
-                LineChartData(
-                  lineTouchData: LineTouchData(
-                    touchTooltipData: LineTouchTooltipData(
-                      getTooltipItems: (touchedSpots) {
-                        return touchedSpots.map((LineBarSpot touchedSpot) {
-                          final textStyle = const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          );
-                          return LineTooltipItem(
-                              touchedSpot.y.toString(), textStyle);
-                        }).toList();
-                      },
-                    ),
-                  ),
-                  lineBarsData: [
-                    LineChartBarData(
-                      color: blueColor,
-                      spots: getMonthlySpots(monthlyRiskValues),
-                      barWidth: 3,
-                      isCurved: true,
-                      dotData: FlDotData(
-                        show: true,
-                        getDotPainter: (spot, percent, bar, index) {
-                          return FlDotCirclePainter(
-                            radius: 6,
-                            color:
-                                pinkColor, // Change this color to your desired color
-                            strokeWidth: 2,
-                            strokeColor: const Color.fromARGB(255, 78, 70, 70),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                  titlesData: FlTitlesData(
-                    topTitles: AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
-                    rightTitles: AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
-                    leftTitles: AxisTitles(
-                      axisNameWidget: Transform.translate(
-                        offset: const Offset(26, -16),
-                        child: const Text(
-                          'Risk Percentage (RP)',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: blueColor,
-                          ),
-                        ),
-                      ),
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
-                    bottomTitles: AxisTitles(
-                      axisNameWidget: const Text('Month of the Year'),
-                      sideTitles: monthOfYearBottomTitles(),
-                    ),
-                  ),
-                  gridData: FlGridData(
-                    show: true,
-                    drawHorizontalLine: true,
-                    getDrawingHorizontalLine: (value) {
-                      return FlLine(
-                        color: Colors.grey,
-                        strokeWidth: 0.5,
-                      );
-                    },
-                    drawVerticalLine: true,
-                    getDrawingVerticalLine: (value) {
-                      return FlLine(
-                        color: Colors.grey,
-                        strokeWidth: 0.5,
-                      );
-                    },
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }

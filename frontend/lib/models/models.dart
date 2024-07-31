@@ -1,5 +1,5 @@
 export 'suitable_menu_modal.dart';
-export 'chart.dart';
+export '../widgets/overall_health_status_pie_chart.dart';
 export 'user.dart';
 export 'meal.dart';
 export 'preferences.dart';
