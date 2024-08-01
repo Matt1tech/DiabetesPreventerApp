@@ -82,7 +82,7 @@ class Meal(models.Model):
     fats = models.FloatField(default=0.0)
     carbs = models.FloatField(default=0.0)
     fiber = models.FloatField(default=0.0)
-    nutrients = models.JSONField()  # Store detailed nutrients info in Dict format//TODO this should be removed if not necessary after testing 
+    cholesterol = models.FloatField(default=0.0)  # New field for cholesterol
     user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='meals')  # One-to-Many relationship with User
     created_at = models.DateTimeField(default=timezone.now)
 

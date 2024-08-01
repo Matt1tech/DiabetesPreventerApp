@@ -4,7 +4,6 @@ part 'meal.g.dart';
 
 @JsonSerializable()
 class Meal {
-  int number;
   String name;
   double quantity;
   double calories;
@@ -12,10 +11,10 @@ class Meal {
   double fats;
   double carbs;
   double fiber;
-  Map<String, dynamic> nutrients;
+  double cholesterol;
+  int user; // User ID field
 
   Meal({
-    required this.number,
     required this.name,
     required this.quantity,
     required this.calories,
@@ -23,7 +22,8 @@ class Meal {
     required this.fats,
     required this.carbs,
     required this.fiber,
-    required this.nutrients,
+    required this.cholesterol,
+    required this.user,
   });
 
   factory Meal.fromJson(Map<String, dynamic> json) => _$MealFromJson(json);

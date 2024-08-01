@@ -1,72 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart'; // Secure storage for storing and retrieving data securely
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:frontend/Pages/login_page.dart';
 import 'package:frontend/Pages/profile_update_page.dart';
 import 'package:frontend/services/auth_service.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:intl/intl.dart';
 import '../models/models.dart'; // Barrel file for models
 import '../services/fetch_user_data_service.dart';
-import '../widgets/exercise_record.dart';
-import '../widgets/stress_level.dart';
+import '../services/meals_ nutrients_service.dart';
 import '../widgets/widgets.dart'; // Barrel file for custom widgets
 import '../utils/utils.dart'; // Barrel file for utilities
 import '../components/components.dart'; // Barrel file for components
 import '../services/user_health_records_service.dart';
-import '../widgets/monthly_risk_chart.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
 
   @override
   _HomePageState createState() => _HomePageState();
-}
-
-// Example list of monthly risk values for diabetes
-List<double> monthlyRiskValues = [10, 15, 14, 34, 0, 22];
-// Function to convert the list of risk values into a list of FlSpot objects
-List<FlSpot> getMonthlySpots(List<double> values) {
-  // Ensure this list generates spots with x-values matching the intended month indexes
-  return List.generate(
-      values.length, (index) => FlSpot(index.toDouble(), values[index]));
-}
-
-// Function to create bottom titles for the months of the year
-SideTitles monthOfYearBottomTitles() {
-  DateTime now = DateTime.now();
-
-  List<String> lastSixMonths = List.generate(6, (index) {
-    DateTime month =
-        DateTime(now.year, now.month - 5 + index, 1); // Start from 6 months ago
-    return DateFormat('MMM').format(month);
-  });
-
-  return SideTitles(
-    showTitles: true,
-    reservedSize: 40, // Reserve more space for titles if necessary
-    getTitlesWidget: (value, meta) {
-      print("Value received: $value"); // See what values are being passed
-      int index = value.toInt();
-      if (index < lastSixMonths.length) {
-        return SideTitleWidget(
-          axisSide: meta.axisSide,
-          space: 16.0,
-          child: Text(lastSixMonths[index],
-              style: TextStyle(
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12)),
-        );
-      } else {
-        return SideTitleWidget(
-            axisSide: meta.axisSide, space: 16.0, child: Text(''));
-      }
-    },
-
-    interval: 1, // Confirm this matches the data point intervals
-  );
 }
 
 // State class for HomePage
@@ -80,7 +31,10 @@ class _HomePageState extends State<HomePage> {
   String? userName;
   String? userProfilePicture;
   late FetchHealthRecordService fetchHealthRecordService;
+  late FetchMealsNutrientsService fetchMealsNutrientsService;
+
   HealthRecord? lastHealthRecord;
+  Meal? mealsNutrients;
   String? user_id;
   // Instance of secure storage
   // Variable to hold user data
@@ -95,6 +49,8 @@ class _HomePageState extends State<HomePage> {
     _loadUserData();
     fetchHealthRecordService = FetchHealthRecordService();
     fetchLastHealthRecord();
+    fetchMealsNutrientsService = FetchMealsNutrientsService();
+    fetchLastMealsNutrients();
   }
 
   Future<void> fetchLastHealthRecord() async {
@@ -127,7 +83,37 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-//handle the image of the profile picture
+  Future<void> fetchLastMealsNutrients() async {
+    print('fetchMealsNutrients called');
+    if (user_id != null) {
+      print('user_id is not null: $user_id');
+      final int? userIdInt = int.tryParse(user_id!);
+      if (userIdInt != null) {
+        print('Parsed user_id to int: $userIdInt');
+        try {
+          final record =
+              await fetchMealsNutrientsService.fetchMealsNutrients(userIdInt);
+          print('Received record: $record');
+          if (record != null) {
+            setState(() {
+              mealsNutrients = record as Meal?;
+              print('Set mealsNutrients: $mealsNutrients');
+            });
+          } else {
+            print('No meals nutrients record found for user');
+          }
+        } catch (e) {
+          print('Error fetching meals nutrients record: $e');
+        }
+      } else {
+        print('Failed to parse user_id to int: $user_id');
+      }
+    } else {
+      print('user_id is null');
+    }
+  }
+
+// Handle the image of the profile picture
   Future<void> _loadUserInfo() async {
     final userInfo = await loadUserInfo();
     setState(() {
@@ -147,6 +133,7 @@ class _HomePageState extends State<HomePage> {
       this.user_id = userId;
     });
     fetchLastHealthRecord();
+    fetchLastMealsNutrients();
   }
 
   Future<void> _pickProfilePicture() async {
@@ -209,11 +196,24 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  // Nutrients Details Section
+  Column nutrientsDetailsSection() {
+    return Column(
+      children: [
+        NutritionDetails(
+          totalCalories: 0,
+          proteinCalories: 0,
+          fatsCalories: 0,
+          carbsCalories: 0,
+          fiberCalories: 0, // Ensure this key exists in the API response
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     print('Building HomePage. lastHealthRecord: $lastHealthRecord');
-    final bloodGlucose = 'N/A';
-
     ImageProvider<Object> imageProvider =
         getImageProvider(_profilePicture, userProfilePicture);
     return Scaffold(
@@ -404,21 +404,6 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
     ];
-  }
-
-  // Nutrients Details Section
-  Column nutrientsDetailsSection() {
-    return Column(
-      children: [
-        NutritionDetails(
-          totalCalories: 250,
-          proteinCalories: 150,
-          fatsCalories: 90,
-          carbsCalories: 300,
-          fiberCalories: 50,
-        ),
-      ],
-    );
   }
 
   // Risk Overview Section

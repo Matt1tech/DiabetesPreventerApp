@@ -16,6 +16,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.decorators import parser_classes
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.db.models import Sum
 
 
 @api_view(['POST'])
@@ -155,6 +156,68 @@ def create_or_update_health_record(request):
 
 
 
+@api_view(['POST'])
+def create_meal(request):
+    user_id = request.data.get('user')
+    if not user_id:
+        return Response({'error': 'User ID is required.'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return Response({'error': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+    
+    current_date = timezone.now().date()
+    meals_today = Meal.objects.filter(user=user, created_at__date=current_date)
+    meal_number = meals_today.count() + 1
+
+    data = request.data.copy()
+    data['number'] = meal_number
+    data['user'] = user.id  # Ensure user is set as an ID
+
+    serializer = MealSerializer(data=data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    else:
+        print('Error details:', serializer.errors)  # Add this line to print errors to console/logs
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+@api_view(['GET'])
+def get_total_daily_nutrition(request, user_id):
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return Response({'error': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+    
+    current_date = timezone.now().date()
+    meals_today = Meal.objects.filter(user=user, created_at__date=current_date)
+    
+    nutrition_summary = meals_today.aggregate(
+        total_calories=Sum('calories'),
+        total_protein=Sum('protein'),
+        total_fats=Sum('fats'),
+        total_carbs=Sum('carbs'),
+        total_cholesterol=Sum('cholesterol')  # Include cholesterol in the summary
+    )
+    
+    return Response(nutrition_summary, status=status.HTTP_200_OK)
+
+
+
+
+
+
+
+
+
+
+
+
+
 @api_view(['GET'])
 def get_last_health_record(request, user_id):
     # Retrieve the user
@@ -185,10 +248,11 @@ def get_last_health_record(request, user_id):
     except Exception as e:
         print(f"Error retrieving health records: {e}")
         return Response({'error': 'Error retrieving health records.'}, status=500)
-    
+   
     
     
 
+'''
 @api_view(['POST'])
 def create_or_update_health_record(request):
     today = date.today()
@@ -249,7 +313,7 @@ def create_or_update_health_record(request):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-    
+     '''
     
 @api_view(['GET'])
 def monthely_risk(request):

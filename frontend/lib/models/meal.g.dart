@@ -7,7 +7,6 @@ part of 'meal.dart';
 // **************************************************************************
 
 Meal _$MealFromJson(Map<String, dynamic> json) => Meal(
-      number: (json['number'] as num).toInt(),
       name: json['name'] as String,
       quantity: (json['quantity'] as num).toDouble(),
       calories: (json['calories'] as num).toDouble(),
@@ -15,11 +14,11 @@ Meal _$MealFromJson(Map<String, dynamic> json) => Meal(
       fats: (json['fats'] as num).toDouble(),
       carbs: (json['carbs'] as num).toDouble(),
       fiber: (json['fiber'] as num).toDouble(),
-      nutrients: json['nutrients'] as Map<String, dynamic>,
+      cholesterol: (json['cholesterol'] as num).toDouble(),
+      user: (json['user'] as num).toInt(),
     );
 
 Map<String, dynamic> _$MealToJson(Meal instance) => <String, dynamic>{
-      'number': instance.number,
       'name': instance.name,
       'quantity': instance.quantity,
       'calories': instance.calories,
@@ -27,5 +26,6 @@ Map<String, dynamic> _$MealToJson(Meal instance) => <String, dynamic>{
       'fats': instance.fats,
       'carbs': instance.carbs,
       'fiber': instance.fiber,
-      'nutrients': instance.nutrients,
+      'cholesterol': instance.cholesterol,
+      'user': instance.user,
     };

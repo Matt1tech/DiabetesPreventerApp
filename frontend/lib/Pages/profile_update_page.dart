@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../utils/utilities.dart';
 import '../widgets/widgets.dart';
-import 'package:frontend/services/auth_service.dart';
+import '../services/update_profile_service.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'home_page.dart';
@@ -104,7 +104,7 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
       String password = _passwordController.text;
       String weight = _weightController.text;
 
-      var response = await AuthService().updateUserProfile(
+      var response = await UpdateProfileService().updateUserProfile(
         email,
         password,
         weight,

@@ -14,6 +14,8 @@ urlpatterns = [
     path('logout/', views.logout, name='logout'),
     path('health-record/', views.create_or_update_health_record, name='create_or_update_health_record'),
     path('health-record/last/<int:user_id>/', views.get_last_health_record, name='get_last_health_record'),
+    path('create_meal/', views.create_meal, name='create_meal'),
+    path('total_daily_nutrition/<int:user_id>/', views.get_total_daily_nutrition, name='daily_nutrition/'),
 ]
     
     

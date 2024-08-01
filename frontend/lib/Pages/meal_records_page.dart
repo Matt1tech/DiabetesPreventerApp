@@ -1,11 +1,14 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import '../services/fetch_user_data_service.dart';
+import '../services/meal_records_service.dart';
 import '../widgets/user_header.dart';
 import '../widgets/customized_navigation_bar.dart';
 import '../utils/utils.dart';
 import 'package:frontend/services/analyze_image.dart';
+import '../models/meal.dart';
 
 class MealRecordsPage extends StatefulWidget {
   MealRecordsPage({Key? key}) : super(key: key);
@@ -20,12 +23,27 @@ class _MealRecordsPageState extends State<MealRecordsPage> {
   final ImagePicker _picker = ImagePicker();
   String? userName;
   String? userProfilePicture;
+  String? user_id;
   Map<String, dynamic> _mealData = {};
+  XFile? _profilePicture;
+  final storage = FlutterSecureStorage();
+
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _quantityController = TextEditingController();
+  final TextEditingController _proteinsController = TextEditingController();
+  final TextEditingController _fatController = TextEditingController();
+  final TextEditingController _carbsController = TextEditingController();
+  final TextEditingController _fiberController = TextEditingController();
+  final TextEditingController _cholesterolController = TextEditingController();
+  final TextEditingController _caloriesController = TextEditingController();
+
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
     _loadUserInfo();
+    _loadUserData();
   }
 
   void _onItemTapped(int index) {
@@ -40,13 +58,35 @@ class _MealRecordsPageState extends State<MealRecordsPage> {
     setState(() {
       userName = userInfo['userName'];
       userProfilePicture = userInfo['userProfilePicture'];
+      user_id = userInfo['id'];
     });
   }
 
-  Future<void> _pickImage() async {
-    final XFile? image = await _picker.pickImage(source: ImageSource.camera);
+  Future<void> _loadUserData() async {
+    final userName = await storage.read(key: 'user_name');
+    final userId = await storage.read(key: 'user_id');
+
+    setState(() {
+      this.userName = userName;
+      this.userProfilePicture = userProfilePicture;
+      this.user_id = userId;
+    });
+  }
+
+  Future<void> _pickProfilePicture() async {
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
     if (image != null) {
       setState(() {
+        _profilePicture = image;
+      });
+    }
+  }
+
+  Future<void> _pickImage() async {
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      setState(() {
+        _isLoading = true;
         _mealImageFile = image;
       });
       await _analyzeImage(File(image.path));
@@ -57,35 +97,109 @@ class _MealRecordsPageState extends State<MealRecordsPage> {
     final apiKey = 'uPsCgdLq.jIrKCQePQaXday8iQYsqEgzpcHT1r7Tr';
     final data = await analyzeImage(imageFile, apiKey);
 
+    if (data['items'] != null && data['items'].isNotEmpty) {
+      final nutrition = data['items'][0]['food'][0]['food_info']['nutrition'];
+      final quantity =
+          data['items'][0]['food'][0]['quantity']?.toString() ?? '0.0';
+
+      setState(() {
+        _mealData = {
+          'name': data['items'][0]['food'][0]['food_info']['display_name'] ??
+              'Unknown',
+          'quantity': double.tryParse(quantity) ?? 0.0,
+          'proteins': double.tryParse(
+                  nutrition['proteins_100g']?.toString() ?? '0.0') ??
+              0.0,
+          'fat': double.tryParse(nutrition['fat_100g']?.toString() ?? '0.0') ??
+              0.0,
+          'carbs':
+              double.tryParse(nutrition['carbs_100g']?.toString() ?? '0.0') ??
+                  0.0,
+          'fiber':
+              double.tryParse(nutrition['fibers_100g']?.toString() ?? '0.0') ??
+                  0.0,
+          'cholesterol': double.tryParse(
+                  nutrition['cholesterol_100g']?.toString() ?? '0.0') ??
+              0.0,
+          'calories': double.tryParse(
+                  nutrition['calories_100g']?.toString() ?? '0.0') ??
+              0.0,
+        };
+
+        _nameController.text = _mealData['name'];
+        _quantityController.text = _mealData['quantity'].toString();
+        _proteinsController.text = _mealData['proteins'].toString();
+        _fatController.text = _mealData['fat'].toString();
+        _carbsController.text = _mealData['carbs'].toString();
+        _fiberController.text = _mealData['fiber'].toString();
+        _cholesterolController.text = _mealData['cholesterol'].toString();
+        _caloriesController.text = _mealData['calories'].toString();
+
+        _isLoading = false;
+      });
+    } else {
+      setState(() {
+        _isLoading = false;
+      });
+      print('Error: Invalid data structure');
+    }
+  }
+
+  Future<void> _saveMealData() async {
+    if (user_id == null || user_id!.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please log in again to save meal data.')),
+      );
+      return;
+    }
+
     setState(() {
-      _mealData = {
-        'meal_name': data['display_name'] ?? 'Unknown',
-        'proteins': data['proteins_100g']?.toString() ?? 'N/A',
-        'fat': data['fat_100g']?.toString() ?? 'N/A',
-        'carbs': data['carbs_100g']?.toString() ?? 'N/A',
-        'fiber': data['fibers_100g']?.toString() ?? 'N/A',
-        'cholesterol': data['cholesterol_100g']?.toString() ?? 'N/A',
-        'calories': data['calories_100g']?.toString() ?? 'N/A',
-      };
+      _isLoading = true;
     });
+
+    try {
+      Meal meal = Meal(
+        name: _nameController.text,
+        quantity: double.tryParse(_quantityController.text) ?? 0.0,
+        calories: double.tryParse(_caloriesController.text) ?? 0.0,
+        protein: double.tryParse(_proteinsController.text) ?? 0.0,
+        fats: double.tryParse(_fatController.text) ?? 0.0,
+        carbs: double.tryParse(_carbsController.text) ?? 0.0,
+        fiber: double.tryParse(_fiberController.text) ?? 0.0,
+        cholesterol: double.tryParse(_cholesterolController.text) ?? 0.0,
+        user: int.parse(user_id!),
+      );
+
+      await MealRecordsService.submitMealData(meal);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Meal data saved successfully!')),
+      );
+      _resetFields();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to save meal data. Please try again.')),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    ImageProvider<Object> headerImageProvider = userProfilePicture != null
-        ? NetworkImage(userProfilePicture!)
-        : AssetImage('assets/default_profile_picture.png')
-            as ImageProvider<Object>;
-
     ImageProvider<Object>? mealImageProvider =
         _mealImageFile != null ? FileImage(File(_mealImageFile!.path)) : null;
+    ImageProvider<Object> imageProvider =
+        getImageProvider(_profilePicture, userProfilePicture);
 
     return Scaffold(
       backgroundColor: Color.fromARGB(255, 217, 217, 217),
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(170.0),
         child: UserHeader(
-          imageProvider: headerImageProvider,
+          imageProvider: imageProvider,
           pageName: 'Meal Records Logs',
           welcomeMessage: 'Hello Again!',
           userName: userName ?? 'user name',
@@ -100,20 +214,21 @@ class _MealRecordsPageState extends State<MealRecordsPage> {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
+              if (_isLoading) CircularProgressIndicator(),
               if (mealImageProvider != null)
                 Image(
                   image: mealImageProvider,
                   width: 150,
                   height: 150,
                 ),
-              _buildTextField('Meal Name', _mealData['meal_name']),
-              _buildTextField('Serve Qty', '300 g'),
-              _buildTextField('Proteins', _mealData['proteins']),
-              _buildTextField('Fat', _mealData['fat']),
-              _buildTextField('Carbs', _mealData['carbs']),
-              _buildTextField('Fiber', _mealData['fiber']),
-              _buildTextField('Cholesterol', _mealData['cholesterol']),
-              _buildTextField('Total Calories', _mealData['calories']),
+              _buildTextField('Meal Name', _nameController),
+              _buildTextField('Serve Qty', _quantityController),
+              _buildTextField('Proteins', _proteinsController),
+              _buildTextField('Fat', _fatController),
+              _buildTextField('Carbs', _carbsController),
+              _buildTextField('Fiber', _fiberController),
+              _buildTextField('Cholesterol', _cholesterolController),
+              _buildTextField('Total Calories', _caloriesController),
               SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -137,6 +252,16 @@ class _MealRecordsPageState extends State<MealRecordsPage> {
                         style: TextStyle(
                             color: Colors.white, fontWeight: FontWeight.bold)),
                   ),
+                  SizedBox(width: 20), // Add space between buttons
+                  ElevatedButton(
+                    onPressed: _saveMealData,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: pinkColor, // Background color
+                    ),
+                    child: Text('Save',
+                        style: TextStyle(
+                            color: Colors.white, fontWeight: FontWeight.bold)),
+                  ),
                 ],
               ),
             ],
@@ -150,17 +275,17 @@ class _MealRecordsPageState extends State<MealRecordsPage> {
     );
   }
 
-  Widget _buildTextField(String label, String? initialValue) {
+  Widget _buildTextField(String label, TextEditingController controller) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: TextField(
         decoration: InputDecoration(
           labelText: label,
           border: OutlineInputBorder(),
-          fillColor: Colors.white, // Set background color to white
-          filled: true, // Enable filling
+          fillColor: Colors.white,
+          filled: true,
         ),
-        controller: TextEditingController(text: initialValue),
+        controller: controller,
       ),
     );
   }
@@ -169,7 +294,8 @@ class _MealRecordsPageState extends State<MealRecordsPage> {
     setState(() {
       _mealImageFile = null;
       _mealData = {
-        'meal_name': '',
+        'name': '',
+        'quantity': '',
         'proteins': '',
         'fat': '',
         'carbs': '',
@@ -177,6 +303,14 @@ class _MealRecordsPageState extends State<MealRecordsPage> {
         'cholesterol': '',
         'calories': '',
       };
+      _nameController.clear();
+      _quantityController.clear();
+      _proteinsController.clear();
+      _fatController.clear();
+      _carbsController.clear();
+      _fiberController.clear();
+      _cholesterolController.clear();
+      _caloriesController.clear();
     });
   }
 }
