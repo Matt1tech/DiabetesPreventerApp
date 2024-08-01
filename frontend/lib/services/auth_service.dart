@@ -7,7 +7,7 @@ final storage = FlutterSecureStorage();
 
 class AuthService {
   final String baseUrl =
-      "http://10.0.2.2:8000"; // Update this to your Django server URL
+      "http://192.168.100.7:8000"; // Update this to your Django server URL
 
   /// Registers a new user with the given information.
   ///

@@ -2,8 +2,11 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:image_picker/image_picker.dart';
+import '../services/auth_service.dart';
 import '../services/fetch_user_data_service.dart';
 import '../services/meal_records_service.dart';
+import '../utils/logout_utility.dart';
+import '../widgets/drawer_widget.dart';
 import '../widgets/user_header.dart';
 import '../widgets/customized_navigation_bar.dart';
 import '../utils/utils.dart';
@@ -27,6 +30,7 @@ class _MealRecordsPageState extends State<MealRecordsPage> {
   Map<String, dynamic> _mealData = {};
   XFile? _profilePicture;
   final storage = FlutterSecureStorage();
+  final AuthService _authService = AuthService();
 
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _quantityController = TextEditingController();
@@ -71,15 +75,6 @@ class _MealRecordsPageState extends State<MealRecordsPage> {
       this.userProfilePicture = userProfilePicture;
       this.user_id = userId;
     });
-  }
-
-  Future<void> _pickProfilePicture() async {
-    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
-    if (image != null) {
-      setState(() {
-        _profilePicture = image;
-      });
-    }
   }
 
   Future<void> _pickImage() async {
@@ -208,6 +203,12 @@ class _MealRecordsPageState extends State<MealRecordsPage> {
           showWelcomeMessage: true,
           topPadding: 50.0,
         ),
+      ),
+      drawer: CustomDrawer(
+        userName: userName,
+        imageProvider: imageProvider,
+        logoutManager:
+            LogoutManager(context: context, authService: _authService),
       ),
       body: SingleChildScrollView(
         child: Padding(

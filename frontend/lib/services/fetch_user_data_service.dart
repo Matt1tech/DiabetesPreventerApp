@@ -17,7 +17,7 @@ Future<Map<String, String?>> loadUserInfo() async {
     final userId = user.id;
     // Construct the full URL for the profile picture
     final userProfilePicture =
-        '${'http://10.0.2.2:8000'}/media/${user.profile_picture}';
+        '${'http://192.168.100.7:8000'}/media/${user.profile_picture}';
     print('User Profile Picture: $userProfilePicture'); // Debug statement
     return {
       'userName': userName,

@@ -7,7 +7,7 @@ class PhysicalActivityRecordsService {
       String userId, String type, double duration) async {
     try {
       var response = await http.post(
-        Uri.parse('http://10.0.2.2:8000/physical_record/'),
+        Uri.parse('http://192.168.100.7:8000/physical_record/'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
@@ -34,7 +34,7 @@ class PhysicalActivityRecordsService {
   Future<bool> submitStressLevel(String userId, int stressLevel) async {
     try {
       var response = await http.post(
-        Uri.parse('http://10.0.2.2:8000/physical_record/'),
+        Uri.parse('http://192.168.100.7:8000/physical_record/'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },

@@ -4,7 +4,7 @@ import '../models/models.dart';
 
 class UserHealthRecordsService {
   static const String _baseUrl =
-      'http://10.0.2.2:8000/health-record/'; // Replace with your actual endpoint URL
+      'http://192.168.100.7:8000/health-record/'; // Replace with your actual endpoint URL
 
   static Future<void> inputBloodGlucose(int userId, int bloodGlucose) async {
     final url = Uri.parse(_baseUrl);
@@ -50,10 +50,32 @@ class UserHealthRecordsService {
       print('Error submitting blood pressure data: $e');
     }
   }
+
+  static Future<void> inputDailyWeight(int userId, int weight) async {
+    final url = Uri.parse(_baseUrl);
+    final headers = {'Content-Type': 'application/json'};
+    final body = json.encode({
+      'weight': weight,
+      'user': userId,
+    });
+
+    try {
+      final response = await http.post(url, headers: headers, body: body);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        print('Daily Weight submitted successfully');
+      } else {
+        print(
+            'Failed to submit Daily Weight: ${response.statusCode}, ${response.body}');
+      }
+    } catch (e) {
+      print('Error submitting Daily Weight: $e');
+    }
+  }
 }
 
 class FetchHealthRecordService {
-  static const _baseUrl = 'http://10.0.2.2:8000/health-record/last';
+  static const _baseUrl = 'http://192.168.100.7:8000/health-record/last';
 
   Future<HealthRecord?> fetchLastHealthRecord(int userId) async {
     print(

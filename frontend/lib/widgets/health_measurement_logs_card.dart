@@ -5,11 +5,25 @@ class HealthMeasurementLogsCard extends StatefulWidget {
   final String title;
   final String name;
   final void Function(int) onPressed;
+  final Color cardColor;
+  final List<BoxShadow> boxShadow;
+  final double width;
+  final double height;
 
   HealthMeasurementLogsCard({
     required this.title,
     required this.name,
     required this.onPressed,
+    this.cardColor = Colors.white,
+    this.boxShadow = const [
+      BoxShadow(
+        color: Colors.black26,
+        blurRadius: 10,
+        offset: Offset(0, 4),
+      ),
+    ],
+    this.width = 180, // Default width
+    this.height = 160, // Default height
   });
 
   @override
@@ -32,24 +46,28 @@ class _HealthMeasurementLogsCardState extends State<HealthMeasurementLogsCard> {
     });
   }
 
+  void _saveRecord() {
+    widget.onPressed(_value);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('${widget.title} successfully recorded'),
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 180, // Set the desired width
-      height: 160, // Set the desired height
+      width: widget.width,
+      height: widget.height,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
-        color: Colors.white,
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black26,
-            blurRadius: 10,
-            offset: Offset(0, 4),
-          ),
-        ],
+        color: widget.cardColor,
+        boxShadow: widget.boxShadow,
       ),
       child: Padding(
-        padding: const EdgeInsets.all(8.0), // Adjust the padding
+        padding: const EdgeInsets.all(8.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -62,7 +80,7 @@ class _HealthMeasurementLogsCardState extends State<HealthMeasurementLogsCard> {
             Row(
               children: [
                 IconButton(
-                  icon: Icon(Icons.remove, size: 20), // Smaller icon size
+                  icon: Icon(Icons.remove, size: 20),
                   onPressed: _decrementValue,
                 ),
                 Expanded(
@@ -82,8 +100,7 @@ class _HealthMeasurementLogsCardState extends State<HealthMeasurementLogsCard> {
                       }
                     },
                     child: Container(
-                      padding: EdgeInsets.symmetric(
-                          vertical: 4, horizontal: 8), // Adjust the padding
+                      padding: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
                       decoration: BoxDecoration(
                         border: Border.all(color: Colors.grey),
                         borderRadius: BorderRadius.circular(4),
@@ -91,30 +108,30 @@ class _HealthMeasurementLogsCardState extends State<HealthMeasurementLogsCard> {
                       child: Center(
                         child: Text(
                           '$_value',
-                          style: TextStyle(fontSize: 20), // Smaller text size
+                          style: TextStyle(fontSize: 20),
                         ),
                       ),
                     ),
                   ),
                 ),
                 IconButton(
-                  icon: Icon(Icons.add, size: 25), // Smaller icon size
+                  icon: Icon(Icons.add, size: 25),
                   onPressed: _incrementValue,
                 ),
               ],
             ),
-            SizedBox(height: 8), // Adjust the spacing
+            SizedBox(height: 8),
             Center(
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: pinkColor, // Background color
+                  backgroundColor: pinkColor,
                 ),
-                onPressed: () => widget.onPressed(_value),
+                onPressed: _saveRecord, // Updated to use the new method
                 child: Text(
                   'Save',
                   style: TextStyle(
                     fontSize: 14,
-                    color: Colors.white, // Text color
+                    color: Colors.white,
                   ),
                 ),
               ),

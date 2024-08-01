@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class NutritionService {
-  final String baseUrl = 'http://10.0.2.2:8000';
+  final String baseUrl = 'http://192.168.100.7:8000';
 
   Future<Map<String, dynamic>> fetchDailyNutrition(int userId) async {
     final String url = '$baseUrl/total_daily_nutrition/$userId';

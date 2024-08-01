@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import '../models/meal.dart';
 
 class MealRecordsService {
-  static const String _baseUrl = 'http://10.0.2.2:8000/create_meal/';
+  static const String _baseUrl = 'http://192.168.100.7:8000/create_meal/';
 
   static Future<void> submitMealData(Meal meal) async {
     final url = Uri.parse(_baseUrl);

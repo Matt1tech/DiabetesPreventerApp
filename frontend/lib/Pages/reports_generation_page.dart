@@ -3,6 +3,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:frontend/services/auth_service.dart';
 import 'package:image_picker/image_picker.dart';
 import '../services/fetch_user_data_service.dart';
+import '../utils/logout_utility.dart';
+import '../widgets/drawer_widget.dart';
 import '../widgets/widgets.dart';
 import '../utils/navigation_util.dart';
 import '../utils/utilities.dart'; // Assuming utilities.dart contains the buildDatePickerField function
@@ -133,6 +135,12 @@ class _ReportsGenerationPageState extends State<ReportsGenerationPage> {
           showWelcomeMessage: true,
           topPadding: 50.0,
         ),
+      ),
+      drawer: CustomDrawer(
+        userName: userName,
+        imageProvider: imageProvider,
+        logoutManager:
+            LogoutManager(context: context, authService: _authService),
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16.0),

@@ -2,7 +2,7 @@ import 'dart:io';
 
 class UpdateProfileService {
   final String baseUrl =
-      "http://10.0.2.2:8000"; // Update this to your Django server URL
+      "http://192.168.100.7:8000"; // Update this to your Django server URL
 
   /// Updates the user profile with the given information.
   ///
