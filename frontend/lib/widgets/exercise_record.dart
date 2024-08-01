@@ -1,14 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/utils/utilities.dart';
 
+import '../services/physical_activities_records_service.dart';
+
 class ExerciseRecord extends StatefulWidget {
+  final String userId;
+  final PhysicalActivityRecordsService service;
+
+  ExerciseRecord({Key? key, required this.userId, required this.service})
+      : super(key: key);
+
   @override
   _ExerciseRecordState createState() => _ExerciseRecordState();
 }
 
 class _ExerciseRecordState extends State<ExerciseRecord> {
   String selectedExercise = '';
-  double duration = 0.5;
+  double duration = 30;
   TextEditingController durationController = TextEditingController();
 
   final List<String> exercises = [
@@ -21,9 +29,18 @@ class _ExerciseRecordState extends State<ExerciseRecord> {
   ];
 
   void submitExercise() {
-    if (selectedExercise.isNotEmpty && duration >= 0.5 && duration <= 24) {
-      print('Selected Exercise: $selectedExercise, Duration: $duration hrs');
-      // Add further handling logic here, e.g., sending the values to a server
+    if (selectedExercise.isNotEmpty && duration >= 5 && duration <= 120) {
+      widget.service
+          .submitExerciseRecord(widget.userId, selectedExercise, duration)
+          .then((success) {
+        if (success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text("Exercise logged successfully")));
+        } else {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text("Failed to log exercise")));
+        }
+      });
     } else {
       print('No exercise selected or invalid duration');
     }

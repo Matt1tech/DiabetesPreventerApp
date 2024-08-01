@@ -16,7 +16,7 @@ urlpatterns = [
     path('health-record/last/<int:user_id>/', views.get_last_health_record, name='get_last_health_record'),
     path('create_meal/', views.create_meal, name='create_meal'),
     path('total_daily_nutrition/<int:user_id>/', views.get_total_daily_nutrition, name='daily_nutrition/'),
-    path('physical_record/', views.physical_record_view, name='physical_record'),
+    path('physical_record/', views.physical_record, name='physical_record'),
 ]
     
     

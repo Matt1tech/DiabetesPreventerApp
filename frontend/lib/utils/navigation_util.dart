@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
-import '../Pages/profile_update_page.dart';
 import '../pages/pages.dart';
 
 const String apiKey =

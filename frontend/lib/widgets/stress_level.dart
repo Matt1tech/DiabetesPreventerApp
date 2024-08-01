@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/utils/utilities.dart';
 
+import '../services/physical_activities_records_service.dart';
+
 /// A widget that allows users to select their stress level.
 class StressLevelSelector extends StatefulWidget {
+  final String userId;
+  final PhysicalActivityRecordsService service;
+
+  StressLevelSelector({Key? key, required this.userId, required this.service})
+      : super(key: key);
   @override
   _StressLevelSelectorState createState() => _StressLevelSelectorState();
 }
@@ -55,9 +62,20 @@ class _StressLevelSelectorState extends State<StressLevelSelector> {
   void saveStressLevel() {
     if (selectedStressLevel != -1) {
       print('Selected Stress Level: $selectedStressLevel');
-      // Add further handling logic here, e.g., sending the value to a server
+      widget.service
+          .submitStressLevel(widget.userId, selectedStressLevel)
+          .then((success) {
+        if (success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text("Stress level logged successfully")));
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text("Failed to log stress level")));
+        }
+      });
     } else {
-      print('No stress level selected');
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text("No stress level selected")));
     }
   }
 

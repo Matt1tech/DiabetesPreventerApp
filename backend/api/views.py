@@ -211,11 +211,11 @@ def get_total_daily_nutrition(request, user_id):
 
 
 @api_view(['POST'])
-def physical_record_view(request):
+def physical_record(request):
     user_id = request.data.get('user_id')
     duration = request.data.get('duration', 0)
     record_type = request.data.get('type')
-    stress_level = request.data.get('stress_level')
+    stress_level = request.data.get('stress_level', None)
 
     if not user_id:
         return Response({'error': 'User ID is required'}, status=status.HTTP_400_BAD_REQUEST)
@@ -237,17 +237,12 @@ def physical_record_view(request):
     )
 
     if not created:
-        if duration:
-            physical_record.duration = duration
-        if record_type:
-            physical_record.type = record_type
-        if stress_level:
-            physical_record.stress_level = stress_level
+        physical_record.duration = duration if duration else physical_record.duration
+        physical_record.type = record_type if record_type else physical_record.type
+        physical_record.stress_level = stress_level if stress_level is not None else physical_record.stress_level
         physical_record.save()
 
     return Response({'status': 'success', 'record_id': physical_record.id})
-
-
 
 
 

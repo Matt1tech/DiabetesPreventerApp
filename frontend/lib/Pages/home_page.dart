@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import '../models/models.dart'; // Barrel file for models
 import '../services/fetch_user_data_service.dart';
 import '../services/nutrients_service.dart';
+import '../services/physical_activities_records_service.dart';
 import '../widgets/widgets.dart'; // Barrel file for custom widgets
 import '../utils/utils.dart'; // Barrel file for utilities
 import '../components/components.dart'; // Barrel file for components
@@ -27,8 +28,6 @@ class _HomePageState extends State<HomePage> {
   XFile? _profilePicture;
   final ImagePicker _picker = ImagePicker();
   final storage = FlutterSecureStorage();
-  // Correctly initialize the service here
-  // Variable to hold user data
   String? userName;
   String? userProfilePicture;
   late FetchHealthRecordService fetchHealthRecordService;
@@ -41,6 +40,8 @@ class _HomePageState extends State<HomePage> {
   // Variable to hold user data
   List<SuitableMenuModel> menu = [];
   int _selectedIndex = 0;
+  final PhysicalActivityRecordsService service =
+      PhysicalActivityRecordsService();
 
   @override
   void initState() {
@@ -484,12 +485,12 @@ class _HomePageState extends State<HomePage> {
                 title: 'Blood Pressure',
                 name: 'bloodPressure',
                 onPressed: (int value) {
-                  // Implement your backend sending logic here
+                  // Implement  backend sending logic here
                   if (user_id != null) {
                     UserHealthRecordsService.inputBloodPressure(
                         int.parse(user_id!), value.toString());
                   }
-                }), // Use the HealthMeasurementLogsCard widget,
+                }),
             HealthMeasurementLogsCard(
               title: 'Glucose Level',
               name: 'glucoseLevel',
@@ -499,7 +500,7 @@ class _HomePageState extends State<HomePage> {
                       int.parse(user_id!), value);
                 }
               },
-            ), // Use the HealthMeasurementLogsCard widget
+            ),
           ],
         ),
       ],
@@ -541,7 +542,7 @@ class _HomePageState extends State<HomePage> {
               ),
               child: Padding(
                 padding: const EdgeInsets.all(10.0),
-                child: ExerciseRecord(),
+                child: ExerciseRecord(userId: user_id!, service: service),
               ),
             ),
             SizedBox(height: 20),
@@ -561,7 +562,7 @@ class _HomePageState extends State<HomePage> {
               ),
               child: Padding(
                 padding: const EdgeInsets.all(10.0),
-                child: StressLevelSelector(),
+                child: StressLevelSelector(userId: user_id!, service: service),
               ),
             ),
           ],
