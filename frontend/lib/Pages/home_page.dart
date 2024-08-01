@@ -7,7 +7,7 @@ import 'package:frontend/services/auth_service.dart';
 import 'package:image_picker/image_picker.dart';
 import '../models/models.dart'; // Barrel file for models
 import '../services/fetch_user_data_service.dart';
-import '../services/meals_ nutrients_service.dart';
+import '../services/nutrients_service.dart';
 import '../widgets/widgets.dart'; // Barrel file for custom widgets
 import '../utils/utils.dart'; // Barrel file for utilities
 import '../components/components.dart'; // Barrel file for components
@@ -27,14 +27,15 @@ class _HomePageState extends State<HomePage> {
   XFile? _profilePicture;
   final ImagePicker _picker = ImagePicker();
   final storage = FlutterSecureStorage();
+  // Correctly initialize the service here
   // Variable to hold user data
   String? userName;
   String? userProfilePicture;
   late FetchHealthRecordService fetchHealthRecordService;
-  late FetchMealsNutrientsService fetchMealsNutrientsService;
-
+  final NutritionService nutritionService = NutritionService();
+  Map<String, dynamic> nutritionData =
+      {}; // Ensure this is initialized to handle null cases
   HealthRecord? lastHealthRecord;
-  Meal? mealsNutrients;
   String? user_id;
   // Instance of secure storage
   // Variable to hold user data
@@ -49,8 +50,7 @@ class _HomePageState extends State<HomePage> {
     _loadUserData();
     fetchHealthRecordService = FetchHealthRecordService();
     fetchLastHealthRecord();
-    fetchMealsNutrientsService = FetchMealsNutrientsService();
-    fetchLastMealsNutrients();
+    fetchDailyNutrition();
   }
 
   Future<void> fetchLastHealthRecord() async {
@@ -83,36 +83,6 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  Future<void> fetchLastMealsNutrients() async {
-    print('fetchMealsNutrients called');
-    if (user_id != null) {
-      print('user_id is not null: $user_id');
-      final int? userIdInt = int.tryParse(user_id!);
-      if (userIdInt != null) {
-        print('Parsed user_id to int: $userIdInt');
-        try {
-          final record =
-              await fetchMealsNutrientsService.fetchMealsNutrients(userIdInt);
-          print('Received record: $record');
-          if (record != null) {
-            setState(() {
-              mealsNutrients = record as Meal?;
-              print('Set mealsNutrients: $mealsNutrients');
-            });
-          } else {
-            print('No meals nutrients record found for user');
-          }
-        } catch (e) {
-          print('Error fetching meals nutrients record: $e');
-        }
-      } else {
-        print('Failed to parse user_id to int: $user_id');
-      }
-    } else {
-      print('user_id is null');
-    }
-  }
-
 // Handle the image of the profile picture
   Future<void> _loadUserInfo() async {
     final userInfo = await loadUserInfo();
@@ -133,7 +103,36 @@ class _HomePageState extends State<HomePage> {
       this.user_id = userId;
     });
     fetchLastHealthRecord();
-    fetchLastMealsNutrients();
+    fetchDailyNutrition();
+  }
+
+  Future<void> fetchDailyNutrition() async {
+    print('fetchDailyNutrition called');
+    if (user_id != null) {
+      final double? parsedDouble = double.tryParse(user_id!);
+      final int? userIdInt =
+          parsedDouble?.toInt(); // Safely convert double to int
+      if (userIdInt != null) {
+        try {
+          final nutritionData =
+              await nutritionService.fetchDailyNutrition(userIdInt);
+          if (nutritionData != null) {
+            setState(() {
+              this.nutritionData =
+                  nutritionData; // This triggers the widget to rebuild
+            });
+          } else {
+            print('No nutrition data found for user');
+          }
+        } catch (e) {
+          print('Error fetching nutrition data: $e');
+        }
+      } else {
+        print('Failed to parse user_id to int: $user_id');
+      }
+    } else {
+      print('user_id is null');
+    }
   }
 
   Future<void> _pickProfilePicture() async {
@@ -194,21 +193,6 @@ class _HomePageState extends State<HomePage> {
         isLoading = false;
       });
     }
-  }
-
-  // Nutrients Details Section
-  Column nutrientsDetailsSection() {
-    return Column(
-      children: [
-        NutritionDetails(
-          totalCalories: 0,
-          proteinCalories: 0,
-          fatsCalories: 0,
-          carbsCalories: 0,
-          fiberCalories: 0, // Ensure this key exists in the API response
-        ),
-      ],
-    );
   }
 
   @override
@@ -404,6 +388,21 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
     ];
+  }
+
+  // Nutrients Details Section
+  Column nutrientsDetailsSection() {
+    return Column(
+      children: [
+        NutritionDetails(
+          totalCalories: (nutritionData['total_calories'] ?? 0),
+          proteinCalories: (nutritionData['total_protein'] ?? 0),
+          fatsCalories: (nutritionData['total_fats'] ?? 0),
+          carbsCalories: (nutritionData['total_carbs'] ?? 0),
+          fiberCalories: (nutritionData['total_cholesterol'] ?? 0),
+        ),
+      ],
+    );
   }
 
   // Risk Overview Section

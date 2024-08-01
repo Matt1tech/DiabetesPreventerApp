@@ -66,8 +66,8 @@ class NutritionContainer extends StatelessWidget {
 /// A widget that displays animated nutrition information in a vertical container.
 class AnimatedNutritionContainer extends StatefulWidget {
   final String title;
-  final int calories;
-  final int maxCalories;
+  final double calories;
+  final double maxCalories;
   final Color textColor;
 
   /// Creates an AnimatedNutritionContainer widget.
@@ -167,8 +167,8 @@ class _AnimatedNutritionContainerState
 /// A widget that displays animated nutrition information in a horizontal container.
 class AnimatedHorizontalContainer extends StatefulWidget {
   final String title;
-  final int calories;
-  final int maxCalories;
+  final double calories;
+  final double maxCalories;
   final Color fillColor;
   final Color textColor;
 
@@ -263,16 +263,16 @@ class _AnimatedHorizontalContainerState
 
 /// A widget that displays detailed nutrition information.
 class NutritionDetails extends StatelessWidget {
-  final int totalCalories;
-  final int proteinCalories;
-  final int fatsCalories;
-  final int carbsCalories;
-  final int fiberCalories;
-  final int maxTotalCalories;
-  final int maxProteinCalories;
-  final int maxFatsCalories;
-  final int maxCarbsCalories;
-  final int maxFiberCalories;
+  final double totalCalories;
+  final double proteinCalories;
+  final double fatsCalories;
+  final double carbsCalories;
+  final double fiberCalories;
+  final double maxTotalCalories;
+  final double maxProteinCalories;
+  final double maxFatsCalories;
+  final double maxCarbsCalories;
+  final double maxFiberCalories;
 
   /// Creates a NutritionDetails widget with default max calories.
   ///
