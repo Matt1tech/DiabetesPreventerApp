@@ -44,6 +44,9 @@ class HealthRecord(models.Model):
     user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='health_records')
 
 
+from django.db import models
+from django.utils import timezone
+
 class PhysicalRecord(models.Model):
     TYPE_CHOICES = [
         ('Gym', 'Gym'),
@@ -66,10 +69,11 @@ class PhysicalRecord(models.Model):
     ]
 
     duration = models.IntegerField(default=0)  # Default duration in minutes
-    type = models.CharField(max_length=50, choices=TYPE_CHOICES, default='Gym')  # Default type
-    stress_level = models.IntegerField(choices=STRESS_LEVEL_CHOICES)
+    type = models.CharField(max_length=50, choices=TYPE_CHOICES, default='Gym', blank=True, null=True)  # Default type
+    stress_level = models.IntegerField(choices=STRESS_LEVEL_CHOICES, blank=True, null=True)
     created_at = models.DateTimeField(default=timezone.now)
     user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='physical_records')
+
 
 
  

@@ -210,7 +210,42 @@ def get_total_daily_nutrition(request, user_id):
 
 
 
+@api_view(['POST'])
+def physical_record_view(request):
+    user_id = request.data.get('user_id')
+    duration = request.data.get('duration', 0)
+    record_type = request.data.get('type')
+    stress_level = request.data.get('stress_level')
 
+    if not user_id:
+        return Response({'error': 'User ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    today = timezone.now().date()
+    physical_record, created = PhysicalRecord.objects.get_or_create(
+        user=user,
+        created_at__date=today,
+        defaults={
+            'duration': duration,
+            'type': record_type,
+            'stress_level': stress_level
+        }
+    )
+
+    if not created:
+        if duration:
+            physical_record.duration = duration
+        if record_type:
+            physical_record.type = record_type
+        if stress_level:
+            physical_record.stress_level = stress_level
+        physical_record.save()
+
+    return Response({'status': 'success', 'record_id': physical_record.id})
 
 
 
