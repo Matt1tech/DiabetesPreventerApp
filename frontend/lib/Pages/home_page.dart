@@ -514,7 +514,7 @@ class _HomePageState extends State<HomePage> {
       children: [
         const SizedBox(height: 5),
         const Padding(
-          padding: EdgeInsets.only(left: 20),
+          padding: EdgeInsets.only(left: 5),
           child: Text(
             'Activity Logs',
             style: TextStyle(
@@ -524,17 +524,18 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 20),
         Column(
           children: [
             Container(
-              width: 390, // Adjusted width for better alignment
+              width: 360, // Adjusted width for better alignment
               height: 380,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(1),
+                borderRadius: BorderRadius.circular(10),
+                color: Color.fromARGB(255, 255, 255, 255),
                 boxShadow: const [
                   BoxShadow(
-                    color: Color.fromARGB(21, 18, 18, 18),
+                    color: Colors.black26,
                     blurRadius: 10,
                     offset: Offset(0, 4),
                   ),

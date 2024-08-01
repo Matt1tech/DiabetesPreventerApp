@@ -56,18 +56,7 @@ class _ExerciseRecordState extends State<ExerciseRecord> {
   Widget build(BuildContext context) {
     return Center(
       child: Container(
-        padding: const EdgeInsets.all(30.0),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(8.0),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black26,
-              blurRadius: 10,
-              offset: Offset(0, 4),
-            ),
-          ],
-        ),
+        padding: const EdgeInsets.all(25.0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -80,10 +69,10 @@ class _ExerciseRecordState extends State<ExerciseRecord> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: 20),
+            SizedBox(height: 30),
             Wrap(
-              spacing: 15,
-              runSpacing: 15,
+              spacing: 12,
+              runSpacing: 12,
               children: exercises.map((exercise) {
                 bool isSelected = selectedExercise == exercise;
                 return GestureDetector(
@@ -116,7 +105,7 @@ class _ExerciseRecordState extends State<ExerciseRecord> {
                 );
               }).toList(),
             ),
-            SizedBox(height: 20),
+            SizedBox(height: 30),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -158,7 +147,7 @@ class _ExerciseRecordState extends State<ExerciseRecord> {
                 ),
               ],
             ),
-            SizedBox(height: 10),
+            SizedBox(height: 15),
             Center(
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
