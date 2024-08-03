@@ -43,7 +43,7 @@ class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
   final PhysicalActivityRecordsService service =
       PhysicalActivityRecordsService();
-  Map<String, dynamic>? userCustomizations;
+  Customizations? userCustomizations;
 
   @override
   void initState() {
@@ -56,7 +56,6 @@ class _HomePageState extends State<HomePage> {
     fetchLastHealthRecord();
     fetchDailyNutrition();
     logoutManager = LogoutManager(context: context, authService: _authService);
-    fetchUserCustomizations();
   }
 
   Future<void> fetchLastHealthRecord() async {
@@ -71,10 +70,12 @@ class _HomePageState extends State<HomePage> {
               await fetchHealthRecordService.fetchLastHealthRecord(userIdInt);
           print('Received record: $record');
           if (record != null) {
-            setState(() {
-              lastHealthRecord = record;
-              print('Set lastHealthRecord: $lastHealthRecord');
-            });
+            if (mounted) {
+              setState(() {
+                lastHealthRecord = record;
+                print('Set lastHealthRecord: $lastHealthRecord');
+              });
+            }
           } else {
             print('No health record found for user');
           }
@@ -95,18 +96,17 @@ class _HomePageState extends State<HomePage> {
       print('user_id is not null: $user_id');
       final int? userIdInt = int.tryParse(user_id!);
       if (userIdInt != null) {
-        print('Parsed user_id to int: $userIdInt');
         try {
           final customizations = await fetchUserCustomizationsService
               .fetchUserCustomizations(userIdInt);
           print('Received customizations: $customizations');
           if (customizations != null) {
-            setState(() {
-              userCustomizations = customizations;
-              print('Set userCustomizations: $userCustomizations');
-            });
-          } else {
-            print('No customizations found for user');
+            if (mounted) {
+              setState(() {
+                userCustomizations = customizations;
+                print('Set userCustomizations: $userCustomizations');
+              });
+            }
           }
         } catch (e) {
           print('Error fetching customizations: $e');
@@ -114,33 +114,7 @@ class _HomePageState extends State<HomePage> {
       } else {
         print('Failed to parse user_id to int: $user_id');
       }
-    } else {
-      print('user_id is null');
     }
-  }
-
-// Handle the image of the profile picture
-  Future<void> _loadUserInfo() async {
-    final userInfo = await loadUserInfo();
-    setState(() {
-      userName = userInfo['userName'];
-      userProfilePicture = userInfo['userProfilePicture'];
-      user_id = userInfo['id'];
-    });
-  }
-
-  Future<void> _loadUserData() async {
-    final userName = await storage.read(key: 'user_name');
-    final userId = await storage.read(key: 'user_id');
-
-    setState(() {
-      this.userName = userName;
-      this.userProfilePicture = userProfilePicture;
-      this.user_id = userId;
-    });
-    fetchLastHealthRecord();
-    fetchDailyNutrition();
-    fetchUserCustomizations();
   }
 
   Future<void> fetchDailyNutrition() async {
@@ -153,10 +127,12 @@ class _HomePageState extends State<HomePage> {
         try {
           final nutritionData =
               await nutritionService.fetchDailyNutrition(userIdInt);
-          setState(() {
-            this.nutritionData =
-                nutritionData; // This triggers the widget to rebuild
-          });
+          if (mounted) {
+            setState(() {
+              this.nutritionData =
+                  nutritionData; // This triggers the widget to rebuild
+            });
+          }
         } catch (e) {
           print('Error fetching nutrition data: $e');
         }
@@ -165,6 +141,33 @@ class _HomePageState extends State<HomePage> {
       }
     } else {
       print('user_id is null');
+    }
+  }
+
+// Handle the image of the profile picture
+  Future<void> _loadUserInfo() async {
+    final userInfo = await loadUserInfo();
+    if (mounted) {
+      setState(() {
+        userName = userInfo['userName'];
+        userProfilePicture = userInfo['userProfilePicture'];
+        user_id = userInfo['id'];
+      });
+    }
+  }
+
+  Future<void> _loadUserData() async {
+    final userName = await storage.read(key: 'user_name');
+    final userId = await storage.read(key: 'user_id');
+    if (mounted) {
+      setState(() {
+        this.userName = userName;
+        userProfilePicture = userProfilePicture;
+        user_id = userId;
+      });
+      fetchLastHealthRecord();
+      fetchDailyNutrition();
+      fetchUserCustomizations();
     }
   }
 
@@ -180,12 +183,16 @@ class _HomePageState extends State<HomePage> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    print('Building HomePage. lastHealthRecord: $lastHealthRecord');
     ImageProvider<Object> imageProvider =
         getImageProvider(_profilePicture, userProfilePicture);
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 217, 217, 217),
+      backgroundColor: Color.fromARGB(255, 240, 236, 236),
       appBar: UserHeader(
         imageProvider: imageProvider,
         pageName: 'Home', // This will be shown as the page title
@@ -213,7 +220,14 @@ class _HomePageState extends State<HomePage> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   const SizedBox(height: 10),
+                  const SizedBox(height: 10),
+                  /*
+                  if (userCustomizations != null) 
+                  if (userCustomizations == null)
+                    nutrientsDetailsSectionWithDefault(),
+                    */ // Show default values if userCustomizations is null
                   nutrientsDetailsSection(),
+                  const SizedBox(height: 30),
                   riskOverviewSection(),
                   const SizedBox(height: 30),
                   healthRecordSection(),
@@ -255,13 +269,13 @@ class _HomePageState extends State<HomePage> {
   // Suitable menu slider Section
   List<Widget> get menuSlider {
     return [
-      Padding(
-        padding: const EdgeInsets.only(left: 20, top: 3),
+      const Padding(
+        padding: EdgeInsets.only(left: 20, top: 3),
         child: Text(
           'Suitable Menu',
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: Color.fromARGB(255, 240, 236, 236),
             fontSize: 18.0,
           ),
         ),
@@ -278,7 +292,7 @@ class _HomePageState extends State<HomePage> {
             return InkWell(
               onTap: () {
                 // Handle button press
-                print('Item ${menu[index].name} pressed');
+                //print('Item ${menu[index].name} pressed');
                 // Add navigation or other logic here
               },
               child: Container(
@@ -301,7 +315,7 @@ class _HomePageState extends State<HomePage> {
                       width: 60,
                       height: 60,
                       decoration: const BoxDecoration(
-                        color: Colors.white,
+                        color: Color.fromARGB(255, 240, 236, 236),
                         shape: BoxShape.circle,
                       ),
                       child: Padding(
@@ -328,25 +342,45 @@ class _HomePageState extends State<HomePage> {
   }
 
   // Nutrients Details Section
-  Column nutrientsDetailsSection() {
-    return Column(
-      children: [
-        NutritionDetails(
-          totalCalories: (nutritionData['total_calories'] ?? 0),
-          proteinCalories: (nutritionData['total_protein'] ?? 0),
-          fatsCalories: (nutritionData['total_fats'] ?? 0),
-          carbsCalories: (nutritionData['total_carbs'] ?? 0),
-          fiberCalories: (nutritionData['total_cholesterol'] ?? 0),
-          maxTotalCalories: 2000,
-          maxProteinCalories: 150,
-          maxFatsCalories: 250,
-          maxCarbsCalories: 300,
-          maxFiberCalories: 75,
-        )
-      ],
+  Container nutrientsDetailsSection() {
+    return Container(
+      width: 380,
+      height: 220,
+      child: NutritionDetails(
+        totalCalories: (nutritionData['total_calories'] ?? 0),
+        proteinCalories: (nutritionData['total_protein'] ?? 0),
+        fatsCalories: (nutritionData['total_fats'] ?? 0),
+        carbsCalories: (nutritionData['total_carbs'] ?? 0),
+        fiberCalories: (nutritionData['total_fiber'] ?? 0),
+        maxTotalCalories: 2000, //userCustomizations?.dailyCaloriesMax ??
+        maxProteinCalories: 180, //userCustomizations?.maxProtein ??
+        maxFatsCalories: 250, //userCustomizations?.maxFat ??
+        maxCarbsCalories: 300, //userCustomizations?.maxCarbs ??
+        maxFiberCalories: 75, //userCustomizations?.maxFiber ??
+      ),
     );
   }
 
+/*
+  Container nutrientsDetailsSectionWithDefault() {
+    return Container(
+      width: 380,
+      height: 220,
+      child: NutritionDetails(
+        totalCalories: (nutritionData['total_calories'] ?? 0),
+        proteinCalories: (nutritionData['total_protein'] ?? 0),
+        fatsCalories: (nutritionData['total_fats'] ?? 0),
+        carbsCalories: (nutritionData['total_carbs'] ?? 0),
+        fiberCalories: (nutritionData['total_fiber'] ?? 0),
+        maxTotalCalories: 2000,
+        maxProteinCalories: 180,
+        maxFatsCalories: 250,
+        maxCarbsCalories: 300,
+        maxFiberCalories: 75,
+      ),
+    );
+  }
+*/
   // Risk Overview Section
   Column riskOverviewSection() {
     return Column(
@@ -365,7 +399,7 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         const SizedBox(height: 15),
-        MonthlyRiskChart(monthlyRiskValues: [1, 1, 1, 1, 5, 22]),
+        const MonthlyRiskChart(monthlyRiskValues: [1, 1, 1, 1, 5, 22]),
         const SizedBox(height: 40),
         diabetesInfectionStatus(),
       ],
@@ -434,7 +468,7 @@ class _HomePageState extends State<HomePage> {
               width: 180, // Specify the width as needed
               height: 160, // Specify the height as needed
               cardColor: Colors.white,
-              boxShadow: [
+              boxShadow: const [
                 BoxShadow(
                   color: Colors.black26,
                   blurRadius: 10,
@@ -454,7 +488,7 @@ class _HomePageState extends State<HomePage> {
               width: 180, // Specify the width as needed
               height: 160, // Specify the height as needed
               cardColor: Colors.white,
-              boxShadow: [
+              boxShadow: const [
                 BoxShadow(
                   color: Colors.black26,
                   blurRadius: 10,
@@ -464,7 +498,7 @@ class _HomePageState extends State<HomePage> {
             ),
           ],
         ),
-        SizedBox(height: 40),
+        const SizedBox(height: 40),
         Center(
           child: HealthMeasurementLogsCard(
             title: 'Daily Weight',
@@ -478,7 +512,7 @@ class _HomePageState extends State<HomePage> {
             width: 370, // Specify the width as needed
             height: 160, // Specify the height as needed
             cardColor: Colors.white,
-            boxShadow: [
+            boxShadow: const [
               BoxShadow(
                 color: Colors.black26,
                 blurRadius: 10,
@@ -516,7 +550,7 @@ class _HomePageState extends State<HomePage> {
               height: 380,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
-                color: Color.fromARGB(255, 255, 255, 255),
+                color: Colors.white,
                 boxShadow: const [
                   BoxShadow(
                     color: Colors.black26,
@@ -530,13 +564,13 @@ class _HomePageState extends State<HomePage> {
                 child: ExerciseRecord(userId: user_id!, service: service),
               ),
             ),
-            SizedBox(height: 40),
+            const SizedBox(height: 40),
             Container(
               width: 370, // Adjusted width for better alignment
               height: 380,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
-                color: Color.fromARGB(255, 255, 255, 255),
+                color: Color.fromARGB(255, 240, 236, 236),
                 boxShadow: const [
                   BoxShadow(
                     color: Colors.black26,
@@ -576,7 +610,7 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
+            const Text(
               'Glucose Level:',
               style: TextStyle(
                 fontSize: 16,
@@ -621,7 +655,7 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
+            const Text(
               'Blood Pressure:',
               style: TextStyle(
                 fontSize: 16,
@@ -629,12 +663,12 @@ class _HomePageState extends State<HomePage> {
                 color: pinkColor,
               ),
             ),
-            SizedBox(width: 5),
+            const SizedBox(width: 5),
             Text(
               lastHealthRecord != null
                   ? '${lastHealthRecord!.blood_pressure}/d'
                   : 'N/A',
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
                 color: Colors.red,

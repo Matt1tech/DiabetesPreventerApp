@@ -85,6 +85,47 @@ def logout(request):
 
 
 
+
+@api_view(['PUT'])
+@parser_classes([MultiPartParser, FormParser])
+def update_user(request):
+    user_id = request.data.get('user_id')
+    user = get_object_or_404(User, id=user_id)
+    
+    if 'password' in request.data:
+        user.password = make_password(request.data['password'])
+    
+    if 'height' in request.data:
+        user.height = request.data['height']
+    
+    if 'marital_status' in request.data:
+        user.marital_status = request.data['marital_status']
+    
+    if 'profile_picture' in request.FILES:
+        image = request.FILES['profile_picture']
+        image_path = default_storage.save('profile_pictures/' + image.name, ContentFile(image.read()))
+        user.profile_picture = image_path
+
+    user.save()
+    
+    user_data = {
+        'id': user.id,
+        'name': user.name,
+        'email': user.email,
+        'gender': user.gender,
+        'marital_status': user.marital_status,
+        'height': user.height,
+        'birthdate': str(user.birthdate),
+        'family_history': user.family_history,
+        'profile_picture': user.profile_picture,
+        'created_at': str(user.created_at),
+    }
+    
+    return Response({'user': user_data}, status=status.HTTP_200_OK)
+
+
+
+
 @api_view(['POST'])
 def create_or_update_health_record(request):
     today = date.today()
@@ -283,9 +324,9 @@ def get_last_health_record(request, user_id):
    
    
    
-   
+
 @api_view(['POST'])
-def update_preferences(request):
+def update_customizations(request):
     today = date.today()
     data = request.data
 
@@ -304,55 +345,59 @@ def update_preferences(request):
     max_fat = data.get('max_fat')
     max_fiber = data.get('max_fiber')
     max_cholesterol = data.get('max_cholesterol')
+    max_carbs = data.get('max_carbs')  # New field for max carbs
     meals_per_day = data.get('meals_per_day')
     allergies = data.get('allergies')
     diets_followed = data.get('diets_followed')
 
     # Check if at least one field is provided
-    if not any([daily_calories_max, max_protein, max_fat, max_fiber, max_cholesterol, meals_per_day, allergies, diets_followed]):
+    if not any([daily_calories_max, max_protein, max_fat, max_fiber, max_cholesterol, max_carbs, meals_per_day, allergies, diets_followed]):
         return Response({'error': 'At least one field must be provided.'}, status=status.HTTP_400_BAD_REQUEST)
 
-    # Check ifCustomizations for today already exist
-    existing_preferences =Customizations.objects.filter(user=user, created_at__date=today).first()
-    if existing_preferences:
-        # Update the existingCustomizations
+    # Check if Customizations for today already exist
+    existing_customizations = Customizations.objects.filter(user=user, created_at__date=today).first()
+    if existing_customizations:
+        # Update the existing Customizations
         if daily_calories_max is not None:
-            existing_preferences.daily_calories_max = daily_calories_max
+            existing_customizations.daily_calories_max = daily_calories_max
         if max_protein is not None:
-            existing_preferences.max_protein = max_protein
+            existing_customizations.max_protein = max_protein
         if max_fat is not None:
-            existing_preferences.max_fat = max_fat
+            existing_customizations.max_fat = max_fat
         if max_fiber is not None:
-            existing_preferences.max_fiber = max_fiber
+            existing_customizations.max_fiber = max_fiber
         if max_cholesterol is not None:
-            existing_preferences.max_cholesterol = max_cholesterol
+            existing_customizations.max_cholesterol = max_cholesterol
+        if max_carbs is not None:
+            existing_customizations.max_carbs = max_carbs
         if meals_per_day:
-            existing_preferences.meals_per_day = list(set(existing_preferences.meals_per_day + meals_per_day))
+            existing_customizations.meals_per_day = list(set(existing_customizations.meals_per_day + meals_per_day))
         if allergies:
-            existing_preferences.allergies = list(set(existing_preferences.allergies + allergies))
+            existing_customizations.allergies = list(set(existing_customizations.allergies + allergies))
         if diets_followed:
-            existing_preferences.diets_followed = list(set(existing_preferences.diets_followed + diets_followed))
-        existing_preferences.save()
-        return Response(PreferencesSerializer(existing_preferences).data, status=status.HTTP_200_OK)
+            existing_customizations.diets_followed = list(set(existing_customizations.diets_followed + diets_followed))
+        existing_customizations.save()
+        return Response(CustomizationsSerializer(existing_customizations).data, status=status.HTTP_200_OK)
     else:
-        # Create newCustomizations
+        # Create new Customizations
         new_data = {
             'user': user.id,
-            'daily_calories_max': daily_calories_max,
-            'max_protein': max_protein,
-            'max_fat': max_fat,
-            'max_fiber': max_fiber,
-            'max_cholesterol': max_cholesterol,
-            'meals_per_day': meals_per_day,
-            'allergies': allergies,
-            'diets_followed': diets_followed,
+            'daily_calories_max': daily_calories_max or 0,
+            'max_protein': max_protein or 0,
+            'max_fat': max_fat or 0,
+            'max_fiber': max_fiber or 0,
+            'max_cholesterol': max_cholesterol or 0,
+            'max_carbs': max_carbs or 0,
+            'meals_per_day': meals_per_day or [],
+            'allergies': allergies or [],
+            'diets_followed': diets_followed or [],
         }
-        serializer =CustomizationsSerializer(data=new_data)
+        serializer = CustomizationsSerializer(data=new_data)
         if serializer.is_valid():
             serializer.save(user=user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-   
+
    
    
    

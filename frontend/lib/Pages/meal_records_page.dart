@@ -59,31 +59,36 @@ class _MealRecordsPageState extends State<MealRecordsPage> {
 
   Future<void> _loadUserInfo() async {
     final userInfo = await loadUserInfo();
-    setState(() {
-      userName = userInfo['userName'];
-      userProfilePicture = userInfo['userProfilePicture'];
-      user_id = userInfo['id'];
-    });
+    if (mounted) {
+      setState(() {
+        userName = userInfo['userName'];
+        userProfilePicture = userInfo['userProfilePicture'];
+        user_id = userInfo['id'];
+      });
+    }
   }
 
   Future<void> _loadUserData() async {
     final userName = await storage.read(key: 'user_name');
     final userId = await storage.read(key: 'user_id');
-
-    setState(() {
-      this.userName = userName;
-      this.userProfilePicture = userProfilePicture;
-      this.user_id = userId;
-    });
+    if (mounted) {
+      setState(() {
+        this.userName = userName;
+        userProfilePicture = userProfilePicture;
+        user_id = userId;
+      });
+    }
   }
 
   Future<void> _pickImage() async {
     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
     if (image != null) {
-      setState(() {
-        _isLoading = true;
-        _mealImageFile = image;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = true;
+          _mealImageFile = image;
+        });
+      }
       await _analyzeImage(File(image.path));
     }
   }

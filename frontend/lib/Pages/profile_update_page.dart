@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../utils/utilities.dart';
 import '../widgets/widgets.dart';
-import '../services/update_profile_service.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'home_page.dart';
@@ -96,31 +95,6 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
     _heightController.dispose();
     _weightController.dispose();
     super.dispose();
-  }
-
-  void _updateProfile() async {
-    if (_formKey.currentState!.validate()) {
-      String email = _emailController.text.toLowerCase();
-      String password = _passwordController.text;
-      String weight = _weightController.text;
-
-      var response = await UpdateProfileService().updateUserProfile(
-        email,
-        password,
-        weight,
-        _profilePicture != null ? File(_profilePicture!.path) : null,
-      );
-
-      if (response.statusCode == 200) {
-        final snackBar =
-            SnackBar(content: Text('Profile updated successfully!'));
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
-      } else {
-        final snackBar =
-            SnackBar(content: Text('Update failed: ${response.body}'));
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
-      }
-    }
   }
 
   @override
@@ -263,7 +237,7 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
                         ),
                       ),
                     ),
-                    onPressed: _updateProfile,
+                    onPressed: () {},
                     child: const Text(
                       'Update',
                       style: TextStyle(

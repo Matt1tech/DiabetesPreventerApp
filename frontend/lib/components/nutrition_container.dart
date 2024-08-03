@@ -12,7 +12,7 @@ class NutritionContainer extends StatelessWidget {
   /// [title] is the name of the nutrient.
   /// [calories] is the calorie content of the nutrient.
   /// [textColor] is the color of the text displaying the title.
-  NutritionContainer({
+  const NutritionContainer({
     required this.title,
     required this.calories,
     required this.textColor,
@@ -25,7 +25,7 @@ class NutritionContainer extends StatelessWidget {
         height: 70.0,
         width: 90,
         decoration: BoxDecoration(
-          color: Color.fromARGB(217, 255, 255, 255),
+          color: const Color.fromARGB(217, 255, 255, 255),
           borderRadius: BorderRadius.circular(8.0),
           boxShadow: [
             BoxShadow(
@@ -66,8 +66,8 @@ class NutritionContainer extends StatelessWidget {
 /// A widget that displays animated nutrition information in a vertical container.
 class AnimatedNutritionContainer extends StatefulWidget {
   final String title;
-  final double calories;
-  final double maxCalories;
+  final int calories;
+  final int maxCalories;
   final Color textColor;
 
   /// Creates an AnimatedNutritionContainer widget.
@@ -97,7 +97,7 @@ class _AnimatedNutritionContainerState
   Widget build(BuildContext context) {
     return Center(
       child: Container(
-        height: 100.0,
+        height: 100,
         width: 80,
         decoration: BoxDecoration(
           color: Color.fromARGB(255, 255, 255, 255),
@@ -146,11 +146,11 @@ class _AnimatedNutritionContainerState
                       ),
                     ),
                     Text(
-                      '${widget.calories}cal/${widget.maxCalories}cal',
+                      '${widget.calories} / ${widget.maxCalories} cal',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        color: Colors.black.withOpacity(.4),
-                        fontSize: 12.0,
+                        color: Colors.black.withOpacity(.5),
+                        fontSize: 10.0,
                       ),
                     ),
                   ],
@@ -167,8 +167,8 @@ class _AnimatedNutritionContainerState
 /// A widget that displays animated nutrition information in a horizontal container.
 class AnimatedHorizontalContainer extends StatefulWidget {
   final String title;
-  final double calories;
-  final double maxCalories;
+  final int calories;
+  final int maxCalories;
   final Color fillColor;
   final Color textColor;
 
@@ -201,7 +201,7 @@ class _AnimatedHorizontalContainerState
   Widget build(BuildContext context) {
     return Center(
       child: Container(
-        height: 30.0,
+        height: 35,
         width: 365,
         decoration: BoxDecoration(
           color: Colors.white,
@@ -225,7 +225,7 @@ class _AnimatedHorizontalContainerState
               child: AnimatedContainer(
                 duration: Duration(seconds: 1),
                 width: 365 * fillPercentage,
-                height: 30.0,
+                height: 35,
                 decoration: BoxDecoration(
                   color: widget.fillColor.withOpacity(0.5),
                   borderRadius: BorderRadius.circular(8.0),
@@ -233,7 +233,8 @@ class _AnimatedHorizontalContainerState
               ),
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 20.0, vertical: 5),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -245,7 +246,7 @@ class _AnimatedHorizontalContainerState
                     ),
                   ),
                   Text(
-                    '${widget.calories}cal/${widget.maxCalories}cal',
+                    '${widget.calories} /${widget.maxCalories} cal',
                     style: TextStyle(
                       color: Colors.black.withOpacity(.4),
                       fontSize: 12.0,
@@ -261,31 +262,18 @@ class _AnimatedHorizontalContainerState
   }
 }
 
-/// A widget that displays detailed nutrition information.
 class NutritionDetails extends StatelessWidget {
-  final double totalCalories;
-  final double proteinCalories;
-  final double fatsCalories;
-  final double carbsCalories;
-  final double fiberCalories;
-  final double maxTotalCalories;
-  final double maxProteinCalories;
-  final double maxFatsCalories;
-  final double maxCarbsCalories;
-  final double maxFiberCalories;
+  final int totalCalories;
+  final int proteinCalories;
+  final int fatsCalories;
+  final int carbsCalories;
+  final int fiberCalories;
+  final int maxTotalCalories;
+  final int maxProteinCalories;
+  final int maxFatsCalories;
+  final int maxCarbsCalories;
+  final int maxFiberCalories;
 
-  /// Creates a NutritionDetails widget with default max calories or allows setting them.
-  ///
-  /// [totalCalories] is the total calorie intake.
-  /// [proteinCalories] is the calorie content for protein.
-  /// [fatsCalories] is the calorie content for fats.
-  /// [carbsCalories] is the calorie content for carbohydrates.
-  /// [fiberCalories] is the calorie content for fiber.
-  /// [maxTotalCalories] is the maximum total calorie intake.
-  /// [maxProteinCalories] is the maximum calorie content for protein.
-  /// [maxFatsCalories] is the maximum calorie content for fats.
-  /// [maxCarbsCalories] is the maximum calorie content for carbohydrates.
-  /// [maxFiberCalories] is the maximum calorie content for fiber.
   NutritionDetails({
     required this.totalCalories,
     required this.proteinCalories,
@@ -306,24 +294,24 @@ class NutritionDetails extends StatelessWidget {
         const SizedBox(height: 4),
         Container(
           height: 210,
-          width: 420,
-          color: const Color.fromARGB(217, 217, 217, 217),
+          width: double.infinity,
+          color: Color.fromARGB(255, 240, 236, 236),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 10),
               const Padding(
-                padding: EdgeInsets.only(left: 20),
+                padding: EdgeInsets.only(left: 10),
                 child: Text(
                   'Nutrition Details',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: blueColor,
-                    fontSize: 24.0,
+                    fontSize: 22.0,
                   ),
                 ),
               ),
-              const SizedBox(height: 15),
+              const SizedBox(height: 12),
               Center(
                 child: AnimatedHorizontalContainer(
                   title: 'Total Calories',

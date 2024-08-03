@@ -2,6 +2,9 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.utils import timezone
 
+from django.db import models
+from django.utils import timezone
+
 class Customizations(models.Model):
     MEAL_CHOICES = [
         ('breakfast', 'Breakfast'),
@@ -34,8 +37,10 @@ class Customizations(models.Model):
     max_fiber = models.IntegerField(default=0)    
     max_fat = models.IntegerField(default=0)      
     max_cholesterol = models.IntegerField(default=0)  
+    max_carbs = models.IntegerField(default=0)  
     created_at = models.DateTimeField(default=timezone.now)
-    user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='preferences')  # One-to-Many relationship with User
+    user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='customization')
+
     
 
 class HealthRecord(models.Model):

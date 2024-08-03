@@ -133,13 +133,21 @@ class AuthService {
     await storage.deleteAll();
   }
 
-  /// Updates the user profile with the given information.
-  ///
-  /// [email]: User's email address
-  /// [password]: User's password
-  /// [weight]: User's weight
-  /// [file]: Optional file for updating profile picture
-  updateUserProfile(String email, String password, String weight, File? file) {
-    // Implement the update user profile logic here
+  Future<http.Response> updateUserProfile(String userId, String password,
+      double height, String maritalStatus, File? profilePicture) async {
+    var uri = Uri.parse('$baseUrl/update_user/');
+    var request = http.MultipartRequest('PUT', uri)
+      ..fields['user_id'] = userId
+      ..fields['password'] = password
+      ..fields['height'] = height.toString()
+      ..fields['marital_status'] = maritalStatus;
+
+    if (profilePicture != null) {
+      request.files.add(await http.MultipartFile.fromPath(
+          'profile_picture', profilePicture.path));
+    }
+
+    var response = await request.send();
+    return await http.Response.fromStream(response);
   }
 }

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../models/models.dart';
 import '../urls.dart';
 
 class UserCustomizationService {
@@ -182,7 +183,7 @@ class UserCustomizationService {
 }
 
 class FetchUserCustomizationsService {
-  Future<Map<String, dynamic>?> fetchUserCustomizations(int userId) async {
+  Future<Customizations?> fetchUserCustomizations(int userId) async {
     print(
         'FetchUserCustomizationsService.fetchUserCustomizations called with userId: $userId');
     try {
@@ -193,9 +194,20 @@ class FetchUserCustomizationsService {
       print('Response body: ${response.body}');
 
       if (response.statusCode == 200) {
-        final Map<String, dynamic> data = jsonDecode(response.body);
-        print('Parsed JSON data: $data');
-        return data;
+        final List<dynamic> jsonList = jsonDecode(response.body);
+        if (jsonList.isNotEmpty) {
+          final Map<String, dynamic> data = jsonList[0];
+          print('Parsed JSON data: $data');
+          try {
+            return Customizations.fromJson(data);
+          } catch (e) {
+            print('Error creating Customizations object: $e');
+            return null;
+          }
+        } else {
+          print('Error: Empty response list');
+          return null;
+        }
       } else {
         print('Error fetching user customizations: ${response.statusCode}');
         return null;
