@@ -1,9 +1,9 @@
 from rest_framework import serializers
-from .models import Preferences, HealthRecord, PhysicalRecord, Meal, MealRecommendation, User
+from .models import *
 
-class PreferencesSerializer(serializers.ModelSerializer):
+class CustomizationsSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Preferences
+        model = Customizations
         fields = '__all__'
 
 class HealthRecordsSerializer(serializers.ModelSerializer):

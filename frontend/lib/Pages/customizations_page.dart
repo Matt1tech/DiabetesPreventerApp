@@ -3,7 +3,6 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:frontend/services/fetch_user_data_service.dart';
 import 'package:image_picker/image_picker.dart';
 import '../services/auth_service.dart';
-import '../services/user_health_records_service.dart';
 import '../services/customization_service.dart';
 import '../utils/logout_utility.dart';
 import '../utils/utilities.dart';
@@ -63,14 +62,6 @@ class _CustomizationsPageState extends State<CustomizationsPage> {
       this.userName = userName;
       this.userProfilePicture = userProfilePicture;
       this.user_id = userId;
-    });
-  }
-
-  void _setMaxCalories(String value) {
-    setState(() {
-      // Update the max calories value here
-      // For demonstration, it's printed out
-      print('Max Calories set to: $value');
     });
   }
 
@@ -136,7 +127,7 @@ class _CustomizationsPageState extends State<CustomizationsPage> {
         children: [
           const SizedBox(height: 30),
           const Padding(
-            padding: EdgeInsets.only(right: 180),
+            padding: EdgeInsets.only(right: 190),
             child: Text(
               'Meals a day',
               style: TextStyle(
@@ -186,7 +177,7 @@ class _CustomizationsPageState extends State<CustomizationsPage> {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           const Padding(
-            padding: EdgeInsets.only(right: 220),
+            padding: EdgeInsets.only(right: 230),
             child: Text(
               'Allergies',
               style: TextStyle(
@@ -241,7 +232,7 @@ class _CustomizationsPageState extends State<CustomizationsPage> {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           const Padding(
-            padding: EdgeInsets.only(right: 150),
+            padding: EdgeInsets.only(right: 160),
             child: Text(
               'Diets  Followed',
               style: TextStyle(
@@ -291,12 +282,12 @@ class _CustomizationsPageState extends State<CustomizationsPage> {
   Container dailyCalories() {
     return Container(
       width: 380,
-      height: 420,
+      height: 550,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           const Padding(
-            padding: EdgeInsets.only(right: 150),
+            padding: EdgeInsets.only(right: 160),
             child: Text(
               'Daily Calories',
               style: TextStyle(
@@ -313,16 +304,16 @@ class _CustomizationsPageState extends State<CustomizationsPage> {
             children: [
               SizedBox(width: 35),
               HealthMeasurementLogsCard(
-                title: 'Max daily calories',
-                name: 'maxDailyCalories',
+                title: 'Max Protein',
+                name: 'maxDailyProtein',
                 onPressed: (int value) {
                   if (user_id != null) {
-                    UserCustomizationService.setMaxDailyCalories(
+                    UserCustomizationService.setMaxDailyProtein(
                         int.parse(user_id!), value);
                   }
                 },
-                width: 155, // Specify the width as needed
-                height: 150, // Specify the height as needed
+                width: 155,
+                height: 150,
                 cardColor: Color.fromARGB(221, 255, 250, 250),
                 boxShadow: [
                   BoxShadow(
@@ -335,15 +326,15 @@ class _CustomizationsPageState extends State<CustomizationsPage> {
               SizedBox(width: 30),
               HealthMeasurementLogsCard(
                 title: 'Max Cholesterol',
-                name: 'totalCalories',
+                name: 'totalCholesterol',
                 onPressed: (int value) {
                   if (user_id != null) {
-                    UserHealthRecordsService.inputBloodPressure(
-                        int.parse(user_id!), value.toString());
+                    UserCustomizationService.setMaxDailyCholesterol(
+                        int.parse(user_id!), value);
                   }
                 },
-                width: 155, // Specify the width as needed
-                height: 150, // Specify the height as needed
+                width: 155,
+                height: 150,
                 cardColor: Color.fromARGB(221, 255, 250, 250),
                 boxShadow: [
                   BoxShadow(
@@ -363,15 +354,15 @@ class _CustomizationsPageState extends State<CustomizationsPage> {
               SizedBox(width: 35),
               HealthMeasurementLogsCard(
                 title: 'Max Fiber',
-                name: 'totalCalories',
+                name: 'totalFiber',
                 onPressed: (int value) {
                   if (user_id != null) {
-                    UserHealthRecordsService.inputBloodPressure(
-                        int.parse(user_id!), value.toString());
+                    UserCustomizationService.setMaxDailyFiber(
+                        int.parse(user_id!), value);
                   }
                 },
-                width: 155, // Specify the width as needed
-                height: 150, // Specify the height as needed
+                width: 155,
+                height: 150,
                 cardColor: Color.fromARGB(221, 255, 250, 250),
                 boxShadow: [
                   BoxShadow(
@@ -384,15 +375,15 @@ class _CustomizationsPageState extends State<CustomizationsPage> {
               SizedBox(width: 30),
               HealthMeasurementLogsCard(
                 title: 'Max Fat',
-                name: 'totalCalories',
+                name: 'totalFat',
                 onPressed: (int value) {
                   if (user_id != null) {
-                    UserHealthRecordsService.inputBloodPressure(
-                        int.parse(user_id!), value.toString());
+                    UserCustomizationService.setMaxDailyFat(
+                        int.parse(user_id!), value);
                   }
                 },
-                width: 155, // Specify the width as needed
-                height: 150, // Specify the height as needed
+                width: 155,
+                height: 150,
                 cardColor: Color.fromARGB(221, 255, 250, 250),
                 boxShadow: [
                   BoxShadow(
@@ -404,12 +395,56 @@ class _CustomizationsPageState extends State<CustomizationsPage> {
               ),
             ],
           ),
+          SizedBox(height: 15),
+          Row(children: [
+            SizedBox(
+              width: 40,
+            ),
+            HealthMeasurementLogsCard(
+              title: 'Max Daily Calories',
+              name: 'totalDailyCalories',
+              onPressed: (int value) {
+                if (user_id != null) {
+                  UserCustomizationService.setMaxDailyCalories(
+                      int.parse(user_id!), value);
+                }
+              },
+              width: 340,
+              height: 150,
+              cardColor: Color.fromARGB(221, 255, 250, 250),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black26,
+                  blurRadius: 10,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+          ])
         ],
       ),
     );
   }
 
   void handleTagClick(String tagName) {
+    if (user_id == null) {
+      print("User ID is null");
+      return;
+    }
+
+    List<String> tagList = [tagName];
+
+    // Determine the category of the tag
+    if (tagName.contains('-free')) {
+      UserCustomizationService.allergies(int.parse(user_id!), tagList);
+    } else if (tagName.contains('Low') ||
+        tagName.contains('High') ||
+        tagName.contains('No')) {
+      UserCustomizationService.dietsFollowed(int.parse(user_id!), tagList);
+    } else {
+      UserCustomizationService.setMealPerDay(int.parse(user_id!), tagList);
+    }
+
     print("Tag clicked: $tagName");
   }
 }

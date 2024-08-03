@@ -5,8 +5,8 @@ from .models import *
 
 # Register your models here.
 
-@admin.register(Preferences)
-class PreferencesAdmin(admin.ModelAdmin):
+@admin.register(Customizations)
+class CustomizationsAdmin(admin.ModelAdmin):
     list_display = ('user', 'daily_calories_max', 'created_at')
     search_fields = ('user__name', 'user__email')
     list_filter = ('meals_per_day', 'allergies', 'diets_followed', 'created_at')

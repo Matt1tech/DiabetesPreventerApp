@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart'; // Secure storage for storing and retrieving data securely
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:frontend/Pages/login_page.dart';
-import 'package:frontend/Pages/profile_update_page.dart';
 import 'package:frontend/services/auth_service.dart';
 import 'package:image_picker/image_picker.dart';
 import '../models/models.dart'; // Barrel file for models
+import '../services/customization_service.dart';
 import '../services/fetch_user_data_service.dart';
 import '../services/nutrients_service.dart';
 import '../services/physical_activities_records_service.dart';
@@ -17,7 +16,7 @@ import '../components/components.dart'; // Barrel file for components
 import '../services/user_health_records_service.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -28,23 +27,23 @@ class _HomePageState extends State<HomePage> {
   final AuthService _authService = AuthService();
   bool isLoading = false;
   XFile? _profilePicture;
-  final ImagePicker _picker = ImagePicker();
   final storage = FlutterSecureStorage();
   String? userName;
   String? userProfilePicture;
   late FetchHealthRecordService fetchHealthRecordService;
+  late FetchUserCustomizationsService fetchUserCustomizationsService;
   final NutritionService nutritionService = NutritionService();
   Map<String, dynamic> nutritionData =
       {}; // Ensure this is initialized to handle null cases
   HealthRecord? lastHealthRecord;
   String? user_id;
   late LogoutManager logoutManager;
-
   // Variable to hold user data
   List<SuitableMenuModel> menu = [];
   int _selectedIndex = 0;
   final PhysicalActivityRecordsService service =
       PhysicalActivityRecordsService();
+  Map<String, dynamic>? userCustomizations;
 
   @override
   void initState() {
@@ -53,9 +52,11 @@ class _HomePageState extends State<HomePage> {
     _loadUserInfo();
     _loadUserData();
     fetchHealthRecordService = FetchHealthRecordService();
+    fetchUserCustomizationsService = FetchUserCustomizationsService();
     fetchLastHealthRecord();
     fetchDailyNutrition();
     logoutManager = LogoutManager(context: context, authService: _authService);
+    fetchUserCustomizations();
   }
 
   Future<void> fetchLastHealthRecord() async {
@@ -88,6 +89,36 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  Future<void> fetchUserCustomizations() async {
+    print('fetchUserCustomizations called');
+    if (user_id != null) {
+      print('user_id is not null: $user_id');
+      final int? userIdInt = int.tryParse(user_id!);
+      if (userIdInt != null) {
+        print('Parsed user_id to int: $userIdInt');
+        try {
+          final customizations = await fetchUserCustomizationsService
+              .fetchUserCustomizations(userIdInt);
+          print('Received customizations: $customizations');
+          if (customizations != null) {
+            setState(() {
+              userCustomizations = customizations;
+              print('Set userCustomizations: $userCustomizations');
+            });
+          } else {
+            print('No customizations found for user');
+          }
+        } catch (e) {
+          print('Error fetching customizations: $e');
+        }
+      } else {
+        print('Failed to parse user_id to int: $user_id');
+      }
+    } else {
+      print('user_id is null');
+    }
+  }
+
 // Handle the image of the profile picture
   Future<void> _loadUserInfo() async {
     final userInfo = await loadUserInfo();
@@ -109,6 +140,7 @@ class _HomePageState extends State<HomePage> {
     });
     fetchLastHealthRecord();
     fetchDailyNutrition();
+    fetchUserCustomizations();
   }
 
   Future<void> fetchDailyNutrition() async {
@@ -121,14 +153,10 @@ class _HomePageState extends State<HomePage> {
         try {
           final nutritionData =
               await nutritionService.fetchDailyNutrition(userIdInt);
-          if (nutritionData != null) {
-            setState(() {
-              this.nutritionData =
-                  nutritionData; // This triggers the widget to rebuild
-            });
-          } else {
-            print('No nutrition data found for user');
-          }
+          setState(() {
+            this.nutritionData =
+                nutritionData; // This triggers the widget to rebuild
+          });
         } catch (e) {
           print('Error fetching nutrition data: $e');
         }
@@ -309,7 +337,12 @@ class _HomePageState extends State<HomePage> {
           fatsCalories: (nutritionData['total_fats'] ?? 0),
           carbsCalories: (nutritionData['total_carbs'] ?? 0),
           fiberCalories: (nutritionData['total_cholesterol'] ?? 0),
-        ),
+          maxTotalCalories: 2000,
+          maxProteinCalories: 150,
+          maxFatsCalories: 250,
+          maxCarbsCalories: 300,
+          maxFiberCalories: 75,
+        )
       ],
     );
   }

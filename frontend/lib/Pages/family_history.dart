@@ -184,9 +184,9 @@ class _FamilyHistoryPageState extends State<FamilyHistoryPage> {
 
 /*from mongoengine import Document, EmbeddedDocument, EmbeddedDocumentListField, StringField, BooleanField, EmbeddedDocumentField, FloatField, DateTimeField, DictField, IntField
 import datetime
-class Preferences(EmbeddedDocument):
-    # Define fields for preferences
-    preferences = DictField(required=True)  # Store user preferences in Dict format
+classCustomizations(EmbeddedDocument):
+    # Define fields forCustomizations
+   Customizations = DictField(required=True)  # Store userCustomizations in Dict format
 
 class HealthRecords(EmbeddedDocument):
     blood_glucose = FloatField(required=True)
@@ -237,7 +237,7 @@ class User(Document):
     birthdate = StringField(required=True)
     family_history = BooleanField(required=True)
     profile_picture = StringField()  # Store the path to the profile picture
-    preferences = EmbeddedDocumentField(Preferences)
+   Customizations = EmbeddedDocumentField(Preferences)
     health_records = EmbeddedDocumentListField(HealthRecords)
     physical_records = EmbeddedDocumentListField(PhysicalRecords)
     meal_recommendation = EmbeddedDocumentField(MealRecommendation)
@@ -249,8 +249,8 @@ class User(Document):
 
     from mongoengine import Document, EmbeddedDocument, EmbeddedDocumentListField, StringField, BooleanField, EmbeddedDocumentField, FileField
 
-class Preferences(EmbeddedDocument):
-    # Define fields for preferences
+classCustomizations(EmbeddedDocument):
+    # Define fields forCustomizations
     example_field = StringField()  # Example field, replace with actual fields
 
 class HealthRecords(EmbeddedDocument):
@@ -278,7 +278,7 @@ class User(Document):
     birthdate = StringField(required=True)
     family_history = BooleanField(required=True)
     profile_picture = StringField()  # Store the path to the profile picture
-    preferences = EmbeddedDocumentField(Preferences)
+   Customizations = EmbeddedDocumentField(Preferences)
     health_records = EmbeddedDocumentListField(HealthRecords)
     physical_records = EmbeddedDocumentListField(PhysicalRecords)
     meal_recommendation = EmbeddedDocumentField(MealRecommendation)
@@ -298,17 +298,17 @@ class User(Document):
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 #from .models import User
 from rest_framework import serializers  # Import serializers from Django REST framework
-from .models import User, Preferences, HealthRecords, PhysicalActivity, PhysicalRecords, Meal, DailyRecord, MonthlyRecord, MealRecommendation
+from .models import User,Customizations, HealthRecords, PhysicalActivity, PhysicalRecords, Meal, DailyRecord, MonthlyRecord, MealRecommendation
 
 
-class PreferencesSerializer(serializers.EmbeddedDocumentSerializer):
+classCustomizationsSerializer(serializers.EmbeddedDocumentSerializer):
     """
-    Serializer for Preferences embedded document.
+    Serializer forCustomizations embedded document.
 
-    This serializer handles the serialization and deserialization of Preferences instances.
+    This serializer handles the serialization and deserialization ofCustomizations instances.
     """
     class Meta:
-        model = Preferences
+        model =Customizations
         fields = '__all__'
 
 class HealthRecordsSerializer(serializers.EmbeddedDocumentSerializer):
@@ -404,7 +404,7 @@ class UserSerializer(serializers.DocumentSerializer):
             fields (str): A special field name '__all__' indicates that all fields in the model
                           should be included in the serialization.
     """
-    preferences = PreferencesSerializer()
+   Customizations =CustomizationsSerializer()
     health_records = HealthRecordsSerializer(many=True)
     physical_records = PhysicalRecordsSerializer(many=True)
     meal_recommendation = MealRecommendationSerializer()
@@ -422,14 +422,14 @@ class UserSerializer(serializers.DocumentSerializer):
         This method extracts nested data for embedded documents, creates instances
         of these embedded documents, and associates them with the newly created User instance.
         """
-        preferences_data = validated_data.pop('preferences')
+       Customizations_data = validated_data.pop('preferences')
         health_records_data = validated_data.pop('health_records')
         physical_records_data = validated_data.pop('physical_records')
         meal_recommendation_data = validated_data.pop('meal_recommendation')
         daily_records_data = validated_data.pop('daily_records')
         monthly_records_data = validated_data.pop('monthly_records')
 
-        preferences = Preferences.objects.create(**preferences_data)
+       Customizations =Customizations.objects.create(**preferences_data)
         user = User.objects.create(preferences=preferences, **validated_data)
 
         for health_record_data in health_records_data:
@@ -456,15 +456,15 @@ class UserSerializer(serializers.DocumentSerializer):
         of these embedded documents, and associates them with the User instance.
         Existing nested documents are deleted and recreated to simplify the update process.
         """
-        preferences_data = validated_data.pop('preferences', None)
+       Customizations_data = validated_data.pop('preferences', None)
         health_records_data = validated_data.pop('health_records', None)
         physical_records_data = validated_data.pop('physical_records', None)
         meal_recommendation_data = validated_data.pop('meal_recommendation', None)
         daily_records_data = validated_data.pop('daily_records', None)
         monthly_records_data = validated_data.pop('monthly_records', None)
 
-        if preferences_data:
-            for attr, value in preferences_data.items():
+        ifCustomizations_data:
+            for attr, value inCustomizations_data.items():
                 setattr(instance.preferences, attr, value)
             instance.preferences.save()
 

@@ -274,43 +274,30 @@ class NutritionDetails extends StatelessWidget {
   final double maxCarbsCalories;
   final double maxFiberCalories;
 
-  /// Creates a NutritionDetails widget with default max calories.
+  /// Creates a NutritionDetails widget with default max calories or allows setting them.
   ///
   /// [totalCalories] is the total calorie intake.
   /// [proteinCalories] is the calorie content for protein.
   /// [fatsCalories] is the calorie content for fats.
   /// [carbsCalories] is the calorie content for carbohydrates.
   /// [fiberCalories] is the calorie content for fiber.
+  /// [maxTotalCalories] is the maximum total calorie intake.
+  /// [maxProteinCalories] is the maximum calorie content for protein.
+  /// [maxFatsCalories] is the maximum calorie content for fats.
+  /// [maxCarbsCalories] is the maximum calorie content for carbohydrates.
+  /// [maxFiberCalories] is the maximum calorie content for fiber.
   NutritionDetails({
     required this.totalCalories,
     required this.proteinCalories,
     required this.fatsCalories,
     required this.carbsCalories,
     required this.fiberCalories,
-  })  : maxTotalCalories = 3000,
-        maxProteinCalories = 200,
-        maxFatsCalories = 300,
-        maxCarbsCalories = 400,
-        maxFiberCalories = 100;
-
-  /// Creates a NutritionDetails widget with max calories for each nutrient.
-  ///
-  /// [maxTotalCalories] is the maximum total calorie intake.
-  /// [maxProteinCalories] is the maximum calorie content for protein.
-  /// [maxFatsCalories] is the maximum calorie content for fats.
-  /// [maxCarbsCalories] is the maximum calorie content for carbohydrates.
-  /// [maxFiberCalories] is the maximum calorie content for fiber.
-  NutritionDetails.withMaxCalories({
-    required this.maxTotalCalories,
-    required this.maxProteinCalories,
-    required this.maxFatsCalories,
-    required this.maxCarbsCalories,
-    required this.maxFiberCalories,
-  })  : totalCalories = 0,
-        proteinCalories = 0,
-        fatsCalories = 0,
-        carbsCalories = 0,
-        fiberCalories = 0;
+    this.maxTotalCalories = 3000,
+    this.maxProteinCalories = 200,
+    this.maxFatsCalories = 300,
+    this.maxCarbsCalories = 400,
+    this.maxFiberCalories = 100,
+  });
 
   @override
   Widget build(BuildContext context) {

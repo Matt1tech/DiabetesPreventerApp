@@ -20,7 +20,7 @@ class BMICalculationTest(TestCase):
             birthdate="1990-01-01",
             family_history=False,
             profile_picture="",
-            preferences={},
+           Customizations={},
             health_records=[
                 HealthRecords(
                     blood_glucose=5.5,

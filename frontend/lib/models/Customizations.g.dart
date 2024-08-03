@@ -1,12 +1,13 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'preferences.dart';
+part of 'Customizations.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-Preferences _$PreferencesFromJson(Map<String, dynamic> json) => Preferences(
+Customizations _$CustomizationsFromJson(Map<String, dynamic> json) =>
+    Customizations(
       mealsPerDay: (json['mealsPerDay'] as List<dynamic>)
           .map((e) => e as String)
           .toList(),
@@ -24,7 +25,7 @@ Preferences _$PreferencesFromJson(Map<String, dynamic> json) => Preferences(
       createdAt: DateTime.parse(json['createdAt'] as String),
     );
 
-Map<String, dynamic> _$PreferencesToJson(Preferences instance) =>
+Map<String, dynamic> _$CustomizationsToJson(Customizations instance) =>
     <String, dynamic>{
       'mealsPerDay': instance.mealsPerDay,
       'allergies': instance.allergies,

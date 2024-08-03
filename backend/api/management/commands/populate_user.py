@@ -1,7 +1,7 @@
 # backend/api/management/commands/populate_user.py
 
 from django.core.management.base import BaseCommand
-from api.models import User, Preferences, HealthRecords, PhysicalActivity, PhysicalRecords, Meal, DailyRecord, MonthlyRecord, MealRecommendation
+from api.models import User,Customizations, HealthRecords, PhysicalActivity, PhysicalRecords, Meal, DailyRecord, MonthlyRecord, MealRecommendation
 import datetime
 from django.contrib.auth.hashers import make_password
 
@@ -9,7 +9,7 @@ class Command(BaseCommand):
     help = 'Populate the User model with full data'
 
     def handle(self, *args, **kwargs):
-        preferences = Preferences(preferences={"theme": "dark", "notifications": True})
+       Customizations =Customizations(preferences={"theme": "dark", "notifications": True})
 
         health_record = HealthRecords(
             blood_glucose=5.5,
@@ -67,7 +67,7 @@ class Command(BaseCommand):
             birthdate="1990-01-01",
             family_history=True,
             profile_picture="/path/to/profile.jpg",
-            preferences=preferences,
+           Customizations=preferences,
             health_records=[health_record],
             physical_records=[physical_record],
             meal_recommendation=meal_recommendation,

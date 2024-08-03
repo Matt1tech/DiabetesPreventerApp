@@ -1,6 +1,6 @@
 import random
 from django.utils import timezone
-from api.models import User, Preferences, HealthRecord, PhysicalActivity, PhysicalRecord, Meal, MealRecommendation
+from api.models import User,Customizations, HealthRecord, PhysicalActivity, PhysicalRecord, Meal, MealRecommendation
 
 # Create a user
 user = User.objects.create(
@@ -16,8 +16,8 @@ user = User.objects.create(
     created_at=timezone.now()
 )
 
-# Create preferences for the user
-preferences = Preferences.objects.create(
+# CreateCustomizations for the user
+preferences =Customizations.objects.create(
     meals_per_day=["breakfast", "lunch", "dinner"],
     allergies=["soy_free", "gluten_free"],
     diets_followed=["low_fat", "no_sugar"],

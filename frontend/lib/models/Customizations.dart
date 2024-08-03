@@ -1,9 +1,9 @@
 import 'package:json_annotation/json_annotation.dart';
 
-part 'preferences.g.dart';
+part 'Customizations.g.dart';
 
 @JsonSerializable()
-class Preferences {
+class Customizations {
   List<String> mealsPerDay;
   List<String> allergies;
   List<String> dietsFollowed;
@@ -15,7 +15,7 @@ class Preferences {
   String userId; // Assuming the user ID is stored as a String
   DateTime createdAt;
 
-  Preferences({
+  Customizations({
     required this.mealsPerDay,
     required this.allergies,
     required this.dietsFollowed,
@@ -28,7 +28,7 @@ class Preferences {
     required this.createdAt,
   });
 
-  factory Preferences.fromJson(Map<String, dynamic> json) =>
-      _$PreferencesFromJson(json);
-  Map<String, dynamic> toJson() => _$PreferencesToJson(this);
+  factory Customizations.fromJson(Map<String, dynamic> json) =>
+      _$CustomizationsFromJson(json);
+  Map<String, dynamic> toJson() => _$CustomizationsToJson(this);
 }

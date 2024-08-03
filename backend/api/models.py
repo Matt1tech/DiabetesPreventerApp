@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.utils import timezone
 
-class Preferences(models.Model):
+class Customizations(models.Model):
     MEAL_CHOICES = [
         ('breakfast', 'Breakfast'),
         ('lunch', 'Lunch'),
@@ -34,8 +34,9 @@ class Preferences(models.Model):
     max_fiber = models.IntegerField(default=0)    
     max_fat = models.IntegerField(default=0)      
     max_cholesterol = models.IntegerField(default=0)  
-    user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='preferences')  # One-to-Many relationship with User
     created_at = models.DateTimeField(default=timezone.now)
+    user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='preferences')  # One-to-Many relationship with User
+    
 
 class HealthRecord(models.Model):
     blood_glucose = models.FloatField(null=True, blank=True)
