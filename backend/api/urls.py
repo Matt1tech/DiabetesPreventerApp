@@ -17,6 +17,7 @@ urlpatterns = [
     path('create_meal/', views.create_meal, name='create_meal'),
     path('total_daily_nutrition/<int:user_id>/', views.get_total_daily_nutrition, name='daily_nutrition/'),
     path('physical_record/', views.physical_record, name='physical_record'),
+    path('update-customization/', views.update_preferences, name='update_preferences'),
 ]
     
     

@@ -279,6 +279,63 @@ def get_last_health_record(request, user_id):
         print(f"Error retrieving health records: {e}")
         return Response({'error': 'Error retrieving health records.'}, status=500)
    
+   
+   
+   
+   
+   
+@api_view(['POST'])
+def update_preferences(request):
+    data = request.data
+    user_id = data.get('user_id')
+    max_protein = data.get('max_protein')
+    max_fat = data.get('max_fat')
+    max_fiber = data.get('max_fiber')
+    max_cholesterol = data.get('max_cholesterol')
+    meals_per_day = data.get('meals_per_day')
+    allergies = data.get('allergies')
+    diets_followed = data.get('diets_followed')
+    
+    try:
+        # Get the existing preferences for the user
+        preferences = Preferences.objects.get(user_id=user_id)
+    except Preferences.DoesNotExist:
+        return Response({'error': 'Preferences not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    # Update only the provided fields
+    if max_protein is not None:
+        preferences.max_protein = max_protein
+    if max_fat is not None:
+        preferences.max_fat = max_fat
+    if max_fiber is not None:
+        preferences.max_fiber = max_fiber
+    if max_cholesterol is not None:
+        preferences.max_cholesterol = max_cholesterol
+    if meals_per_day is not None:
+        preferences.meals_per_day = meals_per_day
+    if allergies is not None:
+        preferences.allergies = allergies
+    if diets_followed is not None:
+        preferences.diets_followed = diets_followed
+
+    # Save the updated preferences
+    preferences.save()
+
+    # Serialize and return the updated preferences
+    serializer = PreferencesSerializer(preferences)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
     
     
 

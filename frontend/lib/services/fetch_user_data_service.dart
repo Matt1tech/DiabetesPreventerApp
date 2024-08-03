@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import '../models/user.dart' as userModel;
+import '../urls.dart';
 
 final storage = FlutterSecureStorage();
 
@@ -16,8 +17,7 @@ Future<Map<String, String?>> loadUserInfo() async {
     final userName = user.name;
     final userId = user.id;
     // Construct the full URL for the profile picture
-    final userProfilePicture =
-        '${'http://192.168.100.7:8000'}/media/${user.profile_picture}';
+    final userProfilePicture = '${'$baseUrl'}/media/${user.profile_picture}';
     print('User Profile Picture: $userProfilePicture'); // Debug statement
     return {
       'userName': userName,

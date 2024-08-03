@@ -3,12 +3,11 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import '../urls.dart';
+
 final storage = FlutterSecureStorage();
 
 class AuthService {
-  final String baseUrl =
-      "http://192.168.100.7:8000"; // Update this to your Django server URL
-
   /// Registers a new user with the given information.
   ///
   /// [name]: User's name

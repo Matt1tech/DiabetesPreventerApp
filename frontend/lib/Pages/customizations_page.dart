@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:frontend/Pages/pages.dart';
 import 'package:frontend/services/fetch_user_data_service.dart';
 import 'package:image_picker/image_picker.dart';
 import '../services/auth_service.dart';
+import '../services/user_health_records_service.dart';
+import '../services/customization_service.dart';
 import '../utils/logout_utility.dart';
 import '../utils/utilities.dart';
+import '../widgets/customization_button.dart';
 import '../widgets/drawer_widget.dart';
+import '../widgets/health_measurement_logs_card.dart';
 import '../widgets/user_header.dart';
 import '../widgets/customized_navigation_bar.dart';
 import '../utils/navigation_util.dart';
-import '../urls.dart';
 
 class CustomizationsPage extends StatefulWidget {
   CustomizationsPage({Key? key}) : super(key: key);
@@ -30,8 +32,7 @@ class _CustomizationsPageState extends State<CustomizationsPage> {
   final storage = FlutterSecureStorage();
   String? user_id;
 
-  User userService = User();
-
+  @override
   void initState() {
     super.initState();
     _loadUserInfo();
@@ -65,6 +66,14 @@ class _CustomizationsPageState extends State<CustomizationsPage> {
     });
   }
 
+  void _setMaxCalories(String value) {
+    setState(() {
+      // Update the max calories value here
+      // For demonstration, it's printed out
+      print('Max Calories set to: $value');
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     ImageProvider<Object> imageProvider =
@@ -75,7 +84,8 @@ class _CustomizationsPageState extends State<CustomizationsPage> {
         preferredSize: Size.fromHeight(170.0),
         child: UserHeader(
           imageProvider: imageProvider,
-          welcomeMessage: 'Hello Again!',
+          pageName: 'Customization',
+          welcomeMessage: 'Make a plan!',
           userName: userName ?? 'user name',
           userStatus: 'Active',
           rightIcon: Icons.notifications,
@@ -91,44 +101,21 @@ class _CustomizationsPageState extends State<CustomizationsPage> {
       ),
       body: Column(
         children: [
-          Center(
-            child: Text(
-              'Customizations Page',
-              style: TextStyle(fontSize: 24),
-            ),
-          ),
+          const SizedBox(height: 0),
           Expanded(
-            child: FutureBuilder<List>(
-              future: userService.getAllUser(),
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  return ListView.builder(
-                    itemCount: snapshot.data?.length,
-                    itemBuilder: (context, i) {
-                      var user = snapshot.data![i];
-                      var healthRecords = user['health_records'] as List;
-                      return Card(
-                        child: ExpansionTile(
-                          title: Text(
-                            user['name'],
-                            style: TextStyle(fontSize: 24),
-                          ),
-                          children: healthRecords.map<Widget>((record) {
-                            return ListTile(
-                              title: Text(
-                                'Blood Glucose Level: ${record['blood_glucose']}',
-                                style: TextStyle(fontSize: 18),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      );
-                    },
-                  );
-                } else {
-                  return Center(child: Text('No data found'));
-                }
-              },
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  const SizedBox(height: 10),
+                  mealPerDaySection(),
+                  const SizedBox(height: 10),
+                  alergiesSection(),
+                  const SizedBox(height: 10),
+                  dietsFollowedSection(),
+                  const SizedBox(height: 10),
+                  dailyCalories(),
+                ],
+              ),
             ),
           ),
         ],
@@ -138,5 +125,291 @@ class _CustomizationsPageState extends State<CustomizationsPage> {
         onItemTapped: _onItemTapped,
       ),
     );
+  }
+
+  Container mealPerDaySection() {
+    return Container(
+      width: 360,
+      height: 220,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          const SizedBox(height: 30),
+          const Padding(
+            padding: EdgeInsets.only(right: 180),
+            child: Text(
+              'Meals a day',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: blueColor,
+                fontSize: 22.0,
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              SizedBox(width: 12),
+              CustomTag(
+                tagName: "Breakfast",
+                onTagClick: handleTagClick,
+              ),
+              SizedBox(width: 40),
+              CustomTag(
+                tagName: "Lunch",
+                onTagClick: handleTagClick,
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              SizedBox(width: 10),
+              CustomTag(
+                tagName: "Dinner",
+                onTagClick: handleTagClick,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Container alergiesSection() {
+    return Container(
+      width: 360,
+      height: 200,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.only(right: 220),
+            child: Text(
+              'Allergies',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: blueColor,
+                fontSize: 22.0,
+              ),
+            ),
+          ),
+          const SizedBox(height: 15),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              SizedBox(width: 12),
+              CustomTag(
+                tagName: "Soy-free",
+                onTagClick: handleTagClick,
+              ),
+              SizedBox(width: 25),
+              CustomTag(
+                tagName: "Gluten-free",
+                onTagClick: handleTagClick,
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              SizedBox(width: 12),
+              CustomTag(
+                tagName: "Wheat-free",
+                onTagClick: handleTagClick,
+              ),
+              SizedBox(width: 25),
+              CustomTag(
+                tagName: "Egg-free",
+                onTagClick: handleTagClick,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Container dietsFollowedSection() {
+    return Container(
+      width: 360,
+      height: 220,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.only(right: 150),
+            child: Text(
+              'Diets  Followed',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: blueColor,
+                fontSize: 22.0,
+              ),
+            ),
+          ),
+          const SizedBox(height: 15),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              SizedBox(width: 12),
+              CustomTag(
+                tagName: "Low-Fat",
+                onTagClick: handleTagClick,
+              ),
+              SizedBox(width: 25),
+              CustomTag(
+                tagName: "No-sugar",
+                onTagClick: handleTagClick,
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              SizedBox(width: 12),
+              CustomTag(
+                tagName: "High-Protein",
+                onTagClick: handleTagClick,
+              ),
+              SizedBox(width: 22),
+              CustomTag(
+                tagName: "Low-Carb",
+                onTagClick: handleTagClick,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Container dailyCalories() {
+    return Container(
+      width: 380,
+      height: 420,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.only(right: 150),
+            child: Text(
+              'Daily Calories',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: blueColor,
+                fontSize: 22.0,
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(width: 35),
+              HealthMeasurementLogsCard(
+                title: 'Max daily calories',
+                name: 'maxDailyCalories',
+                onPressed: (int value) {
+                  if (user_id != null) {
+                    UserCustomizationService.setMaxDailyCalories(
+                        int.parse(user_id!), value);
+                  }
+                },
+                width: 155, // Specify the width as needed
+                height: 150, // Specify the height as needed
+                cardColor: Color.fromARGB(221, 255, 250, 250),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 10,
+                    offset: Offset(0, 4),
+                  ),
+                ],
+              ),
+              SizedBox(width: 30),
+              HealthMeasurementLogsCard(
+                title: 'Max Cholesterol',
+                name: 'totalCalories',
+                onPressed: (int value) {
+                  if (user_id != null) {
+                    UserHealthRecordsService.inputBloodPressure(
+                        int.parse(user_id!), value.toString());
+                  }
+                },
+                width: 155, // Specify the width as needed
+                height: 150, // Specify the height as needed
+                cardColor: Color.fromARGB(221, 255, 250, 250),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 10,
+                    offset: Offset(0, 4),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 15),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(width: 35),
+              HealthMeasurementLogsCard(
+                title: 'Max Fiber',
+                name: 'totalCalories',
+                onPressed: (int value) {
+                  if (user_id != null) {
+                    UserHealthRecordsService.inputBloodPressure(
+                        int.parse(user_id!), value.toString());
+                  }
+                },
+                width: 155, // Specify the width as needed
+                height: 150, // Specify the height as needed
+                cardColor: Color.fromARGB(221, 255, 250, 250),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 10,
+                    offset: Offset(0, 4),
+                  ),
+                ],
+              ),
+              SizedBox(width: 30),
+              HealthMeasurementLogsCard(
+                title: 'Max Fat',
+                name: 'totalCalories',
+                onPressed: (int value) {
+                  if (user_id != null) {
+                    UserHealthRecordsService.inputBloodPressure(
+                        int.parse(user_id!), value.toString());
+                  }
+                },
+                width: 155, // Specify the width as needed
+                height: 150, // Specify the height as needed
+                cardColor: Color.fromARGB(221, 255, 250, 250),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 10,
+                    offset: Offset(0, 4),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  void handleTagClick(String tagName) {
+    print("Tag clicked: $tagName");
   }
 }

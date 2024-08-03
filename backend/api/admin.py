@@ -7,7 +7,7 @@ from .models import *
 
 @admin.register(Preferences)
 class PreferencesAdmin(admin.ModelAdmin):
-    list_display = ('user', 'daily_calories_min', 'daily_calories_max', 'created_at')
+    list_display = ('user', 'daily_calories_max', 'created_at')
     search_fields = ('user__name', 'user__email')
     list_filter = ('meals_per_day', 'allergies', 'diets_followed', 'created_at')
     ordering = ('-created_at',)
@@ -42,7 +42,7 @@ class MealRecommendationAdmin(admin.ModelAdmin):
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('name', 'email', 'gender', 'marital_status', 'height', 'birthdate', 'family_history', 'created_at')
+    list_display = ('name', 'email', 'gender', 'marital_status', 'height', 'birthdate', 'family_history','profile_picture', 'created_at')
     search_fields = ('name', 'email', 'gender', 'marital_status')
     list_filter = ('gender', 'marital_status', 'family_history', 'created_at')
     ordering = ('-created_at',)

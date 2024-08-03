@@ -7,23 +7,33 @@ part of 'preferences.dart';
 // **************************************************************************
 
 Preferences _$PreferencesFromJson(Map<String, dynamic> json) => Preferences(
-      meals_per_day: (json['meals_per_day'] as List<dynamic>)
+      mealsPerDay: (json['mealsPerDay'] as List<dynamic>)
           .map((e) => e as String)
           .toList(),
       allergies:
           (json['allergies'] as List<dynamic>).map((e) => e as String).toList(),
-      diets_followed: (json['diets_followed'] as List<dynamic>)
+      dietsFollowed: (json['dietsFollowed'] as List<dynamic>)
           .map((e) => e as String)
           .toList(),
-      daily_calories_min: (json['daily_calories_min'] as num).toInt(),
-      daily_calories_max: (json['daily_calories_max'] as num).toInt(),
+      dailyCaloriesMax: (json['dailyCaloriesMax'] as num).toInt(),
+      maxProtein: (json['maxProtein'] as num).toInt(),
+      maxFiber: (json['maxFiber'] as num).toInt(),
+      maxFat: (json['maxFat'] as num).toInt(),
+      maxCholesterol: (json['maxCholesterol'] as num).toInt(),
+      userId: json['userId'] as String,
+      createdAt: DateTime.parse(json['createdAt'] as String),
     );
 
 Map<String, dynamic> _$PreferencesToJson(Preferences instance) =>
     <String, dynamic>{
-      'meals_per_day': instance.meals_per_day,
+      'mealsPerDay': instance.mealsPerDay,
       'allergies': instance.allergies,
-      'diets_followed': instance.diets_followed,
-      'daily_calories_min': instance.daily_calories_min,
-      'daily_calories_max': instance.daily_calories_max,
+      'dietsFollowed': instance.dietsFollowed,
+      'dailyCaloriesMax': instance.dailyCaloriesMax,
+      'maxProtein': instance.maxProtein,
+      'maxFiber': instance.maxFiber,
+      'maxFat': instance.maxFat,
+      'maxCholesterol': instance.maxCholesterol,
+      'userId': instance.userId,
+      'createdAt': instance.createdAt.toIso8601String(),
     };

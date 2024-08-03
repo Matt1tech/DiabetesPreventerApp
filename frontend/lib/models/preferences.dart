@@ -4,18 +4,28 @@ part 'preferences.g.dart';
 
 @JsonSerializable()
 class Preferences {
-  List<String> meals_per_day;
+  List<String> mealsPerDay;
   List<String> allergies;
-  List<String> diets_followed;
-  int daily_calories_min;
-  int daily_calories_max;
+  List<String> dietsFollowed;
+  int dailyCaloriesMax;
+  int maxProtein;
+  int maxFiber;
+  int maxFat;
+  int maxCholesterol;
+  String userId; // Assuming the user ID is stored as a String
+  DateTime createdAt;
 
   Preferences({
-    required this.meals_per_day,
+    required this.mealsPerDay,
     required this.allergies,
-    required this.diets_followed,
-    required this.daily_calories_min,
-    required this.daily_calories_max,
+    required this.dietsFollowed,
+    required this.dailyCaloriesMax,
+    required this.maxProtein,
+    required this.maxFiber,
+    required this.maxFat,
+    required this.maxCholesterol,
+    required this.userId,
+    required this.createdAt,
   });
 
   factory Preferences.fromJson(Map<String, dynamic> json) =>

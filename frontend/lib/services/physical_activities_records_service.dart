@@ -2,12 +2,14 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import '../urls.dart';
+
 class PhysicalActivityRecordsService {
   Future<bool> submitExerciseRecord(
       String userId, String type, double duration) async {
     try {
       var response = await http.post(
-        Uri.parse('http://192.168.100.7:8000/physical_record/'),
+        Uri.parse('$baseUrl/physical_record/'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
@@ -34,7 +36,7 @@ class PhysicalActivityRecordsService {
   Future<bool> submitStressLevel(String userId, int stressLevel) async {
     try {
       var response = await http.post(
-        Uri.parse('http://192.168.100.7:8000/physical_record/'),
+        Uri.parse('$baseUrl/physical_record/'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },

@@ -39,7 +39,7 @@ class _HomePageState extends State<HomePage> {
   HealthRecord? lastHealthRecord;
   String? user_id;
   late LogoutManager logoutManager;
-  // Instance of secure storage
+
   // Variable to hold user data
   List<SuitableMenuModel> menu = [];
   int _selectedIndex = 0;
@@ -361,7 +361,6 @@ class _HomePageState extends State<HomePage> {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             bloodPressureRecord(),
-            const SizedBox(width: 10),
             glucoseRecord(),
           ],
         ),
@@ -426,7 +425,7 @@ class _HomePageState extends State<HomePage> {
                 BoxShadow(
                   color: Colors.black26,
                   blurRadius: 10,
-                  offset: Offset(0, 4),
+                  offset: Offset(0, 1),
                 ),
               ],
             ),
@@ -443,14 +442,14 @@ class _HomePageState extends State<HomePage> {
                     int.parse(user_id!), value);
               }
             },
-            width: 380, // Specify the width as needed
+            width: 370, // Specify the width as needed
             height: 160, // Specify the height as needed
             cardColor: Colors.white,
             boxShadow: [
               BoxShadow(
                 color: Colors.black26,
                 blurRadius: 10,
-                offset: Offset(0, 4),
+                offset: Offset(0, 1),
               ),
             ],
           ),
@@ -480,7 +479,7 @@ class _HomePageState extends State<HomePage> {
         Column(
           children: [
             Container(
-              width: 360, // Adjusted width for better alignment
+              width: 370, // Adjusted width for better alignment
               height: 380,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
@@ -489,7 +488,7 @@ class _HomePageState extends State<HomePage> {
                   BoxShadow(
                     color: Colors.black26,
                     blurRadius: 10,
-                    offset: Offset(0, 4),
+                    offset: Offset(0, 1),
                   ),
                 ],
               ),
@@ -498,9 +497,9 @@ class _HomePageState extends State<HomePage> {
                 child: ExerciseRecord(userId: user_id!, service: service),
               ),
             ),
-            SizedBox(height: 20),
+            SizedBox(height: 40),
             Container(
-              width: 360, // Adjusted width for better alignment
+              width: 370, // Adjusted width for better alignment
               height: 380,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
@@ -509,7 +508,7 @@ class _HomePageState extends State<HomePage> {
                   BoxShadow(
                     color: Colors.black26,
                     blurRadius: 10,
-                    offset: Offset(0, 4),
+                    offset: Offset(0, 1),
                   ),
                 ],
               ),

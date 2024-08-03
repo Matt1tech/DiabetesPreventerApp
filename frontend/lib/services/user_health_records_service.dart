@@ -1,13 +1,11 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/models.dart';
+import '../urls.dart';
 
 class UserHealthRecordsService {
-  static const String _baseUrl =
-      'http://192.168.100.7:8000/health-record/'; // Replace with your actual endpoint URL
-
   static Future<void> inputBloodGlucose(int userId, int bloodGlucose) async {
-    final url = Uri.parse(_baseUrl);
+    final url = Uri.parse('$baseUrl/health-record/');
     final headers = {'Content-Type': 'application/json'};
     final body = json.encode({
       'blood_glucose': bloodGlucose,
@@ -30,7 +28,7 @@ class UserHealthRecordsService {
 
   static Future<void> inputBloodPressure(
       int userId, String bloodPressure) async {
-    final url = Uri.parse(_baseUrl);
+    final url = Uri.parse('$baseUrl/health-record/');
     final headers = {'Content-Type': 'application/json'};
     final body = json.encode({
       'blood_pressure': bloodPressure,
@@ -52,7 +50,7 @@ class UserHealthRecordsService {
   }
 
   static Future<void> inputDailyWeight(int userId, int weight) async {
-    final url = Uri.parse(_baseUrl);
+    final url = Uri.parse('$baseUrl/health-record/');
     final headers = {'Content-Type': 'application/json'};
     final body = json.encode({
       'weight': weight,
@@ -75,13 +73,11 @@ class UserHealthRecordsService {
 }
 
 class FetchHealthRecordService {
-  static const _baseUrl = 'http://192.168.100.7:8000/health-record/last';
-
   Future<HealthRecord?> fetchLastHealthRecord(int userId) async {
     print(
         'FetchHealthRecordService.fetchLastHealthRecord called with userId: $userId');
     try {
-      final url = Uri.parse('$_baseUrl/$userId');
+      final url = Uri.parse('$baseUrl/health-record/last/$userId');
       print('Requesting URL: $url');
       final response = await http.get(url);
       print('Response status: ${response.statusCode}');

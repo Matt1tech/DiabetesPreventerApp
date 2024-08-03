@@ -29,8 +29,11 @@ class Preferences(models.Model):
     meals_per_day = models.JSONField(default=list)  # e.g., ['breakfast', 'lunch']
     allergies = models.JSONField(default=list)  # e.g., ['soy_free', 'gluten_free']
     diets_followed = models.JSONField(default=list)  # e.g., ['low_fat', 'no_sugar']
-    daily_calories_min = models.IntegerField(default=0)
     daily_calories_max = models.IntegerField(default=0)
+    max_protein = models.IntegerField(default=0)  
+    max_fiber = models.IntegerField(default=0)    
+    max_fat = models.IntegerField(default=0)      
+    max_cholesterol = models.IntegerField(default=0)  
     user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='preferences')  # One-to-Many relationship with User
     created_at = models.DateTimeField(default=timezone.now)
 
