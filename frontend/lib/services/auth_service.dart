@@ -151,13 +151,8 @@ class AuthService {
     return await http.Response.fromStream(response);
   }
 
-  /// Sends a password reset request to the server.
-  ///
-  /// [email]: User's email address to send the reset link to.
-  ///
-  /// Returns the HTTP response from the server.
-  Future<http.Response> requestPasswordReset(String email) async {
-    final url = Uri.parse('$baseUrl/password_reset/');
+  Future<http.Response> requestOtp(String email) async {
+    final url = Uri.parse('$baseUrl/request_otp/');
     final response = await http.post(
       url,
       headers: {
@@ -165,23 +160,23 @@ class AuthService {
       },
       body: jsonEncode({'email': email}),
     );
-
     return response;
   }
 
-  Future<http.Response> confirmPasswordReset(
-      String uidb64, String token, String newPassword) async {
-    final url = Uri.parse('$baseUrl/reset/$uidb64/$token/');
+  Future<http.Response> verifyOtp(
+      String email, String otp, String newPassword) async {
+    final url = Uri.parse('$baseUrl/verify_otp/');
     final response = await http.post(
       url,
       headers: {
         'Content-Type': 'application/json',
       },
       body: jsonEncode({
+        'email': email,
+        'otp': otp,
         'new_password': newPassword,
       }),
     );
-
     return response;
   }
 }

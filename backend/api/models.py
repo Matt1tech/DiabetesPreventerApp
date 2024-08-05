@@ -117,6 +117,8 @@ class User(AbstractBaseUser):
     family_history = models.BooleanField()
     profile_picture = models.CharField(max_length=255, null=True, blank=True)  # Allow null and blank
     created_at = models.DateTimeField(default=timezone.now)  # Ensure this field is timezone-aware
+    otp = models.CharField(max_length=6, blank=True, null=True)
+    otp_expiration = models.DateTimeField(blank=True, null=True)
 
 
     def __str__(self):

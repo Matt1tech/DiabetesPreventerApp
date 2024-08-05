@@ -1,39 +1,26 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import '../utils/utilities.dart';
-import '../widgets/custom_text_form_field.dart'; // Import utilities for consistent styling
+import '../widgets/custom_text_form_field.dart';
+import 'login_page.dart';
+import 'verify_otp.dart';
 
-class PasswordResetFormPage extends StatefulWidget {
-  final String token;
-  final String uidb64;
-
-  PasswordResetFormPage({required this.token, required this.uidb64});
-
+class RequestOtpPage extends StatefulWidget {
   @override
-  _PasswordResetFormPageState createState() => _PasswordResetFormPageState();
+  _RequestOtpPageState createState() => _RequestOtpPageState();
 }
 
-class _PasswordResetFormPageState extends State<PasswordResetFormPage> {
-  final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController =
-      TextEditingController();
+class _RequestOtpPageState extends State<RequestOtpPage> {
+  final TextEditingController _emailController = TextEditingController();
   final AuthService _authService = AuthService();
   bool _isLoading = false;
 
-  Future<void> _resetPassword() async {
-    if (_passwordController.text != _confirmPasswordController.text) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Passwords do not match')),
-      );
-      return;
-    }
-
+  Future<void> _requestOtp() async {
     setState(() {
       _isLoading = true;
     });
 
-    final response = await _authService.confirmPasswordReset(
-        widget.uidb64, widget.token, _passwordController.text);
+    final response = await _authService.requestOtp(_emailController.text);
 
     setState(() {
       _isLoading = false;
@@ -41,12 +28,16 @@ class _PasswordResetFormPageState extends State<PasswordResetFormPage> {
 
     if (response.statusCode == 200) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Password reset successfully')),
+        SnackBar(content: Text('OTP sent to your email')),
       );
-      Navigator.pop(context);
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => VerifyOtpPage(email: _emailController.text)),
+      );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to reset password')),
+        SnackBar(content: Text('Failed to send OTP')),
       );
     }
   }
@@ -56,20 +47,20 @@ class _PasswordResetFormPageState extends State<PasswordResetFormPage> {
     return Scaffold(
       backgroundColor: const Color.fromARGB(227, 249, 243, 243),
       appBar: AppBar(
-        title: Text('Reset Password'),
+        title: Text('Request OTP'),
       ),
       body: Column(
         children: [
           Expanded(
-            child: bodyPasswordResetForm(context),
+            child: bodyRequestOtp(context),
           ),
-          footer(), // Footer widget for consistency
+          footer(),
         ],
       ),
     );
   }
 
-  Widget bodyPasswordResetForm(BuildContext context) {
+  Widget bodyRequestOtp(BuildContext context) {
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -78,30 +69,19 @@ class _PasswordResetFormPageState extends State<PasswordResetFormPage> {
             children: [
               const SizedBox(height: 50),
               const Text(
-                'Reset Password',
+                'Request OTP',
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
-                  color: pinkColor, // Use your consistent pinkColor variable
+                  color: pinkColor,
                 ),
               ),
               const SizedBox(height: 24),
               ReusableTextFormField(
-                labelText: 'New Password',
-                icon: Icons.lock,
-                validatorMessage: 'Password is required',
-                validatorFormat: RegExp(r'.+'),
-                controller: _passwordController,
-                obscureText: true,
-              ),
-              const SizedBox(height: 16),
-              ReusableTextFormField(
-                labelText: 'Confirm Password',
-                icon: Icons.lock,
-                validatorMessage: 'Password confirmation is required',
-                validatorFormat: RegExp(r'.+'),
-                controller: _confirmPasswordController,
-                obscureText: true,
+                labelText: 'Email',
+                icon: Icons.email,
+                validator: emailUsernameValidator,
+                controller: _emailController,
               ),
               const SizedBox(height: 16),
               _isLoading
@@ -138,9 +118,9 @@ class _PasswordResetFormPageState extends State<PasswordResetFormPage> {
                           ),
                         ),
                       ),
-                      onPressed: _resetPassword,
+                      onPressed: _requestOtp,
                       child: const Text(
-                        'Reset Password',
+                        'Request OTP',
                         style: TextStyle(
                           fontSize: 20,
                           color: Colors.white,

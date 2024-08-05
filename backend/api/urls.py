@@ -16,6 +16,6 @@ urlpatterns = [
     path('update-customization/', views.update_customizations, name='update-customization'),
     path('get-user-customization/<int:user_id>/', views.get_user_customization, name='get-user-customization'),
     path('test_model/', views.test_model, name='test_model'),
-    path('password_reset/', views.request_password_reset, name='password_reset'),
-    path('reset/<uidb64>/<token>/', views.password_reset_confirm, name='password_reset_confirm'),
+    path('request_otp/', views.request_otp, name='request_otp'),
+    path('verify_otp/', views.verify_otp, name='verify_otp'),
 ]

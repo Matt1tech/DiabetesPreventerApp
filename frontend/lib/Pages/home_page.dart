@@ -230,12 +230,11 @@ class _HomePageState extends State<HomePage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 10),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 20),
                   nutrientsDetailsSection(),
                   const SizedBox(height: 30),
                   riskOverviewSection(),
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 50),
                   healthRecordSection(),
                   const SizedBox(height: 40),
                   healthInformationLogsSection(),

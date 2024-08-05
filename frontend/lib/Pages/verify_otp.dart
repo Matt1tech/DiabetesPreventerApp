@@ -1,27 +1,42 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/widgets/widgets.dart';
 import '../services/auth_service.dart';
 import '../utils/utilities.dart';
-import 'login_page.dart';
+import '../widgets/custom_text_form_field.dart';
 
-class PasswordResetRequestPage extends StatefulWidget {
+class VerifyOtpPage extends StatefulWidget {
+  final String email;
+
+  VerifyOtpPage({required this.email});
+
   @override
-  _PasswordResetRequestPageState createState() =>
-      _PasswordResetRequestPageState();
+  _VerifyOtpPageState createState() => _VerifyOtpPageState();
 }
 
-class _PasswordResetRequestPageState extends State<PasswordResetRequestPage> {
-  final TextEditingController _emailController = TextEditingController();
+class _VerifyOtpPageState extends State<VerifyOtpPage> {
+  final TextEditingController _otpController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
   final AuthService _authService = AuthService();
   bool _isLoading = false;
 
-  Future<void> _requestPasswordReset() async {
+  Future<void> _verifyOtp() async {
+    if (_passwordController.text != _confirmPasswordController.text) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Passwords do not match')),
+      );
+      return;
+    }
+
     setState(() {
       _isLoading = true;
     });
 
-    final response =
-        await _authService.requestPasswordReset(_emailController.text);
+    final response = await _authService.verifyOtp(
+      widget.email,
+      _otpController.text,
+      _passwordController.text,
+    );
 
     setState(() {
       _isLoading = false;
@@ -29,11 +44,12 @@ class _PasswordResetRequestPageState extends State<PasswordResetRequestPage> {
 
     if (response.statusCode == 200) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Password reset link sent to your email')),
+        SnackBar(content: Text('Password reset successfully')),
       );
+      Navigator.pop(context);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to send reset link')),
+        SnackBar(content: Text('Failed to reset password')),
       );
     }
   }
@@ -43,12 +59,12 @@ class _PasswordResetRequestPageState extends State<PasswordResetRequestPage> {
     return Scaffold(
       backgroundColor: const Color.fromARGB(227, 249, 243, 243),
       appBar: AppBar(
-        title: Text('Forgot Password'),
+        title: Text('Verify OTP'),
       ),
       body: Column(
         children: [
           Expanded(
-            child: bodyPasswordResetRequest(context),
+            child: bodyVerifyOtp(context),
           ),
           footer(),
         ],
@@ -56,7 +72,7 @@ class _PasswordResetRequestPageState extends State<PasswordResetRequestPage> {
     );
   }
 
-  Widget bodyPasswordResetRequest(BuildContext context) {
+  Widget bodyVerifyOtp(BuildContext context) {
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -65,7 +81,7 @@ class _PasswordResetRequestPageState extends State<PasswordResetRequestPage> {
             children: [
               const SizedBox(height: 50),
               const Text(
-                'Reset Password',
+                'Verify OTP',
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
@@ -74,10 +90,23 @@ class _PasswordResetRequestPageState extends State<PasswordResetRequestPage> {
               ),
               const SizedBox(height: 24),
               ReusableTextFormField(
-                labelText: 'Email',
-                icon: Icons.email,
-                validator: emailUsernameValidator,
-                controller: _emailController,
+                labelText: 'OTP',
+                icon: Icons.lock,
+                controller: _otpController,
+              ),
+              const SizedBox(height: 16),
+              ReusableTextFormField(
+                labelText: 'New Password',
+                icon: Icons.lock,
+                controller: _passwordController,
+                obscureText: true,
+              ),
+              const SizedBox(height: 16),
+              ReusableTextFormField(
+                labelText: 'Confirm Password',
+                icon: Icons.lock,
+                controller: _confirmPasswordController,
+                obscureText: true,
               ),
               const SizedBox(height: 16),
               _isLoading
@@ -114,9 +143,9 @@ class _PasswordResetRequestPageState extends State<PasswordResetRequestPage> {
                           ),
                         ),
                       ),
-                      onPressed: _requestPasswordReset,
+                      onPressed: _verifyOtp,
                       child: const Text(
-                        'Send Reset Link',
+                        'Verify OTP',
                         style: TextStyle(
                           fontSize: 20,
                           color: Colors.white,

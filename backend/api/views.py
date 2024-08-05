@@ -28,7 +28,7 @@ from django.urls import reverse
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.conf import settings
-
+import random
 
 
 @api_view(['POST'])
@@ -194,7 +194,7 @@ def test_model(request):
 
 
 
-# Setup logging
+
 logger = logging.getLogger(__name__)
 @api_view(['POST'])
 def create_or_update_health_record(request):
@@ -539,12 +539,14 @@ def get_user_customization(request, user_id):
 def monthely_risk(request):
     pass 
 
-import logging
 
-logger = logging.getLogger(__name__)
+
+def generate_otp():
+    return str(random.randint(100000, 999999))
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
-def request_password_reset(request):
+def request_otp(request):
     email = request.data.get('email')
     if not email:
         return Response({'error': 'Email is required'}, status=status.HTTP_400_BAD_REQUEST)
@@ -554,23 +556,14 @@ def request_password_reset(request):
     except User.DoesNotExist:
         return Response({'error': 'User with this email does not exist'}, status=status.HTTP_404_NOT_FOUND)
 
-    token = default_token_generator.make_token(user)
-    uid = urlsafe_base64_encode(force_bytes(user.pk))
-    protocol = 'https' if request.is_secure() else 'http'
-    domain = request.get_host()
-    reset_link = f"{protocol}://{domain}/reset/{uid}/{token}/"
+    otp = generate_otp()
+    user.otp = otp
+    user.otp_expiration = timezone.now() + timedelta(minutes=5)  # OTP valid for 5 minutes
+    user.save()
 
-    email_subject = 'Password Reset Request'
-    email_body = (
-        f"Hi {user.name},\n\n"
-        f"You're receiving this email because you requested a password reset for your user account at {domain}.\n\n"
-        f"Please go to the following page and choose a new password:\n"
-        f"{reset_link}\n\n"
-        f"Your username, in case you've forgotten: {user.email}\n\n"
-        f"Thanks for using our site!\n"
-        f"The {domain} team"
-    )
-
+    email_subject = 'Password Reset OTP'
+    email_body = f"Your OTP for password reset is: {otp}"
+    
     try:
         send_mail(
             email_subject,
@@ -579,29 +572,34 @@ def request_password_reset(request):
             [email],
             fail_silently=False,
         )
-        return Response({'message': 'Password reset link sent'}, status=status.HTTP_200_OK)
+        return Response({'message': 'OTP sent to your email'}, status=status.HTTP_200_OK)
     except Exception as e:
-        return Response({'error': f'Failed to send reset link: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'error': f'Failed to send OTP: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
-def password_reset_confirm(request, uidb64, token):
-    try:
-        uid = force_str(urlsafe_base64_decode(uidb64))
-        user = User.objects.get(pk=uid)
-    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
-        user = None
+def verify_otp(request):
+    email = request.data.get('email')
+    otp = request.data.get('otp')
+    new_password = request.data.get('new_password')
 
-    if user is not None and default_token_generator.check_token(user, token):
-        new_password = request.data.get('new_password')
-        if not new_password:
-            return Response({'error': 'New password is required'}, status=status.HTTP_400_BAD_REQUEST)
-        
-        user.set_password(new_password)
-        user.save()
-        return Response({'message': 'Password has been reset'}, status=status.HTTP_200_OK)
-    else:
-        return Response({'error': 'Invalid token'}, status=status.HTTP_400_BAD_REQUEST)
+    if not email or not otp or not new_password:
+        return Response({'error': 'Email, OTP, and new password are required'}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        user = User.objects.get(email=email)
+    except User.DoesNotExist:
+        return Response({'error': 'Invalid email or OTP'}, status=status.HTTP_404_NOT_FOUND)
+
+    if user.otp != otp or timezone.now() > user.otp_expiration:
+        return Response({'error': 'Invalid or expired OTP'}, status=status.HTTP_400_BAD_REQUEST)
+
+    user.set_password(new_password)
+    user.otp = None
+    user.otp_expiration = None
+    user.save()
+
+    return Response({'message': 'Password has been reset'}, status=status.HTTP_200_OK)
 
     
     
