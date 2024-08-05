@@ -3,7 +3,8 @@ import 'package:frontend/Pages/pages.dart';
 import '../utils/utilities.dart'; // Correct relative import for utilities
 import '../widgets/widgets.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart'; // Secure storage package for storing JWT token
-import '../services/auth_service.dart'; // Import AuthService
+import '../services/auth_service.dart';
+import 'reset_password_page.dart'; // Import AuthService
 
 // Define form key, text controllers, and secure storage instance
 final _formKey = GlobalKey<FormState>();
@@ -153,7 +154,13 @@ class _LoginPageState extends State<LoginPage> {
                     ],
                   ),
                   TextButton(
-                    onPressed: () {}, // Forgot password button
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => PasswordResetRequestPage()),
+                      );
+                    }, // Forgot password button
                     child: const Text('Forget password?'),
                   ),
                 ],

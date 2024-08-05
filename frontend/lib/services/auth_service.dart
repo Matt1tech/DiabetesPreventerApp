@@ -150,4 +150,38 @@ class AuthService {
     var response = await request.send();
     return await http.Response.fromStream(response);
   }
+
+  /// Sends a password reset request to the server.
+  ///
+  /// [email]: User's email address to send the reset link to.
+  ///
+  /// Returns the HTTP response from the server.
+  Future<http.Response> requestPasswordReset(String email) async {
+    final url = Uri.parse('$baseUrl/password_reset/');
+    final response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({'email': email}),
+    );
+
+    return response;
+  }
+
+  Future<http.Response> confirmPasswordReset(
+      String uidb64, String token, String newPassword) async {
+    final url = Uri.parse('$baseUrl/reset/$uidb64/$token/');
+    final response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'new_password': newPassword,
+      }),
+    );
+
+    return response;
+  }
 }

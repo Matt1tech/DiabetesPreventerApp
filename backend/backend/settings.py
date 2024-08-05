@@ -14,7 +14,7 @@ from pathlib import Path
 import os
 #from mongoengine import connect
 from datetime import timedelta
-
+from decouple import config
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 
@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'allauth.account',
     'rest_auth.registration',
     'allauth.socialaccount',
+    'django_rest_passwordreset',
     
 ]
 
@@ -218,6 +219,17 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:8000',
     'http://10.0.2.2:8000',
 ]
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'mattalbukaai@gmail.com'
+EMAIL_HOST_PASSWORD = 'm01172455491'
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = 'no-reply@diabetespreventer.admin.my.com'
+
+
 
 
 CORS_ALLOW_ALL_ORIGINS = True

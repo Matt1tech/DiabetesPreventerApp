@@ -1,13 +1,8 @@
-# In your urls.py
 from django.urls import path
-#from .views import register, MyTokenObtainPairView
 from . import views
-
-from django.urls import path
-#from .views import register, login
+from django.contrib.auth import views as auth_views
 
 urlpatterns = [
-
     path('create_user/', views.create_user, name='create_user'),
     path('login/', views.login, name='login'),
     path('user_details/', views.user_details, name='user_details'),
@@ -21,6 +16,6 @@ urlpatterns = [
     path('update-customization/', views.update_customizations, name='update-customization'),
     path('get-user-customization/<int:user_id>/', views.get_user_customization, name='get-user-customization'),
     path('test_model/', views.test_model, name='test_model'),
+    path('password_reset/', views.request_password_reset, name='password_reset'),
+    path('reset/<uidb64>/<token>/', views.password_reset_confirm, name='password_reset_confirm'),
 ]
-    
-    
