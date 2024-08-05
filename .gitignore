@@ -138,6 +138,12 @@ cython_debug/
 # PyCharm
 .idea/
 
+#models
+backend/api/diabetes_prediction_model.pkl
+
+
+
+
 # Dart/Pub
 .dart_tool/
 .packages
