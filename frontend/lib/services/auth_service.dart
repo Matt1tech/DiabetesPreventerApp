@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import '../models/user.dart';
 import '../urls.dart';
 
 final storage = FlutterSecureStorage();
@@ -133,24 +134,6 @@ class AuthService {
     await storage.deleteAll();
   }
 
-  Future<http.Response> updateUserProfile(String userId, String password,
-      double height, String maritalStatus, File? profilePicture) async {
-    var uri = Uri.parse('$baseUrl/update_user/');
-    var request = http.MultipartRequest('PUT', uri)
-      ..fields['user_id'] = userId
-      ..fields['password'] = password
-      ..fields['height'] = height.toString()
-      ..fields['marital_status'] = maritalStatus;
-
-    if (profilePicture != null) {
-      request.files.add(await http.MultipartFile.fromPath(
-          'profile_picture', profilePicture.path));
-    }
-
-    var response = await request.send();
-    return await http.Response.fromStream(response);
-  }
-
   Future<http.Response> requestOtp(String email) async {
     final url = Uri.parse('$baseUrl/request_otp/');
     final response = await http.post(
@@ -178,5 +161,44 @@ class AuthService {
       }),
     );
     return response;
+  }
+
+  Future<Map<String, dynamic>> getUserInfo(String userId) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/user/$userId'),
+      headers: {
+        'Authorization': 'Bearer ${await storage.read(key: 'access_token')}',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Failed to load user info');
+    }
+  }
+
+  Future<http.Response> updateUserProfile(
+      String userId,
+      String name,
+      String password,
+      double height,
+      String maritalStatus,
+      File? profilePicture) async {
+    var uri = Uri.parse('$baseUrl/update_user/');
+    var request = http.MultipartRequest('PUT', uri)
+      ..fields['user_id'] = userId
+      ..fields['name'] = name
+      ..fields['password'] = password
+      ..fields['height'] = height.toString()
+      ..fields['marital_status'] = maritalStatus;
+
+    if (profilePicture != null) {
+      request.files.add(await http.MultipartFile.fromPath(
+          'profile_picture', profilePicture.path));
+    }
+
+    var response = await request.send();
+    return await http.Response.fromStream(response);
   }
 }

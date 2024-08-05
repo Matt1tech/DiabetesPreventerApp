@@ -84,60 +84,35 @@ def login(request):
     else:
         return Response({"error": "Invalid Credentials"}, status=status.HTTP_401_UNAUTHORIZED)
     
-@api_view(['GET'])
-def user_details(request):
-    user = request.user
-    serializer = UserSerializer(user)
-    return Response(serializer.data)
     
 @api_view(['POST'])
 def logout(request):
     return Response(status=status.HTTP_205_RESET_CONTENT)
     
 
-
-
-
 @api_view(['PUT'])
 @parser_classes([MultiPartParser, FormParser])
-def update_user(request):
+def update_user_profile(request):
     user_id = request.data.get('user_id')
     user = get_object_or_404(User, id=user_id)
-    
-    if 'password' in request.data:
-        user.password = make_password(request.data['password'])
-    
-    if 'height' in request.data:
-        user.height = request.data['height']
-    
-    if 'marital_status' in request.data:
-        user.marital_status = request.data['marital_status']
-    
-    if 'profile_picture' in request.FILES:
-        image = request.FILES['profile_picture']
+
+    data = request.data.dict()
+    image = request.FILES.get('profile_picture')
+    if image:
         image_path = default_storage.save('profile_pictures/' + image.name, ContentFile(image.read()))
-        user.profile_picture = image_path
+        data['profile_picture'] = image_path
+    else:
+        # If 'remove_profile_picture' is set in the request, clear the profile picture
+        if request.data.get('remove_profile_picture') == 'true':
+            data['profile_picture'] = None
 
-    user.save()
-    
-    user_data = {
-        'id': user.id,
-        'name': user.name,
-        'email': user.email,
-        'gender': user.gender,
-        'marital_status': user.marital_status,
-        'height': user.height,
-        'birthdate': str(user.birthdate),
-        'family_history': user.family_history,
-        'profile_picture': user.profile_picture,
-        'created_at': str(user.created_at),
-    }
-    
-    return Response({'user': user_data}, status=status.HTTP_200_OK)
-
-
-
-
+    serializer = UserSerializer(user, data=data, partial=True)
+    if serializer.is_valid():
+        if 'password' in serializer.validated_data:
+            serializer.validated_data['password'] = make_password(serializer.validated_data['password'])
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 
@@ -562,7 +537,7 @@ def request_otp(request):
     user.save()
 
     email_subject = 'Password Reset OTP'
-    email_body = f"Your OTP for password reset is: {otp}"
+    email_body = f" Thank you for using Diabetes Preventer Application. \n Your OTP for password reset is: {otp}\n , Stay healthy.\n Diabetes Preventer Application \n Users Support Team."
     
     try:
         send_mail(
@@ -605,37 +580,11 @@ def verify_otp(request):
     
     
     
-    
-    """
-    
+
  
     
     
-    
-    
-    @api_view(['PUT'])
-def updateUser(request, pk):
-    try:
-        user_data = User.objects.get(userId=pk)
-    except User.DoesNotExist:
-        return Response({'error': 'User not found'}, status=404)
 
-    data = request.data
-
-    # Handle password separately if it's in the request
-    if 'password' in data:
-        data['password'] = make_password(data['password'])
-
-    serializer = UserSerializer(user_data, data=data, partial=True)
-    
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data)
-    else:
-        return Response(serializer.errors, status=400)
-        
-        
-    
     
     
     
@@ -645,5 +594,4 @@ def updateUser(request, pk):
     
 
 
-    """
 

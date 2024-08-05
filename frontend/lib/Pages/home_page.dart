@@ -232,11 +232,11 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   const SizedBox(height: 20),
                   nutrientsDetailsSection(),
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 10),
                   riskOverviewSection(),
                   const SizedBox(height: 50),
                   healthRecordSection(),
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 50),
                   healthInformationLogsSection(),
                   const SizedBox(height: 40),
                   activityLogsSection(),

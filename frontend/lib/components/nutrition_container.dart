@@ -303,7 +303,7 @@ class NutritionDetails extends StatelessWidget {
             children: [
               const SizedBox(height: 10),
               const Padding(
-                padding: EdgeInsets.only(left: 10),
+                padding: EdgeInsets.only(left: 5),
                 child: Text(
                   'Nutrition Details',
                   style: TextStyle(

@@ -5,15 +5,9 @@ import 'package:image_picker/image_picker.dart';
 import '../utils/utilities.dart';
 import '../widgets/widgets.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import '../models/user.dart'; // Replace with the correct path to your User model
-
+import '../services/auth_service.dart';
+import '../models/user.dart';
 import 'home_page.dart';
-
-final _formKey = GlobalKey<FormState>();
-final _emailController = TextEditingController();
-final _passwordController = TextEditingController();
-final _confirmPasswordController = TextEditingController();
-final _weightController = TextEditingController();
 
 class UpdateProfilePage extends StatefulWidget {
   const UpdateProfilePage({Key? key}) : super(key: key);
@@ -23,13 +17,23 @@ class UpdateProfilePage extends StatefulWidget {
 }
 
 class _UpdateProfilePageState extends State<UpdateProfilePage> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _heightController = TextEditingController();
   List<bool> isSelectedGender = [true, false];
+  List<bool> isSelectedMaritalStatus = [true, false];
+  final FlutterSecureStorage storage = FlutterSecureStorage();
   XFile? _profilePicture;
-  final storage = FlutterSecureStorage();
   final ImagePicker _picker = ImagePicker();
+  String? userName;
+  String? userProfilePicture;
+  String? userId;
+  String? userEmail;
 
   @override
   void initState() {
@@ -41,44 +45,58 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
     final userInfo = await loadUserInfo();
     setState(() {
       _nameController.text = userInfo['userName'] ?? '';
-      /* _emailController.text = globals.userEmail ?? '';
-      _dateController.text = globals.userBirthdate ?? '';
-      _heightController.text = globals.userHeight ?? '';
-      _weightController.text = globals.userWeight ?? '';
+      _emailController.text = userInfo['userEmail'] ?? '';
+      _dateController.text = userInfo['userBirthdate'] ?? '';
+      _heightController.text = userInfo['userHeight'] ?? '';
       isSelectedGender =
-          globals.userGender == 'Male' ? [true, false] : [false, true];
+          userInfo['userGender'] == 'Male' ? [true, false] : [false, true];
+      isSelectedMaritalStatus = userInfo['userMaritalStatus'] == 'Married'
+          ? [true, false]
+          : [false, true];
       _profilePicture = userInfo['userProfilePicture'] != null
           ? XFile(userInfo['userProfilePicture']!)
-          : null;*/
+          : null;
+      userName = userInfo['userName'];
+      userProfilePicture = userInfo['userProfilePicture'];
+      userId = userInfo['userId'];
+      userEmail = userInfo['userEmail'];
     });
   }
 
   Future<Map<String, String?>> loadUserInfo() async {
-    final storage = FlutterSecureStorage();
     final userJson = await storage.read(key: 'user_data');
-
     if (userJson != null) {
       final userMap = jsonDecode(userJson);
-      print('User JSON: $userMap'); // Debug statement
-      final user = User.fromJson(userMap);
-      final userName = user.name;
-      final userId = user.id;
-      // Construct the full URL for the profile picture
-      final userProfilePicture =
-          'http://10.0.2.2:8000/media/${user.profile_picture}';
-      print('User Name: $userName'); // Debug statement
-      print('User Profile Picture: $userProfilePicture'); // Debug statement
+      final userName = userMap['name'];
+      final userEmail = userMap['email'];
+      final userBirthdate = userMap['birthdate'];
+      final userHeight = userMap['height'];
+      final userGender = userMap['gender'];
+      final userMaritalStatus = userMap['marital_status'];
+      final userProfilePicture = userMap['profile_picture'] != null
+          ? 'http://10.0.2.2:8000/media/${userMap['profile_picture']}'
+          : null;
+      final userId = userMap['id'].toString();
       return {
         'userName': userName,
+        'userEmail': userEmail,
+        'userBirthdate': userBirthdate,
+        'userHeight': userHeight,
+        'userGender': userGender,
+        'userMaritalStatus': userMaritalStatus,
         'userProfilePicture': userProfilePicture,
-        'user_id': userId.toString(),
+        'userId': userId,
       };
     } else {
-      print('No user data found in storage'); // Debug statement
       return {
         'userName': null,
+        'userEmail': null,
+        'userBirthdate': null,
+        'userHeight': null,
+        'userGender': null,
+        'userMaritalStatus': null,
         'userProfilePicture': null,
-        'user_id': null,
+        'userId': null,
       };
     }
   }
@@ -90,13 +108,70 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
     });
   }
 
+  void _removeProfilePicture() {
+    setState(() {
+      _profilePicture = null;
+      userProfilePicture = null; // Also clear the userProfilePicture
+    });
+  }
+
   @override
   void dispose() {
     _nameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
     _dateController.dispose();
     _heightController.dispose();
-    _weightController.dispose();
     super.dispose();
+  }
+
+  void _updateProfile() async {
+    if (_formKey.currentState!.validate()) {
+      String userId = (await storage.read(key: 'user_id'))!;
+      String name = _nameController.text;
+      String password = _passwordController.text;
+      double height = double.parse(_heightController.text);
+      String maritalStatus = isSelectedMaritalStatus[0] ? 'Married' : 'Single';
+
+      var response = await AuthService().updateUserProfile(
+        userId,
+        name,
+        password,
+        height,
+        maritalStatus,
+        _profilePicture != null ? File(_profilePicture!.path) : null,
+      );
+
+      if (response.statusCode == 200) {
+        final snackBar =
+            SnackBar(content: Text('Profile updated successfully!'));
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+
+        // Update user data in storage
+        final updatedUser = {
+          'name': name,
+          'email': userEmail,
+          'birthdate': _dateController.text,
+          'height': height.toString(),
+          'gender': isSelectedGender[0] ? 'Male' : 'Female',
+          'marital_status': maritalStatus,
+          'profile_picture':
+              _profilePicture != null ? _profilePicture!.path : null,
+          'id': userId,
+        };
+        await storage.write(key: 'user_data', value: jsonEncode(updatedUser));
+
+        // Update the UI immediately
+        setState(() {
+          _loadUserInfo(); // Reload user info to reflect changes
+        });
+      } else {
+        final snackBar =
+            SnackBar(content: Text('Update failed: ${response.body}'));
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      }
+    }
   }
 
   @override
@@ -106,7 +181,8 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
       appBar: AppBar(
         backgroundColor: blueColor,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: Icon(Icons.arrow_back,
+              color: Colors.white), // Set the color to white
           onPressed: () {
             Navigator.push(
               context,
@@ -117,8 +193,14 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
         title: Text('Update Profile'),
         actions: [
           IconButton(
-            icon: Icon(Icons.add),
+            icon:
+                Icon(Icons.add, color: Colors.white), // Set the color to white
             onPressed: _pickProfilePicture,
+          ),
+          IconButton(
+            icon: Icon(Icons.delete,
+                color: Colors.white), // Set the color to white
+            onPressed: _removeProfilePicture,
           ),
         ],
       ),
@@ -139,38 +221,38 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
                       backgroundColor: Colors.grey[200],
                       backgroundImage: _profilePicture != null
                           ? FileImage(File(_profilePicture!.path))
-                          : null,
-                      child: _profilePicture == null
-                          ? Icon(
-                              Icons.camera_alt,
-                              size: 40,
-                              color: Colors.grey[800],
-                            )
-                          : null,
+                          : (userProfilePicture != null
+                              ? NetworkImage(userProfilePicture!)
+                              : null) as ImageProvider?,
+                      child:
+                          _profilePicture == null && userProfilePicture == null
+                              ? Icon(Icons.camera_alt,
+                                  size: 40, color: Colors.grey[800])
+                              : null,
                     ),
                   ),
                 ),
                 const SizedBox(height: 16),
                 TextField(
                   controller: _nameController,
-                  readOnly: true, // Disable editing
+                  readOnly: false,
                   decoration: InputDecoration(
                     labelText: 'Name',
-                    prefixIcon:
-                        Icon(Icons.person), // Use prefixIcon instead of icon
+                    prefixIcon: Icon(Icons.person),
                     filled: true,
                     fillColor: Colors.grey[200],
                   ),
                 ),
                 const SizedBox(height: 16),
-                ReusableTextFormField(
-                  labelText: 'Email',
-                  icon: Icons.email,
-                  validatorMessage: 'Please enter a valid email',
-                  validatorFormat:
-                      RegExp(r'^[\w-]+(\.[\w-]+)*@[\w-]+(\.\w{2,3})+$'),
+                TextField(
                   controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
+                  readOnly: true,
+                  decoration: InputDecoration(
+                    labelText: userEmail ?? 'Email',
+                    prefixIcon: Icon(Icons.email),
+                    filled: true,
+                    fillColor: Colors.grey[200],
+                  ),
                 ),
                 const SizedBox(height: 16),
                 ReusableTextFormField(
@@ -199,14 +281,35 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
                   },
                 ),
                 const SizedBox(height: 16),
+                const Text(
+                  'Marital Status',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: blueColor,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 const SizedBox(height: 8),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    const SizedBox(width: 16),
-                  ],
+                CustomToggleButtons(
+                  options: const ['Married', 'Single'],
+                  isSelected: isSelectedMaritalStatus,
+                  onPressed: (int index) {
+                    setState(() {
+                      for (int i = 0; i < isSelectedMaritalStatus.length; i++) {
+                        isSelectedMaritalStatus[i] = i == index;
+                      }
+                    });
+                  },
                 ),
                 const SizedBox(height: 16),
+                ReusableTextFormField(
+                  labelText: 'Height',
+                  icon: null,
+                  validatorMessage: 'Invalid Height',
+                  validatorFormat: RegExp(r'^\d+(\.\d+)?$'),
+                  controller: _heightController,
+                  suffixText: 'cm',
+                ),
                 const SizedBox(height: 24),
                 Center(
                   child: ElevatedButton(
@@ -239,7 +342,7 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
                         ),
                       ),
                     ),
-                    onPressed: () {},
+                    onPressed: _updateProfile,
                     child: const Text(
                       'Update',
                       style: TextStyle(

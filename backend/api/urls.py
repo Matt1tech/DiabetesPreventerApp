@@ -5,9 +5,8 @@ from django.contrib.auth import views as auth_views
 urlpatterns = [
     path('create_user/', views.create_user, name='create_user'),
     path('login/', views.login, name='login'),
-    path('user_details/', views.user_details, name='user_details'),
     path('logout/', views.logout, name='logout'),
-    path('update_user/', views.update_user, name='update_user'),
+    path('update_user/', views.update_user_profile, name='update_user'),
     path('health-record/', views.create_or_update_health_record, name='create_or_update_health_record'),
     path('health-record/last/<int:user_id>/', views.get_last_health_record, name='get_last_health_record'),
     path('create_meal/', views.create_meal, name='create_meal'),
