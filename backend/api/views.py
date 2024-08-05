@@ -542,7 +542,6 @@ def monthely_risk(request):
 import logging
 
 logger = logging.getLogger(__name__)
-
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def request_password_reset(request):
@@ -557,21 +556,32 @@ def request_password_reset(request):
 
     token = default_token_generator.make_token(user)
     uid = urlsafe_base64_encode(force_bytes(user.pk))
-    reset_link = request.build_absolute_uri(reverse('password_reset_confirm', kwargs={'uidb64': uid, 'token': token}))
-    
+    protocol = 'https' if request.is_secure() else 'http'
+    domain = request.get_host()
+    reset_link = f"{protocol}://{domain}/reset/{uid}/{token}/"
+
+    email_subject = 'Password Reset Request'
+    email_body = (
+        f"Hi {user.name},\n\n"
+        f"You're receiving this email because you requested a password reset for your user account at {domain}.\n\n"
+        f"Please go to the following page and choose a new password:\n"
+        f"{reset_link}\n\n"
+        f"Your username, in case you've forgotten: {user.email}\n\n"
+        f"Thanks for using our site!\n"
+        f"The {domain} team"
+    )
+
     try:
         send_mail(
-            'Password Reset Request',
-            f'Click the link to reset your password: {reset_link}',
+            email_subject,
+            email_body,
             settings.DEFAULT_FROM_EMAIL,
             [email],
+            fail_silently=False,
         )
+        return Response({'message': 'Password reset link sent'}, status=status.HTTP_200_OK)
     except Exception as e:
-        logger.error(f"Failed to send email: {e}")
-        return Response({'error': 'Failed to send reset link'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-    return Response({'message': 'Password reset link sent'}, status=status.HTTP_200_OK)
-
+        return Response({'error': f'Failed to send reset link: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
