@@ -5,7 +5,7 @@ part 'health_records.g.dart';
 @JsonSerializable()
 class HealthRecord {
   double? blood_glucose;
-  String? blood_pressure;
+  double? blood_pressure;
   double? bmi;
   double? weight;
   double? diabetes_risk;
@@ -23,7 +23,7 @@ class HealthRecord {
   factory HealthRecord.fromJson(Map<String, dynamic> json) {
     return HealthRecord(
       blood_glucose: json['blood_glucose']?.toDouble(),
-      blood_pressure: json['blood_pressure']?.toString(),
+      blood_pressure: json['blood_pressure']?.toDouble(),
       bmi: json['bmi']?.toDouble(),
       weight: json['weight']?.toDouble(),
       diabetes_risk: json['diabetes_risk']?.toDouble(),

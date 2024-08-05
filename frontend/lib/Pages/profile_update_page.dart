@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import '../utils/utilities.dart';
 import '../widgets/widgets.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../models/user.dart'; // Replace with the correct path to your User model
 
 import 'home_page.dart';
 
@@ -53,17 +54,18 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
   }
 
   Future<Map<String, String?>> loadUserInfo() async {
+    final storage = FlutterSecureStorage();
     final userJson = await storage.read(key: 'user_data');
+
     if (userJson != null) {
       final userMap = jsonDecode(userJson);
       print('User JSON: $userMap'); // Debug statement
-      var userModel;
-      final user = userModel.User.fromJson(userMap);
+      final user = User.fromJson(userMap);
       final userName = user.name;
       final userId = user.id;
       // Construct the full URL for the profile picture
       final userProfilePicture =
-          '${'http://10.0.2.2:8000'}/media/${user.profile_picture}';
+          'http://10.0.2.2:8000/media/${user.profile_picture}';
       print('User Name: $userName'); // Debug statement
       print('User Profile Picture: $userProfilePicture'); // Debug statement
       return {
@@ -76,7 +78,7 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
       return {
         'userName': null,
         'userProfilePicture': null,
-        'userId': null,
+        'user_id': null,
       };
     }
   }

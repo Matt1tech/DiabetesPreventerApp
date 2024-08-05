@@ -63,7 +63,6 @@ class NutritionContainer extends StatelessWidget {
   }
 }
 
-/// A widget that displays animated nutrition information in a vertical container.
 class AnimatedNutritionContainer extends StatefulWidget {
   final String title;
   final int calories;
@@ -91,7 +90,9 @@ class AnimatedNutritionContainer extends StatefulWidget {
 class _AnimatedNutritionContainerState
     extends State<AnimatedNutritionContainer> {
   /// Calculates the fill percentage for the animated container.
-  double get fillPercentage => widget.calories / widget.maxCalories;
+  double get fillPercentage =>
+      widget.calories /
+      widget.maxCalories.toDouble(); // Ensure the division result is double
 
   @override
   Widget build(BuildContext context) {
@@ -164,7 +165,6 @@ class _AnimatedNutritionContainerState
   }
 }
 
-/// A widget that displays animated nutrition information in a horizontal container.
 class AnimatedHorizontalContainer extends StatefulWidget {
   final String title;
   final int calories;
@@ -195,7 +195,9 @@ class AnimatedHorizontalContainer extends StatefulWidget {
 class _AnimatedHorizontalContainerState
     extends State<AnimatedHorizontalContainer> {
   /// Calculates the fill percentage for the animated container.
-  double get fillPercentage => widget.calories / widget.maxCalories;
+  double get fillPercentage =>
+      widget.calories /
+      widget.maxCalories.toDouble(); // Ensure the division result is double
 
   @override
   Widget build(BuildContext context) {

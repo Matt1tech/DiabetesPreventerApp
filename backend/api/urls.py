@@ -20,6 +20,7 @@ urlpatterns = [
     path('physical_record/', views.physical_record, name='physical_record'),
     path('update-customization/', views.update_customizations, name='update-customization'),
     path('get-user-customization/<int:user_id>/', views.get_user_customization, name='get-user-customization'),
+    path('test_model/', views.test_model, name='test_model'),
 ]
     
     

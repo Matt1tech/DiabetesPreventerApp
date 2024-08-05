@@ -26,8 +26,7 @@ class UserHealthRecordsService {
     }
   }
 
-  static Future<void> inputBloodPressure(
-      int userId, String bloodPressure) async {
+  static Future<void> inputBloodPressure(int userId, int bloodPressure) async {
     final url = Uri.parse('$baseUrl/health-record/');
     final headers = {'Content-Type': 'application/json'};
     final body = json.encode({

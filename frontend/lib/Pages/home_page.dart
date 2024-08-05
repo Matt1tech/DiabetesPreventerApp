@@ -44,6 +44,7 @@ class _HomePageState extends State<HomePage> {
   final PhysicalActivityRecordsService service =
       PhysicalActivityRecordsService();
   Customizations? userCustomizations;
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
@@ -55,6 +56,7 @@ class _HomePageState extends State<HomePage> {
     fetchUserCustomizationsService = FetchUserCustomizationsService();
     fetchLastHealthRecord();
     fetchDailyNutrition();
+    fetchUserCustomizations();
     logoutManager = LogoutManager(context: context, authService: _authService);
   }
 
@@ -144,7 +146,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-// Handle the image of the profile picture
+  // Handle the image of the profile picture
   Future<void> _loadUserInfo() async {
     final userInfo = await loadUserInfo();
     if (mounted) {
@@ -168,6 +170,15 @@ class _HomePageState extends State<HomePage> {
       fetchLastHealthRecord();
       fetchDailyNutrition();
       fetchUserCustomizations();
+    }
+  }
+
+  Future<void> _pickProfilePicture() async {
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      setState(() {
+        _profilePicture = image;
+      });
     }
   }
 
@@ -221,11 +232,6 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   const SizedBox(height: 10),
                   const SizedBox(height: 10),
-                  /*
-                  if (userCustomizations != null) 
-                  if (userCustomizations == null)
-                    nutrientsDetailsSectionWithDefault(),
-                    */ // Show default values if userCustomizations is null
                   nutrientsDetailsSection(),
                   const SizedBox(height: 30),
                   riskOverviewSection(),
@@ -268,77 +274,77 @@ class _HomePageState extends State<HomePage> {
 
   // Suitable menu slider Section
   List<Widget> get menuSlider {
-    return [
-      const Padding(
-        padding: EdgeInsets.only(left: 20, top: 3),
-        child: Text(
-          'Suitable Menu',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Color.fromARGB(255, 240, 236, 236),
-            fontSize: 18.0,
-          ),
-        ),
-      ),
-      const SizedBox(height: 10),
-      Container(
-        height: 95,
-        child: ListView.separated(
-          itemCount: menu.length,
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.only(left: 20, right: 20),
-          separatorBuilder: (context, index) => const SizedBox(width: 15),
-          itemBuilder: (context, index) {
-            return InkWell(
-              onTap: () {
-                // Handle button press
-                //print('Item ${menu[index].name} pressed');
-                // Add navigation or other logic here
-              },
-              child: Container(
-                width: 90,
-                decoration: BoxDecoration(
-                  color: menu[index].boxColor.withOpacity(0.7),
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 4,
-                      offset: Offset(2, 2),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Container(
-                      width: 60,
-                      height: 60,
-                      decoration: const BoxDecoration(
-                        color: Color.fromARGB(255, 240, 236, 236),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: SvgPicture.asset(menu[index].imagePath),
-                      ),
-                    ),
-                    Text(
-                      menu[index].name,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w400,
-                        color: Colors.black,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
+    return menu.isNotEmpty
+        ? [
+            const Padding(
+              padding: EdgeInsets.only(left: 20, top: 3),
+              child: Text(
+                'Suitable Menu',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Color.fromARGB(255, 240, 236, 236),
+                  fontSize: 18.0,
                 ),
               ),
-            );
-          },
-        ),
-      ),
-    ];
+            ),
+            const SizedBox(height: 10),
+            Container(
+              height: 95,
+              child: ListView.separated(
+                itemCount: menu.length,
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.only(left: 20, right: 20),
+                separatorBuilder: (context, index) => const SizedBox(width: 15),
+                itemBuilder: (context, index) {
+                  return InkWell(
+                    onTap: () {
+                      // Handle button press
+                    },
+                    child: Container(
+                      width: 90,
+                      decoration: BoxDecoration(
+                        color: menu[index].boxColor.withOpacity(0.7),
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Colors.black26,
+                            blurRadius: 4,
+                            offset: Offset(2, 2),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Container(
+                            width: 60,
+                            height: 60,
+                            decoration: const BoxDecoration(
+                              color: Color.fromARGB(255, 240, 236, 236),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: SvgPicture.asset(menu[index].imagePath),
+                            ),
+                          ),
+                          Text(
+                            menu[index].name,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w400,
+                              color: Colors.black,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ]
+        : [];
   }
 
   // Nutrients Details Section
@@ -347,40 +353,35 @@ class _HomePageState extends State<HomePage> {
       width: 380,
       height: 220,
       child: NutritionDetails(
-        totalCalories: (nutritionData['total_calories'] ?? 0),
-        proteinCalories: (nutritionData['total_protein'] ?? 0),
-        fatsCalories: (nutritionData['total_fats'] ?? 0),
-        carbsCalories: (nutritionData['total_carbs'] ?? 0),
-        fiberCalories: (nutritionData['total_fiber'] ?? 0),
-        maxTotalCalories: 2000, //userCustomizations?.dailyCaloriesMax ??
-        maxProteinCalories: 180, //userCustomizations?.maxProtein ??
-        maxFatsCalories: 250, //userCustomizations?.maxFat ??
-        maxCarbsCalories: 300, //userCustomizations?.maxCarbs ??
-        maxFiberCalories: 75, //userCustomizations?.maxFiber ??
+        totalCalories: (nutritionData['total_calories'] ?? 0).toInt(),
+        proteinCalories: (nutritionData['total_protein'] ?? 0).toInt(),
+        fatsCalories: (nutritionData['total_fats'] ?? 0).toInt(),
+        carbsCalories: (nutritionData['total_carbs'] ?? 0).toInt(),
+        fiberCalories: (nutritionData['total_fiber'] ?? 0).toInt(),
+        maxTotalCalories: (userCustomizations?.dailyCaloriesMax != null &&
+                userCustomizations!.dailyCaloriesMax > 0)
+            ? userCustomizations!.dailyCaloriesMax.toInt()
+            : 2000,
+        maxProteinCalories: (userCustomizations?.maxProtein != null &&
+                userCustomizations!.maxProtein > 0)
+            ? userCustomizations!.maxProtein.toInt()
+            : 180,
+        maxFatsCalories: (userCustomizations?.maxFat != null &&
+                userCustomizations!.maxFat > 0)
+            ? userCustomizations!.maxFat.toInt()
+            : 250,
+        maxCarbsCalories: (userCustomizations?.maxCarbs != null &&
+                userCustomizations!.maxCarbs > 0)
+            ? userCustomizations!.maxCarbs.toInt()
+            : 300,
+        maxFiberCalories: (userCustomizations?.maxFiber != null &&
+                userCustomizations!.maxFiber > 0)
+            ? userCustomizations!.maxFiber.toInt()
+            : 75,
       ),
     );
   }
 
-/*
-  Container nutrientsDetailsSectionWithDefault() {
-    return Container(
-      width: 380,
-      height: 220,
-      child: NutritionDetails(
-        totalCalories: (nutritionData['total_calories'] ?? 0),
-        proteinCalories: (nutritionData['total_protein'] ?? 0),
-        fatsCalories: (nutritionData['total_fats'] ?? 0),
-        carbsCalories: (nutritionData['total_carbs'] ?? 0),
-        fiberCalories: (nutritionData['total_fiber'] ?? 0),
-        maxTotalCalories: 2000,
-        maxProteinCalories: 180,
-        maxFatsCalories: 250,
-        maxCarbsCalories: 300,
-        maxFiberCalories: 75,
-      ),
-    );
-  }
-*/
   // Risk Overview Section
   Column riskOverviewSection() {
     return Column(
@@ -462,7 +463,7 @@ class _HomePageState extends State<HomePage> {
                 // Implement  backend sending logic here
                 if (user_id != null) {
                   UserHealthRecordsService.inputBloodPressure(
-                      int.parse(user_id!), value.toString());
+                      int.parse(user_id!), value);
                 }
               },
               width: 180, // Specify the width as needed
@@ -561,7 +562,11 @@ class _HomePageState extends State<HomePage> {
               ),
               child: Padding(
                 padding: const EdgeInsets.all(10.0),
-                child: ExerciseRecord(userId: user_id!, service: service),
+                child: user_id != null
+                    ? ExerciseRecord(userId: user_id!, service: service)
+                    : Center(
+                        child:
+                            CircularProgressIndicator()), // Show a loading indicator or a placeholder
               ),
             ),
             const SizedBox(height: 40),
@@ -570,7 +575,7 @@ class _HomePageState extends State<HomePage> {
               height: 380,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
-                color: Color.fromARGB(255, 240, 236, 236),
+                color: Color.fromARGB(255, 255, 255, 255),
                 boxShadow: const [
                   BoxShadow(
                     color: Colors.black26,
@@ -581,7 +586,9 @@ class _HomePageState extends State<HomePage> {
               ),
               child: Padding(
                 padding: const EdgeInsets.all(10.0),
-                child: StressLevelSelector(userId: user_id!, service: service),
+                child: user_id != null
+                    ? StressLevelSelector(userId: user_id!, service: service)
+                    : Center(child: CircularProgressIndicator()),
               ),
             ),
           ],
@@ -620,8 +627,8 @@ class _HomePageState extends State<HomePage> {
             ),
             const SizedBox(width: 5),
             Text(
-              lastHealthRecord != null
-                  ? '${lastHealthRecord!.blood_glucose?.toString()}'
+              lastHealthRecord?.blood_glucose != null
+                  ? lastHealthRecord!.blood_glucose!.toInt().toString()
                   : 'N/A',
               style: const TextStyle(
                 fontSize: 18,
@@ -665,8 +672,8 @@ class _HomePageState extends State<HomePage> {
             ),
             const SizedBox(width: 5),
             Text(
-              lastHealthRecord != null
-                  ? '${lastHealthRecord!.blood_pressure}/d'
+              lastHealthRecord?.blood_pressure != null
+                  ? lastHealthRecord!.blood_pressure!.toInt().toString()
                   : 'N/A',
               style: const TextStyle(
                 fontSize: 18,

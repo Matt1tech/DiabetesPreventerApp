@@ -8,7 +8,7 @@ part of 'health_records.dart';
 
 HealthRecord _$HealthRecordFromJson(Map<String, dynamic> json) => HealthRecord(
       blood_glucose: (json['blood_glucose'] as num?)?.toDouble(),
-      blood_pressure: json['blood_pressure'] as String?,
+      blood_pressure: (json['blood_pressure'] as num?)?.toDouble(),
       bmi: (json['bmi'] as num?)?.toDouble(),
       weight: (json['weight'] as num?)?.toDouble(),
       diabetes_risk: (json['diabetes_risk'] as num?)?.toDouble(),

@@ -90,6 +90,11 @@ class _NutrientationPageState extends State<NutrientationPage> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     ImageProvider<Object> imageProvider =
         getImageProvider(_profilePicture, userProfilePicture);
@@ -122,12 +127,12 @@ class _NutrientationPageState extends State<NutrientationPage> {
                 padding: const EdgeInsets.all(8.0),
                 child: Column(
                   children: [
-                    Text('Analysis Results:',
+                    const Text('Analysis Results:',
                         style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                             color: pinkColor)),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     Text('Name: ${analysisData!['display_name']}',
                         style: const TextStyle(color: blueColor)),
                     Text('Proteins: ${analysisData!['proteins']} g',

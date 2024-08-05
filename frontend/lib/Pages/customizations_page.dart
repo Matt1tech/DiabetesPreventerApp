@@ -30,6 +30,7 @@ class _CustomizationsPageState extends State<CustomizationsPage> {
   String? userName;
   final storage = FlutterSecureStorage();
   String? user_id;
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
@@ -66,6 +67,20 @@ class _CustomizationsPageState extends State<CustomizationsPage> {
         user_id = userId;
       });
     }
+  }
+
+  Future<void> _pickProfilePicture() async {
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      setState(() {
+        _profilePicture = image;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
@@ -294,7 +309,6 @@ class _CustomizationsPageState extends State<CustomizationsPage> {
             child: Text(
               'Daily Calories',
               style: TextStyle(
-                fontWeight: FontWeight.bold,
                 color: blueColor,
                 fontSize: 22.0,
               ),

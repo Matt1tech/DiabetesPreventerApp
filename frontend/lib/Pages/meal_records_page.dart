@@ -93,6 +93,15 @@ class _MealRecordsPageState extends State<MealRecordsPage> {
     }
   }
 
+  Future<void> _pickProfilePicture() async {
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      setState(() {
+        _profilePicture = image;
+      });
+    }
+  }
+
   Future<void> _analyzeImage(File imageFile) async {
     final apiKey = 'uPsCgdLq.jIrKCQePQaXday8iQYsqEgzpcHT1r7Tr';
     final data = await analyzeImage(imageFile, apiKey);
@@ -185,6 +194,11 @@ class _MealRecordsPageState extends State<MealRecordsPage> {
         _isLoading = false;
       });
     }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override

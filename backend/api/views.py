@@ -17,6 +17,10 @@ from rest_framework.decorators import parser_classes
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.db.models import Sum
+from .model_utils import model  # Import the loaded model
+import pandas as pd
+from .model_features import *
+import logging
 
 
 @api_view(['POST'])
@@ -126,9 +130,67 @@ def update_user(request):
 
 
 
+
+
+
+
+@api_view(['POST'])
+def test_model(request):
+    # Extract features from the request data
+    feature_data = request.data
+    
+    # Check if all required features are provided
+    required_features = [
+        'HighBP', 'HighChol', 'BMI', 'PhysActivity', 'Fruits', 
+        'Veggies', 'GenHlth', 'MentHlth', 'PhysHlth', 'Sex', 
+        'Age', 'DiabetesPedigreeFunction', 'FamilyHistory', 'Glucose'
+    ]
+    
+    for feature in required_features:
+        if feature not in feature_data:
+            return Response({'error': f'Missing feature: {feature}'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    # Convert the input data to a DataFrame
+    input_df = pd.DataFrame([feature_data])
+
+    # Ensure the input features match the training feature order
+    model_features = model.feature_names_in_
+    input_df = input_df[model_features]
+
+    # Make a prediction
+    prediction = model.predict(input_df)
+    prediction_prob = model.predict_proba(input_df)
+
+    return Response({
+        'prediction': prediction[0],
+        'prediction_probabilities': prediction_prob[0].tolist()
+    }, status=status.HTTP_200_OK)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Setup logging
+logger = logging.getLogger(__name__)
 @api_view(['POST'])
 def create_or_update_health_record(request):
-    today = date.today()
+    today = timezone.now().date()
     data = request.data
 
     user_id = data.get('user')
@@ -148,22 +210,64 @@ def create_or_update_health_record(request):
     if not any([weight, blood_glucose, blood_pressure]):
         return Response({'error': 'At least one of weight, blood_glucose, or blood_pressure must be provided.'}, status=status.HTTP_400_BAD_REQUEST)
 
-    bmi = None
-    diabetes_risk = None
+    bmi = calculate_bmi(weight, user.height)
+    age = calculate_age(user.birthdate)
+    high_bp = is_high_bp(blood_pressure)
+    high_chol = is_high_cholesterol(user)
+    start_date = today - timedelta(days=30)
+    ment_hlth = calculate_mental_health(user, start_date)
+    phys_hlth = calculate_physical_health(user, start_date)
+    gen_hlth = calculate_general_health(user, start_date)
+    fruits = check_fruit_intake(user, today)
+    veggies = check_veggie_intake(user, today)
+    glucose = calculate_average_blood_glucose(user)
 
-    if weight is not None:
-        try:
-            weight = float(weight)
-        except ValueError:
-            return Response({'weight': 'Invalid value'}, status=status.HTTP_400_BAD_REQUEST)
+    # Dynamically calculate DiabetesPedigreeFunction
+    diabetes_pedigree_function = calculate_diabetes_pedigree_function(user)
 
-        # Calculate BMI
-        height = user.height / 100  # Assuming height is in centimeters
-        bmi = weight / (height * height)
+    # Calculate average blood glucose if not provided
+    if blood_glucose is None:
+        blood_glucose = glucose
 
-        # Predict diabetes risk using the machine learning model
-        # features = [weight, height, bmi, blood_glucose, blood_pressure, user.age, user.family_history]  # Add other necessary features
-        # diabetes_risk = predict_diabetes_risk(features)
+    # Ensure FamilyHistory is either 0 or 1
+    family_history = 1 if user.family_history else 0
+
+    # Prepare the features in the correct order
+    features_dict = {
+        'HighBP': high_bp,
+        'HighChol': high_chol,
+        'BMI': bmi,
+        'PhysActivity': phys_hlth,
+        'Fruits': fruits,
+        'Veggies': veggies,
+        'GenHlth': gen_hlth,
+        'MentHlth': ment_hlth,
+        'PhysHlth': phys_hlth,
+        'Sex': 1 if user.gender.lower() == 'male' else 0,
+        'Age': age,
+        'DiabetesPedigreeFunction': diabetes_pedigree_function,
+        'Glucose': glucose,
+        'FamilyHistory': family_history
+    }
+
+    # Ensure the features are in the correct order
+    features_df = pd.DataFrame([features_dict])[FEATURE_ORDER]
+
+    # Log the ordered features for debugging
+    print("Model expects features:", model.feature_names_in_)
+    print("Ordered features:", features_df.columns.tolist())
+    print("Feature values:", features_df.iloc[0].to_dict())
+
+    # Ensure the input features match the training feature order
+    if list(features_df.columns) != list(model.feature_names_in_):
+        return Response({'error': 'Feature names do not match the model.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Predict diabetes risk using the machine learning model
+    try:
+        diabetes_risk = model.predict(features_df)[0]
+    except ValueError as e:
+        print("Error during model prediction:", str(e))
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     # Check if a record exists for the user for today
     existing_record = HealthRecord.objects.filter(user=user, created_at__date=today).first()
@@ -472,5 +576,4 @@ def updateUser(request, pk):
 
 
     """
-
 

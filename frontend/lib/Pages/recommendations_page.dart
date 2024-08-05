@@ -26,6 +26,7 @@ class _RecommendationsState extends State<RecommendationsPage> {
   String? userName;
   final storage = FlutterSecureStorage();
   String? user_id;
+  final ImagePicker _picker = ImagePicker();
   void initState() {
     super.initState();
     _loadUserInfo();
@@ -57,6 +58,20 @@ class _RecommendationsState extends State<RecommendationsPage> {
       this.userProfilePicture = userProfilePicture;
       this.user_id = userId;
     });
+  }
+
+  Future<void> _pickProfilePicture() async {
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      setState(() {
+        _profilePicture = image;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override

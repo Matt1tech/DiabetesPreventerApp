@@ -118,6 +118,11 @@ class _ReportsGenerationPageState extends State<ReportsGenerationPage> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     ImageProvider<Object> imageProvider =
         getImageProvider(_profilePicture, userProfilePicture);
@@ -147,12 +152,6 @@ class _ReportsGenerationPageState extends State<ReportsGenerationPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              "Report Generation",
-              style: TextStyle(
-                  color: pinkColor, fontSize: 28, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 30.0),
             _buildReportTitle('Risk Summary Report'),
             _buildReportSection(
               title: 'Risk Summary Report',
@@ -160,7 +159,7 @@ class _ReportsGenerationPageState extends State<ReportsGenerationPage> {
               endDateController: riskEndDateController,
               reportName: 'Risk Summary Report',
             ),
-            SizedBox(height: 30.0),
+            const SizedBox(height: 30.0),
             _buildReportTitle('Activity Reports'),
             _buildReportSection(
               title: 'Activity Reports',
