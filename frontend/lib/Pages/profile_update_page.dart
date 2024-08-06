@@ -205,11 +205,6 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
         title: Text('Update Profile'),
         actions: [
           IconButton(
-            icon:
-                Icon(Icons.add, color: Colors.white), // Set the color to white
-            onPressed: _pickProfilePicture,
-          ),
-          IconButton(
             icon: Icon(Icons.delete,
                 color: Colors.white), // Set the color to white
             onPressed: _removeProfilePicture,

@@ -34,12 +34,6 @@ class SuitableMenuModel {
       boxColor: Color.fromARGB(255, 255, 255, 255),
     ));
 
-    menu.add(SuitableMenuModel(
-      name: "Snack",
-      imagePath: "assets/icons/snack.svg",
-      boxColor: Color.fromARGB(255, 255, 255, 255),
-    ));
-
     return menu;
   }
 }

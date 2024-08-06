@@ -324,7 +324,8 @@ def get_total_daily_nutrition(request, user_id):
         total_protein=Sum('protein'),
         total_fats=Sum('fats'),
         total_carbs=Sum('carbs'),
-        total_cholesterol=Sum('cholesterol')  # Include cholesterol in the summary
+        total_cholesterol=Sum('cholesterol'),
+        total_fiber=Sum('fiber') # Include cholesterol in the summary
     )
     
     return Response(nutrition_summary, status=status.HTTP_200_OK)
@@ -594,7 +595,7 @@ def request_otp(request):
     user.save()
 
     email_subject = 'Password Reset OTP-Diabetes Preventer Application'
-    email_body = f"Diabetes Preventer Application, Reset Password Service. \n\n\n Your OTP for password reset is: {otp}\n\n\n\n  This message is confidential please don not reply it or share with any third party.\n\n\n\n\n Thank you for using Diabetes Preventer Application.\n\n Stay healthy.\n\n Users Support Team."
+    email_body = f"Diabetes Preventer Application, Reset Password Service. \n\n\n Your OTP for password reset is: {otp}\n\n\n\n This message is confidential please don not reply it or share with any third party.\n\n\n\n\n Thank you for using Diabetes Preventer Application.\n\n\n\n Stay healthy.\n\n Users Support Team."
     
     try:
         send_mail(

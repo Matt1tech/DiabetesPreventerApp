@@ -132,7 +132,7 @@ class _ReportsGenerationPageState extends State<ReportsGenerationPage> {
         preferredSize: Size.fromHeight(170.0),
         child: UserHeader(
           imageProvider: imageProvider,
-          pageName: 'Reports Generation',
+          pageName: 'Reports',
           welcomeMessage: 'Hello Again!',
           userName: userName,
           userStatus: 'Active',

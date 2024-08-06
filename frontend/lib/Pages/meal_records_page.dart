@@ -214,7 +214,7 @@ class _MealRecordsPageState extends State<MealRecordsPage> {
         preferredSize: Size.fromHeight(170.0),
         child: UserHeader(
           imageProvider: imageProvider,
-          pageName: 'Meal Records Logs',
+          pageName: 'Meal Records',
           welcomeMessage: 'Hello Again!',
           userName: userName ?? 'user name',
           userStatus: 'Active',

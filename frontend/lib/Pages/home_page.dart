@@ -231,7 +231,7 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   const SizedBox(height: 20),
                   nutrientsDetailsSection(),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 5),
                   riskOverviewSection(),
                   const SizedBox(height: 50),
                   healthRecordSection(),
@@ -259,7 +259,7 @@ class _HomePageState extends State<HomePage> {
       children: [
         Container(
           color: pinkColor, // Background color
-          height: 140.0,
+          height: 150.0,
           width: 420,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -275,7 +275,7 @@ class _HomePageState extends State<HomePage> {
     return menu.isNotEmpty
         ? [
             const Padding(
-              padding: EdgeInsets.only(left: 20, top: 3),
+              padding: EdgeInsets.only(left: 16, top: 8),
               child: Text(
                 'Suitable Menu',
                 style: TextStyle(
@@ -285,14 +285,15 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 11),
             Container(
               height: 95,
+              width: 400,
               child: ListView.separated(
                 itemCount: menu.length,
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.only(left: 20, right: 20),
-                separatorBuilder: (context, index) => const SizedBox(width: 15),
+                separatorBuilder: (context, index) => const SizedBox(width: 20),
                 itemBuilder: (context, index) {
                   return InkWell(
                     onTap: () {
@@ -375,7 +376,7 @@ class _HomePageState extends State<HomePage> {
         maxFiberCalories: (userCustomizations?.maxFiber != null &&
                 userCustomizations!.maxFiber > 0)
             ? userCustomizations!.maxFiber.toInt()
-            : 75,
+            : 105,
       ),
     );
   }

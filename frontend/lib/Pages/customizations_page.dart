@@ -145,7 +145,7 @@ class _CustomizationsPageState extends State<CustomizationsPage> {
         children: [
           const SizedBox(height: 30),
           const Padding(
-            padding: EdgeInsets.only(right: 190),
+            padding: EdgeInsets.only(right: 220),
             child: Text(
               'Meals a day',
               style: TextStyle(
@@ -155,7 +155,7 @@ class _CustomizationsPageState extends State<CustomizationsPage> {
               ),
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 15),
           Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
@@ -195,7 +195,7 @@ class _CustomizationsPageState extends State<CustomizationsPage> {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           const Padding(
-            padding: EdgeInsets.only(right: 230),
+            padding: EdgeInsets.only(right: 250),
             child: Text(
               'Allergies',
               style: TextStyle(
@@ -250,7 +250,7 @@ class _CustomizationsPageState extends State<CustomizationsPage> {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           const Padding(
-            padding: EdgeInsets.only(right: 160),
+            padding: EdgeInsets.only(right: 180),
             child: Text(
               'Diets  Followed',
               style: TextStyle(
@@ -299,16 +299,17 @@ class _CustomizationsPageState extends State<CustomizationsPage> {
 
   Container dailyCalories() {
     return Container(
-      width: 380,
-      height: 550,
+      width: 390,
+      height: 580,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           const Padding(
-            padding: EdgeInsets.only(right: 160),
+            padding: EdgeInsets.only(right: 190),
             child: Text(
               'Daily Calories',
               style: TextStyle(
+                fontWeight: FontWeight.bold,
                 color: blueColor,
                 fontSize: 22.0,
               ),
@@ -316,10 +317,9 @@ class _CustomizationsPageState extends State<CustomizationsPage> {
           ),
           const SizedBox(height: 20),
           Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              SizedBox(width: 35),
+              SizedBox(width: 10),
               HealthMeasurementLogsCard(
                 title: 'Max Protein',
                 name: 'maxDailyProtein',
@@ -329,8 +329,8 @@ class _CustomizationsPageState extends State<CustomizationsPage> {
                         int.parse(user_id!), value);
                   }
                 },
-                width: 155,
-                height: 150,
+                width: 170,
+                height: 160,
                 cardColor: Color.fromARGB(221, 255, 250, 250),
                 boxShadow: [
                   BoxShadow(
@@ -340,7 +340,7 @@ class _CustomizationsPageState extends State<CustomizationsPage> {
                   ),
                 ],
               ),
-              SizedBox(width: 30),
+              SizedBox(width: 20),
               HealthMeasurementLogsCard(
                 title: 'Max Cholesterol',
                 name: 'totalCholesterol',
@@ -350,8 +350,8 @@ class _CustomizationsPageState extends State<CustomizationsPage> {
                         int.parse(user_id!), value);
                   }
                 },
-                width: 155,
-                height: 150,
+                width: 170,
+                height: 160,
                 cardColor: Color.fromARGB(221, 255, 250, 250),
                 boxShadow: [
                   BoxShadow(
@@ -365,10 +365,9 @@ class _CustomizationsPageState extends State<CustomizationsPage> {
           ),
           const SizedBox(height: 15),
           Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              SizedBox(width: 35),
+              SizedBox(width: 10),
               HealthMeasurementLogsCard(
                 title: 'Max Fiber',
                 name: 'totalFiber',
@@ -378,8 +377,8 @@ class _CustomizationsPageState extends State<CustomizationsPage> {
                         int.parse(user_id!), value);
                   }
                 },
-                width: 155,
-                height: 150,
+                width: 170,
+                height: 160,
                 cardColor: Color.fromARGB(221, 255, 250, 250),
                 boxShadow: [
                   BoxShadow(
@@ -389,7 +388,7 @@ class _CustomizationsPageState extends State<CustomizationsPage> {
                   ),
                 ],
               ),
-              SizedBox(width: 30),
+              SizedBox(width: 20),
               HealthMeasurementLogsCard(
                 title: 'Max Fat',
                 name: 'totalFat',
@@ -399,8 +398,8 @@ class _CustomizationsPageState extends State<CustomizationsPage> {
                         int.parse(user_id!), value);
                   }
                 },
-                width: 155,
-                height: 150,
+                width: 170,
+                height: 160,
                 cardColor: Color.fromARGB(221, 255, 250, 250),
                 boxShadow: [
                   BoxShadow(
@@ -412,10 +411,10 @@ class _CustomizationsPageState extends State<CustomizationsPage> {
               ),
             ],
           ),
-          SizedBox(height: 15),
-          Row(children: [
+          SizedBox(height: 30),
+          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
             SizedBox(
-              width: 40,
+              width: 10,
             ),
             HealthMeasurementLogsCard(
               title: 'Max Daily Calories',
@@ -426,7 +425,7 @@ class _CustomizationsPageState extends State<CustomizationsPage> {
                       int.parse(user_id!), value);
                 }
               },
-              width: 340,
+              width: 370,
               height: 150,
               cardColor: Color.fromARGB(221, 255, 250, 250),
               boxShadow: [

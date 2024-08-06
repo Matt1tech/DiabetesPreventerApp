@@ -32,7 +32,7 @@ class HealthMeasurementLogsCard extends StatefulWidget {
 }
 
 class _HealthMeasurementLogsCardState extends State<HealthMeasurementLogsCard> {
-  int _value = 75;
+  int _value = 120;
 
   void _incrementValue() {
     setState(() {

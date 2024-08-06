@@ -297,7 +297,7 @@ class NutritionDetails extends StatelessWidget {
         Container(
           height: 210,
           width: double.infinity,
-          color: Color.fromARGB(255, 240, 236, 236),
+          color: Color.fromARGB(255, 217, 217, 217),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
