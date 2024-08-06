@@ -33,16 +33,29 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   bool isLoading = false; // Define isLoading as a state variable
+  bool rememberMe = false; // Define rememberMe as a state variable
 
   @override
   void initState() {
     super.initState();
-    _clearFields(); // Clear the text fields
+    _loadSavedCredentials(); // Load saved credentials if any
   }
 
   void _clearFields() {
     _emailController.clear();
     _passwordController.clear();
+  }
+
+  Future<void> _loadSavedCredentials() async {
+    String? savedEmail = await storage.read(key: 'email');
+    String? savedPassword = await storage.read(key: 'password');
+    if (savedEmail != null && savedPassword != null) {
+      _emailController.text = savedEmail;
+      _passwordController.text = savedPassword;
+      setState(() {
+        rememberMe = true;
+      });
+    }
   }
 
   Future<void> _handleLogin() async {
@@ -52,6 +65,13 @@ class _LoginPageState extends State<LoginPage> {
     try {
       await authService.login(
           _emailController.text.toLowerCase(), _passwordController.text);
+      if (rememberMe) {
+        await storage.write(key: 'email', value: _emailController.text);
+        await storage.write(key: 'password', value: _passwordController.text);
+      } else {
+        await storage.delete(key: 'email');
+        await storage.delete(key: 'password');
+      }
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Login Successful')),
       );
@@ -85,11 +105,20 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  Future<void> _handleLogout() async {
+    await storage.delete(key: 'email');
+    await storage.delete(key: 'password');
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const LoginPage()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor:
-          const Color.fromARGB(255, 240, 236, 236), // Background color
+          const Color.fromARGB(255, 217, 217, 217), // Background color
       appBar: CustomHeader(
         imagePath:
             'assets/images/diabetesLogo.png', // Default profile picture if not available
@@ -147,8 +176,12 @@ class _LoginPageState extends State<LoginPage> {
                   Row(
                     children: [
                       Checkbox(
-                        value: false,
-                        onChanged: (value) {}, // Remember Me checkbox
+                        value: rememberMe,
+                        onChanged: (value) {
+                          setState(() {
+                            rememberMe = value ?? false;
+                          });
+                        }, // Remember Me checkbox
                       ),
                       const Text('Remember Me'),
                     ],

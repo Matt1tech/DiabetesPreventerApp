@@ -57,7 +57,7 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(227, 249, 243, 243),
+      backgroundColor: Color.fromARGB(255, 217, 217, 217),
       appBar: AppBar(
         title: Text('Verify OTP'),
       ),

@@ -35,96 +35,29 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
   String? userProfilePicture;
   String? userId;
   String? userEmail;
+  double? userHeight;
 
   @override
   void initState() {
     super.initState();
-    _loadUserInfo();
+
     _loadUserData();
   }
 
-/*
-  Future<void> _loadUserInfo() async {
-    final userInfo = await loadUserInfo();
-    setState(() {
-      _nameController.text = userInfo['userName'] ?? '';
-      _emailController.text = userInfo['userEmail'] ?? ''; // Set email here
-      _dateController.text = userInfo['userBirthdate'] ?? '';
-      _heightController.text = userInfo['userHeight'] ?? '';
-      isSelectedGender =
-          userInfo['userGender'] == 'Male' ? [true, false] : [false, true];
-      isSelectedMaritalStatus = userInfo['userMaritalStatus'] == 'Married'
-          ? [true, false]
-          : [false, true];
-      _profilePicture = userInfo['userProfilePicture'] != null
-          ? XFile(userInfo['userProfilePicture']!)
-          : null;
-      userName = userInfo['userName'];
-      userProfilePicture = userInfo['userProfilePicture'];
-      userId = userInfo['userId'];
-      userEmail = userInfo['userEmail'];
-    });
-  }
-/*
-  Future<Map<String, String?>> loadUserInfo() async {
+  Future<void> _loadUserData() async {
     final userJson = await storage.read(key: 'user_data');
     if (userJson != null) {
       final userMap = jsonDecode(userJson);
-      final userName = userMap['name'];
-      final userEmail = userMap['email'];
-      final userBirthdate = userMap['birthdate'];
-      final userHeight = userMap['height'];
-      final userGender = userMap['gender'];
-      final userMaritalStatus = userMap['marital_status'];
-      final userProfilePicture = userMap['profile_picture'] != null
-          ? 'http://10.0.2.2:8000/media/${userMap['profile_picture']}'
-          : null;
-      final userId = userMap['id'].toString();
-      return {
-        'userName': userName,
-        'userEmail': userEmail,
-        'userBirthdate': userBirthdate,
-        'userHeight': userHeight,
-        'userGender': userGender,
-        'userMaritalStatus': userMaritalStatus,
-        'userProfilePicture': userProfilePicture,
-        'userId': userId,
-      };
-    } else {
-      return {
-        'userName': null,
-        'userEmail': null,
-        'userBirthdate': null,
-        'userHeight': null,
-        'userGender': null,
-        'userMaritalStatus': null,
-        'userProfilePicture': null,
-        'userId': null,
-      };
-    }
-  }
-  */
-*/
-  Future<void> _loadUserInfo() async {
-    final userInfo = await loadUserInfo();
-    if (mounted) {
-      setState(() {
-        userName = userInfo['userName'];
-        userProfilePicture = userInfo['userProfilePicture'];
-        userEmail = userInfo['userEmail'];
-      });
-    }
-  }
-
-  Future<void> _loadUserData() async {
-    final userName = await storage.read(key: 'user_name');
-    final userEmail = await storage.read(key: 'email');
-    if (mounted) {
-      setState(() {
-        this.userName = userName;
-        this.userEmail = userEmail;
-        userProfilePicture = userProfilePicture;
-      });
+      if (mounted) {
+        setState(() {
+          userName = userMap['name'];
+          userEmail = userMap['email'];
+          userHeight = userMap['height'];
+          userProfilePicture = userMap['profile_picture'] != null
+              ? 'http://10.0.2.2:8000/media/${userMap['profile_picture']}'
+              : null;
+        });
+      }
     }
   }
 
@@ -158,48 +91,60 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
       // Collect current password from the user for confirmation
       String currentPassword = await _promptForPassword();
 
-      // Existing code for collecting update details
+      // Collecting update details
       String userId = (await storage.read(key: 'user_id'))!;
       String name = _nameController.text;
-      String email = _emailController.text;
+      String email = userEmail.toString();
       String? password =
           _passwordController.text.isEmpty ? null : _passwordController.text;
-      double height = double.parse(_heightController.text);
       String maritalStatus = isSelectedMaritalStatus[0] ? 'Married' : 'Single';
+
+      // Corrected assignment of height
+      double? height = _heightController.text.isNotEmpty
+          ? double.tryParse(_heightController.text)
+          : userHeight;
 
       var response = await AuthService().updateUserProfile(
         userId,
         name,
         email,
         password,
-        height,
+        height, // Pass the nullable height
         maritalStatus,
         _profilePicture != null ? File(_profilePicture!.path) : null,
-        currentPassword, // Pass the current password
+        currentPassword,
       );
 
       if (response.statusCode == 200) {
+        // Parse the response body to get updated user info
+        final updatedUser = jsonDecode(response.body);
+
+        setState(() {
+          userName = name;
+          userEmail = email;
+          userProfilePicture = _profilePicture != null
+              ? _profilePicture!.path
+              : userProfilePicture;
+          // Update other fields directly
+          _heightController.text = height?.toString() ?? '';
+          isSelectedMaritalStatus = [
+            maritalStatus == 'Married',
+            maritalStatus == 'Single'
+          ];
+          // Update any other relevant fields
+        });
+
+        // Update secure storage with new user data
+        await storage.write(key: 'user_name', value: name);
+        await storage.write(key: 'email', value: email);
+        await storage.write(
+            key: 'user_profile_picture', value: userProfilePicture);
+        await storage.write(key: 'user_id', value: userId);
+        await storage.write(key: 'user_data', value: jsonEncode(updatedUser));
+
         final snackBar =
             SnackBar(content: Text('Profile updated successfully!'));
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
-
-        // Update user data in storage
-        final updatedUser = {
-          'name': name,
-          'email': email,
-          'birthdate': _dateController.text,
-          'height': height.toString(),
-          'gender': isSelectedGender[0] ? 'Male' : 'Female',
-          'marital_status': maritalStatus,
-          'profile_picture':
-              _profilePicture != null ? _profilePicture!.path : null,
-          'id': userId,
-        };
-        await storage.write(key: 'user_data', value: jsonEncode(updatedUser));
-
-        // Reload user info to reflect changes
-        await _loadUserInfo(); // Ensure this is awaited
-        await _loadUserData(); // Ensure this is awaited
       } else {
         final snackBar =
             SnackBar(content: Text('Update failed: ${response.body}'));
@@ -226,6 +171,12 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
               onPressed: () {
                 Navigator.of(context).pop();
               },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(currentPassword);
+              },
               child: Text('Confirm'),
             ),
           ],
@@ -238,7 +189,7 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color.fromARGB(255, 240, 236, 236),
+      backgroundColor: Color.fromARGB(255, 217, 217, 217),
       appBar: AppBar(
         backgroundColor: blueColor,
         leading: IconButton(
@@ -298,20 +249,29 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
                 ReusableTextFormField(
                   labelText: 'Name',
                   icon: Icons.person,
-                  validatorMessage: 'Must include at least 3 characters',
+                  validatorMessage:
+                      'Must include at least 3 characters if provided',
                   validatorFormat: RegExp(r'^.{3,}$'),
                   controller: _nameController,
+                  validator: (value) {
+                    // If the value is not empty, check for at least 3 characters
+                    if (value != null &&
+                        value.isNotEmpty &&
+                        !RegExp(r'^.{3,}$').hasMatch(value)) {
+                      return 'Must include at least 3 characters';
+                    }
+                    return null; // Allow the field to be empty
+                  },
                 ),
                 const SizedBox(height: 16),
                 GestureDetector(
-                  onTap: () {
-                    // Do nothing on tap to ensure it remains read-only
-                  },
+                  onTap: () {},
                   child: AbsorbPointer(
                     child: TextFormField(
+                      controller: _emailController,
                       readOnly: true, // Ensures the field is read-only
                       decoration: InputDecoration(
-                        labelText: userEmail.toString(),
+                        labelText: userEmail,
                         prefixIcon: Icon(Icons.email),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8.0),
@@ -344,7 +304,7 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
                       if (!RegExp(
                               r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$')
                           .hasMatch(value)) {
-                        return 'Must include 6 numbers, a capital letter, a small letter, and a special character';
+                        return 'Must have 6 No, a capital letter, a small letter, and a special character';
                       }
                     }
                     return null;
@@ -391,11 +351,19 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
                 const SizedBox(height: 16),
                 ReusableTextFormField(
                   labelText: 'Height',
-                  icon: null,
+                  icon: Icons.height,
                   validatorMessage: 'Invalid Height',
                   validatorFormat: RegExp(r'^\d+(\.\d+)?$'),
                   controller: _heightController,
                   suffixText: 'cm',
+                  validator: (value) {
+                    if (value != null &&
+                        value.isNotEmpty &&
+                        !RegExp(r'^\d+(\.\d+)?$').hasMatch(value)) {
+                      return 'Invalid Height';
+                    }
+                    return null; // Allow empty values
+                  },
                 ),
                 const SizedBox(height: 24),
                 Center(

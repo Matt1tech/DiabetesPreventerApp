@@ -202,7 +202,7 @@ class _HomePageState extends State<HomePage> {
     ImageProvider<Object> imageProvider =
         getImageProvider(_profilePicture, userProfilePicture);
     return Scaffold(
-      backgroundColor: Color.fromARGB(255, 240, 236, 236),
+      backgroundColor: const Color.fromARGB(255, 217, 217, 217),
       appBar: UserHeader(
         imageProvider: imageProvider,
         pageName: 'Home', // This will be shown as the page title

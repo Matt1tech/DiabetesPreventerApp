@@ -90,7 +90,7 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color.fromARGB(227, 249, 243, 243),
+      backgroundColor: Color.fromARGB(255, 217, 217, 217),
       appBar: CustomHeader(
         imageProvider: _profilePicture != null
             ? FileImage(File(_profilePicture!.path))

@@ -99,6 +99,7 @@ class _NutrientationPageState extends State<NutrientationPage> {
     ImageProvider<Object> imageProvider =
         getImageProvider(_profilePicture, userProfilePicture);
     return Scaffold(
+      backgroundColor: Color.fromARGB(255, 217, 217, 217),
       appBar: UserHeader(
         imageProvider: imageProvider,
         pageName: 'Meal Recognition',

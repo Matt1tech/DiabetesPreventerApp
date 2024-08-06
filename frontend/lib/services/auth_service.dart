@@ -182,7 +182,7 @@ class AuthService {
       String name,
       String email,
       String? password,
-      double height,
+      double? height,
       String maritalStatus,
       File? profilePicture,
       String currentPassword) async {
@@ -192,19 +192,22 @@ class AuthService {
       ..fields['name'] = name
       ..fields['email'] = email
       ..fields['current_password'] = currentPassword
-      ..fields['height'] = height.toString()
       ..fields['marital_status'] = maritalStatus;
 
     if (password != null && password.isNotEmpty) {
       request.fields['password'] = password;
     }
 
+    if (height != null) {
+      request.fields['height'] =
+          height.toString(); // Add height only if not null
+    }
+
     if (profilePicture != null) {
       request.files.add(await http.MultipartFile.fromPath(
           'profile_picture', profilePicture.path));
     } else {
-      request.fields['profile_picture'] =
-          ''; // Ensure the backend knows to remove the picture
+      request.fields['remove_profile_picture'] = 'true';
     }
 
     var response = await request.send();
