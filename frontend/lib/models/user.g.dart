@@ -6,6 +6,19 @@ part of 'user.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
+User _$UserFromJson(Map<String, dynamic> json) => User(
+      id: (json['id'] as num).toInt(),
+      name: json['name'] as String,
+      email: json['email'] as String,
+      gender: json['gender'] as String,
+      marital_status: json['marital_status'] as String,
+      height: (json['height'] as num).toDouble(),
+      birthdate: json['birthdate'] as String,
+      family_history: json['family_history'] as bool,
+      profile_picture: json['profile_picture'] as String,
+      created_at: DateTime.parse(json['created_at'] as String),
+    );
+
 Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
       'id': instance.id,
       'name': instance.name,

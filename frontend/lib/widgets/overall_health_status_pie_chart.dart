@@ -3,6 +3,16 @@ import 'package:flutter/material.dart';
 import '../utils/utilities.dart';
 
 class OverallHealthStatusPieChart extends StatefulWidget {
+  final double healthyPercentage;
+  final double preDiabetesPercentage;
+  final double diabetesPercentage;
+
+  OverallHealthStatusPieChart({
+    required this.healthyPercentage,
+    required this.preDiabetesPercentage,
+    required this.diabetesPercentage,
+  });
+
   @override
   _OverallHealthStatusPieChartState createState() =>
       _OverallHealthStatusPieChartState();
@@ -84,55 +94,44 @@ class _OverallHealthStatusPieChartState
   }
 
   List<PieChartSectionData> showingSections() {
-    return List.generate(3, (i) {
-      final isTouched = i == touchedIndex;
-      final fontSize = isTouched ? 18.0 : 12.0;
-      final radius = isTouched ? 60.0 : 50.0;
-      const shadows = [Shadow(color: Colors.black, blurRadius: 2)];
-      switch (i) {
-        case 0:
-          return PieChartSectionData(
-            color: blueColor,
-            value: 30,
-            title: '30%',
-            radius: radius,
-            titleStyle: TextStyle(
-              fontSize: fontSize,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-              shadows: shadows,
-            ),
-          );
-        case 1:
-          return PieChartSectionData(
-            color: Color.fromARGB(255, 207, 62, 52),
-            value: 40,
-            title: '40%',
-            radius: radius,
-            titleStyle: TextStyle(
-              fontSize: fontSize,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-              shadows: shadows,
-            ),
-          );
-        case 2:
-          return PieChartSectionData(
-            color: pinkColor,
-            value: 30,
-            title: '30%',
-            radius: radius,
-            titleStyle: TextStyle(
-              fontSize: fontSize,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-              shadows: shadows,
-            ),
-          );
-        default:
-          throw Error();
-      }
-    });
+    return [
+      PieChartSectionData(
+        color: blueColor,
+        value: widget.healthyPercentage,
+        title: '${widget.healthyPercentage}%',
+        radius: touchedIndex == 0 ? 60.0 : 50.0,
+        titleStyle: TextStyle(
+          fontSize: touchedIndex == 0 ? 18.0 : 12.0,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+          shadows: [Shadow(color: Colors.black, blurRadius: 2)],
+        ),
+      ),
+      PieChartSectionData(
+        color: Color.fromARGB(255, 207, 62, 52),
+        value: widget.diabetesPercentage,
+        title: '${widget.diabetesPercentage}%',
+        radius: touchedIndex == 1 ? 60.0 : 50.0,
+        titleStyle: TextStyle(
+          fontSize: touchedIndex == 1 ? 18.0 : 12.0,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+          shadows: [Shadow(color: Colors.black, blurRadius: 2)],
+        ),
+      ),
+      PieChartSectionData(
+        color: pinkColor,
+        value: widget.preDiabetesPercentage,
+        title: '${widget.preDiabetesPercentage}%',
+        radius: touchedIndex == 2 ? 60.0 : 50.0,
+        titleStyle: TextStyle(
+          fontSize: touchedIndex == 2 ? 18.0 : 12.0,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+          shadows: [Shadow(color: Colors.black, blurRadius: 2)],
+        ),
+      ),
+    ];
   }
 }
 
@@ -148,7 +147,7 @@ class Indicator extends StatelessWidget {
     required this.color,
     required this.text,
     required this.isSquare,
-    this.size = 16,
+    this.size = 17,
     this.textColor = const Color(0xff505050),
   }) : super(key: key);
 

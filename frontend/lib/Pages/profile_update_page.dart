@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import '../services/fetch_user_data_service.dart';
 import '../utils/utilities.dart';
 import '../widgets/widgets.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -39,13 +40,15 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
   void initState() {
     super.initState();
     _loadUserInfo();
+    _loadUserData();
   }
 
+/*
   Future<void> _loadUserInfo() async {
     final userInfo = await loadUserInfo();
     setState(() {
       _nameController.text = userInfo['userName'] ?? '';
-      _emailController.text = userInfo['userEmail'] ?? '';
+      _emailController.text = userInfo['userEmail'] ?? ''; // Set email here
       _dateController.text = userInfo['userBirthdate'] ?? '';
       _heightController.text = userInfo['userHeight'] ?? '';
       isSelectedGender =
@@ -62,7 +65,7 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
       userEmail = userInfo['userEmail'];
     });
   }
-
+/*
   Future<Map<String, String?>> loadUserInfo() async {
     final userJson = await storage.read(key: 'user_data');
     if (userJson != null) {
@@ -100,6 +103,30 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
       };
     }
   }
+  */
+*/
+  Future<void> _loadUserInfo() async {
+    final userInfo = await loadUserInfo();
+    if (mounted) {
+      setState(() {
+        userName = userInfo['userName'];
+        userProfilePicture = userInfo['userProfilePicture'];
+        userEmail = userInfo['userEmail'];
+      });
+    }
+  }
+
+  Future<void> _loadUserData() async {
+    final userName = await storage.read(key: 'user_name');
+    final userEmail = await storage.read(key: 'email');
+    if (mounted) {
+      setState(() {
+        this.userName = userName;
+        this.userEmail = userEmail;
+        userProfilePicture = userProfilePicture;
+      });
+    }
+  }
 
   Future<void> _pickProfilePicture() async {
     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
@@ -128,19 +155,27 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
 
   void _updateProfile() async {
     if (_formKey.currentState!.validate()) {
+      // Collect current password from the user for confirmation
+      String currentPassword = await _promptForPassword();
+
+      // Existing code for collecting update details
       String userId = (await storage.read(key: 'user_id'))!;
       String name = _nameController.text;
-      String password = _passwordController.text;
+      String email = _emailController.text;
+      String? password =
+          _passwordController.text.isEmpty ? null : _passwordController.text;
       double height = double.parse(_heightController.text);
       String maritalStatus = isSelectedMaritalStatus[0] ? 'Married' : 'Single';
 
       var response = await AuthService().updateUserProfile(
         userId,
         name,
+        email,
         password,
         height,
         maritalStatus,
         _profilePicture != null ? File(_profilePicture!.path) : null,
+        currentPassword, // Pass the current password
       );
 
       if (response.statusCode == 200) {
@@ -151,7 +186,7 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
         // Update user data in storage
         final updatedUser = {
           'name': name,
-          'email': userEmail,
+          'email': email,
           'birthdate': _dateController.text,
           'height': height.toString(),
           'gender': isSelectedGender[0] ? 'Male' : 'Female',
@@ -162,10 +197,9 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
         };
         await storage.write(key: 'user_data', value: jsonEncode(updatedUser));
 
-        // Update the UI immediately
-        setState(() {
-          _loadUserInfo(); // Reload user info to reflect changes
-        });
+        // Reload user info to reflect changes
+        await _loadUserInfo(); // Ensure this is awaited
+        await _loadUserData(); // Ensure this is awaited
       } else {
         final snackBar =
             SnackBar(content: Text('Update failed: ${response.body}'));
@@ -174,10 +208,37 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
     }
   }
 
+  Future<String> _promptForPassword() async {
+    String currentPassword = '';
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Enter Current Password'),
+          content: TextField(
+            obscureText: true,
+            onChanged: (value) {
+              currentPassword = value;
+            },
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Confirm'),
+            ),
+          ],
+        );
+      },
+    );
+    return currentPassword;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color.fromARGB(227, 249, 243, 243),
+      backgroundColor: Color.fromARGB(255, 240, 236, 236),
       appBar: AppBar(
         backgroundColor: blueColor,
         leading: IconButton(
@@ -215,7 +276,8 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
                 const SizedBox(height: 16),
                 Center(
                   child: GestureDetector(
-                    onTap: _pickProfilePicture,
+                    onTap:
+                        _pickProfilePicture, // Ensure this is the tap handler
                     child: CircleAvatar(
                       radius: 40,
                       backgroundColor: Colors.grey[200],
@@ -233,25 +295,38 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                TextField(
+                ReusableTextFormField(
+                  labelText: 'Name',
+                  icon: Icons.person,
+                  validatorMessage: 'Must include at least 3 characters',
+                  validatorFormat: RegExp(r'^.{3,}$'),
                   controller: _nameController,
-                  readOnly: false,
-                  decoration: InputDecoration(
-                    labelText: 'Name',
-                    prefixIcon: Icon(Icons.person),
-                    filled: true,
-                    fillColor: Colors.grey[200],
-                  ),
                 ),
                 const SizedBox(height: 16),
-                TextField(
-                  controller: _emailController,
-                  readOnly: true,
-                  decoration: InputDecoration(
-                    labelText: userEmail ?? 'Email',
-                    prefixIcon: Icon(Icons.email),
-                    filled: true,
-                    fillColor: Colors.grey[200],
+                GestureDetector(
+                  onTap: () {
+                    // Do nothing on tap to ensure it remains read-only
+                  },
+                  child: AbsorbPointer(
+                    child: TextFormField(
+                      readOnly: true, // Ensures the field is read-only
+                      decoration: InputDecoration(
+                        labelText: userEmail.toString(),
+                        prefixIcon: Icon(Icons.email),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                        filled: true,
+                        fillColor: Colors.white,
+                        contentPadding: EdgeInsets.symmetric(
+                            vertical: 16.0, horizontal: 8.0),
+                        labelStyle: TextStyle(
+                          fontSize: 16.0,
+                          color: const Color.fromARGB(255, 49, 47, 47),
+                        ),
+                        floatingLabelBehavior: FloatingLabelBehavior.never,
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -264,6 +339,16 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
                       r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$'),
                   controller: _passwordController,
                   obscureText: true,
+                  validator: (value) {
+                    if (value != null && value.isNotEmpty) {
+                      if (!RegExp(
+                              r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$')
+                          .hasMatch(value)) {
+                        return 'Must include 6 numbers, a capital letter, a small letter, and a special character';
+                      }
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 16),
                 ReusableTextFormField(
@@ -274,8 +359,10 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
                   controller: _confirmPasswordController,
                   obscureText: true,
                   validator: (value) {
-                    if (value != _passwordController.text) {
-                      return 'Passwords do not match';
+                    if (value != null && value.isNotEmpty) {
+                      if (value != _passwordController.text) {
+                        return 'Passwords do not match';
+                      }
                     }
                     return null;
                   },

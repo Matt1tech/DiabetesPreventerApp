@@ -89,7 +89,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor:
-          const Color.fromARGB(227, 249, 243, 243), // Background color
+          const Color.fromARGB(255, 240, 236, 236), // Background color
       appBar: CustomHeader(
         imagePath:
             'assets/images/diabetesLogo.png', // Default profile picture if not available

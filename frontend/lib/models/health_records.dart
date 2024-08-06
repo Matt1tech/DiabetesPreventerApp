@@ -9,6 +9,9 @@ class HealthRecord {
   double? bmi;
   double? weight;
   double? diabetes_risk;
+  double? diabetes_risk_probability_class_0;
+  double? diabetes_risk_probability_class_1;
+  double? diabetes_risk_probability_class_2;
   DateTime? created_at;
 
   HealthRecord({
@@ -17,6 +20,9 @@ class HealthRecord {
     this.bmi,
     this.weight,
     this.diabetes_risk,
+    this.diabetes_risk_probability_class_0,
+    this.diabetes_risk_probability_class_1,
+    this.diabetes_risk_probability_class_2,
     this.created_at,
   });
 
@@ -27,6 +33,12 @@ class HealthRecord {
       bmi: json['bmi']?.toDouble(),
       weight: json['weight']?.toDouble(),
       diabetes_risk: json['diabetes_risk']?.toDouble(),
+      diabetes_risk_probability_class_0:
+          json['diabetes_risk_probability_class_0']?.toDouble(),
+      diabetes_risk_probability_class_1:
+          json['diabetes_risk_probability_class_1']?.toDouble(),
+      diabetes_risk_probability_class_2:
+          json['diabetes_risk_probability_class_2']?.toDouble(),
       created_at: json['created_at'] != null
           ? DateTime.parse(json['created_at'])
           : null,
@@ -40,6 +52,9 @@ class HealthRecord {
       'bmi': bmi,
       'weight': weight,
       'diabetes_risk': diabetes_risk,
+      'diabetes_risk_probability_class_0': diabetes_risk_probability_class_0,
+      'diabetes_risk_probability_class_1': diabetes_risk_probability_class_1,
+      'diabetes_risk_probability_class_2': diabetes_risk_probability_class_2,
       'created_at': created_at?.toIso8601String(),
     };
   }

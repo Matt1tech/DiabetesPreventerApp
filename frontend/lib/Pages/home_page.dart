@@ -146,7 +146,6 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  // Handle the image of the profile picture
   Future<void> _loadUserInfo() async {
     final userInfo = await loadUserInfo();
     if (mounted) {
@@ -719,7 +718,29 @@ class _HomePageState extends State<HomePage> {
           Expanded(
             child: Padding(
               padding: const EdgeInsets.all(23.0),
-              child: OverallHealthStatusPieChart(),
+              child: OverallHealthStatusPieChart(
+                healthyPercentage:
+                    lastHealthRecord?.diabetes_risk_probability_class_0 != null
+                        ? double.parse((lastHealthRecord!
+                                    .diabetes_risk_probability_class_0! *
+                                10)
+                            .toStringAsFixed(2))
+                        : 0,
+                preDiabetesPercentage:
+                    lastHealthRecord?.diabetes_risk_probability_class_1 != null
+                        ? double.parse((lastHealthRecord!
+                                    .diabetes_risk_probability_class_1! *
+                                10)
+                            .toStringAsFixed(2))
+                        : 0,
+                diabetesPercentage:
+                    lastHealthRecord?.diabetes_risk_probability_class_2 != null
+                        ? double.parse((lastHealthRecord!
+                                    .diabetes_risk_probability_class_2! *
+                                10)
+                            .toStringAsFixed(2))
+                        : 0,
+              ),
             ),
           ),
         ],

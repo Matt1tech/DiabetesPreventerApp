@@ -19,6 +19,7 @@ class ReusableTextFormField extends StatelessWidget {
   final TextInputType keyboardType;
   final String? suffixText;
   final String? Function(String?)? validator;
+  final bool readOnly;
 
   ReusableTextFormField({
     required this.labelText,
@@ -30,6 +31,7 @@ class ReusableTextFormField extends StatelessWidget {
     this.keyboardType = TextInputType.text,
     this.suffixText,
     this.validator,
+    this.readOnly = false,
   });
 
   @override
@@ -37,6 +39,7 @@ class ReusableTextFormField extends StatelessWidget {
     return TextFormField(
       controller: controller,
       obscureText: obscureText,
+      readOnly: readOnly,
       decoration: InputDecoration(
         labelText: labelText,
         prefixIcon: icon != null ? Icon(icon) : null,
@@ -81,3 +84,14 @@ class ReusableTextFormField extends StatelessWidget {
     );
   }
 }
+
+/// A reusable TextFormField with validation.
+///
+/// Parameters:
+/// - `labelText`: The label for the TextFormField.
+/// - `icon`: The icon to display in the TextFormField.
+/// - `validatorMessage`: The message to display when validation fails.
+/// - `validatorFormat`: The validation format (e.g., regex pattern) to apply.
+/// - `suffixText`: The text to display as a suffix.
+/// - `validator`: An optional custom validator function.
+/// - `readOnly`: An optional flag to make the TextFormField read-only.

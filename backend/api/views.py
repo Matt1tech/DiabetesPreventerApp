@@ -1,5 +1,4 @@
 from datetime import date, timezone
-from django.http import JsonResponse
 from django.contrib.auth.hashers import check_password, make_password
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
@@ -14,7 +13,6 @@ from .models import *
 from .serializers import *
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.decorators import parser_classes
-from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.db.models import Sum
 from .model_utils import model  # Import the loaded model
@@ -24,9 +22,6 @@ import logging
 from django.contrib.auth.views import PasswordResetView
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
-from django.urls import reverse
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from django.utils.encoding import force_bytes, force_str
 from django.conf import settings
 import random
 
@@ -392,21 +387,83 @@ def get_last_health_record(request, user_id):
         print(f"Last Health Record: {last_health_record}")
 
         if last_health_record:
-            data = {
+            # Extract necessary information from the last health record
+            weight = last_health_record.weight
+            blood_glucose = last_health_record.blood_glucose
+            blood_pressure = last_health_record.blood_pressure
+
+            # Calculate additional features
+            bmi = calculate_bmi(weight, user.height)
+            age = calculate_age(user.birthdate)
+            high_bp = is_high_bp(blood_pressure)
+            high_chol = is_high_cholesterol(user)
+            start_date = timezone.now().date() - timedelta(days=30)
+            ment_hlth = calculate_mental_health(user, start_date)
+            phys_hlth = calculate_physical_health(user, start_date)
+            gen_hlth = calculate_general_health(user, start_date)
+            fruits = check_fruit_intake(user, timezone.now().date())
+            veggies = check_veggie_intake(user, timezone.now().date())
+            glucose = calculate_average_blood_glucose(user)
+            diabetes_pedigree_function = calculate_diabetes_pedigree_function(user)
+            family_history = 1 if user.family_history else 0
+
+            # Prepare features for the model
+            features_dict = {
+                'HighBP': high_bp,
+                'HighChol': high_chol,
+                'BMI': bmi,
+                'PhysActivity': phys_hlth,
+                'Fruits': fruits,
+                'Veggies': veggies,
+                'GenHlth': gen_hlth,
+                'MentHlth': ment_hlth,
+                'PhysHlth': phys_hlth,
+                'Sex': 1 if user.gender.lower() == 'male' else 0,
+                'Age': age,
+                'DiabetesPedigreeFunction': diabetes_pedigree_function,
+                'Glucose': glucose,
+                'FamilyHistory': family_history
+            }
+
+            # Ensure the features are in the correct order
+            features_df = pd.DataFrame([features_dict])[FEATURE_ORDER]
+
+            # Log the ordered features for debugging
+            print("Model expects features:", model.feature_names_in_)
+            print("Ordered features:", features_df.columns.tolist())
+            print("Feature values:", features_df.iloc[0].to_dict())
+
+            # Ensure the input features match the training feature order
+            if list(features_df.columns) != list(model.feature_names_in_):
+                return Response({'error': 'Feature names do not match the model.'}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Predict diabetes risk using the machine learning model
+            try:
+                prediction_prob = model.predict_proba(features_df)[0]
+                prediction = model.predict(features_df)[0]
+            except ValueError as e:
+                print("Error during model prediction:", str(e))
+                return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Prepare the response data
+            response_data = {
                 'blood_glucose': last_health_record.blood_glucose,
                 'blood_pressure': last_health_record.blood_pressure,
                 'weight': last_health_record.weight,
-                'bmi': last_health_record.weight,
+                'bmi': bmi,
+                'diabetes_risk_probability_class_0': prediction_prob[0],
+                'diabetes_risk_probability_class_1': prediction_prob[1],
+                'diabetes_risk_probability_class_2': prediction_prob[2],
             }
-            print(f"Retrieved data: {data}")
-            return Response(data)
+            print(f"Retrieved data: {response_data}")
+            return Response(response_data)
         else:
             print("No health records found for this user.")
             return Response({'error': 'No health records found for this user.'}, status=404)
     except Exception as e:
         print(f"Error retrieving health records: {e}")
         return Response({'error': 'Error retrieving health records.'}, status=500)
-   
+
    
    
    
@@ -469,10 +526,10 @@ def update_customizations(request):
         # Create new Customizations
         new_data = {
             'user': user.id,
-            'daily_calories_max': daily_calories_max or 0,
-            'max_protein': max_protein or 0,
-            'max_fat': max_fat or 0,
-            'max_fiber': max_fiber or 0,
+            'daily_calories_max': daily_calories_max or 1000,
+            'max_protein': max_protein or 100,
+            'max_fat': max_fat or 100,
+            'max_fiber': max_fiber or 100,
             'max_cholesterol': max_cholesterol or 0,
             'max_carbs': max_carbs or 0,
             'meals_per_day': meals_per_day or [],

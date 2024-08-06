@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/pages/login_page.dart';
-import '../services/auth_service.dart'; // Adjust the import path as needed
+import '../services/auth_service.dart';
 
 class LogoutManager {
   final BuildContext context;

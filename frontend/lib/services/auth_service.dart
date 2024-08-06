@@ -2,8 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-
-import '../models/user.dart';
 import '../urls.dart';
 
 final storage = FlutterSecureStorage();
@@ -93,6 +91,7 @@ class AuthService {
       await storage.write(key: 'access_token', value: accessToken);
       await storage.write(key: 'refresh_token', value: refreshToken);
       await storage.write(key: 'user_name', value: user['name']);
+      await storage.write(key: 'email', value: user['email']);
       await storage.write(key: 'user_profile_picture', value: profilePicture);
       await storage.write(key: 'user_id', value: user['id'].toString());
       await storage.write(key: 'user_data', value: jsonEncode(user));
@@ -181,21 +180,31 @@ class AuthService {
   Future<http.Response> updateUserProfile(
       String userId,
       String name,
-      String password,
+      String email,
+      String? password,
       double height,
       String maritalStatus,
-      File? profilePicture) async {
+      File? profilePicture,
+      String currentPassword) async {
     var uri = Uri.parse('$baseUrl/update_user/');
     var request = http.MultipartRequest('PUT', uri)
       ..fields['user_id'] = userId
       ..fields['name'] = name
-      ..fields['password'] = password
+      ..fields['email'] = email
+      ..fields['current_password'] = currentPassword
       ..fields['height'] = height.toString()
       ..fields['marital_status'] = maritalStatus;
+
+    if (password != null && password.isNotEmpty) {
+      request.fields['password'] = password;
+    }
 
     if (profilePicture != null) {
       request.files.add(await http.MultipartFile.fromPath(
           'profile_picture', profilePicture.path));
+    } else {
+      request.fields['profile_picture'] =
+          ''; // Ensure the backend knows to remove the picture
     }
 
     var response = await request.send();
