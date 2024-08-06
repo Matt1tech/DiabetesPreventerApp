@@ -536,8 +536,8 @@ def request_otp(request):
     user.otp_expiration = timezone.now() + timedelta(minutes=5)  # OTP valid for 5 minutes
     user.save()
 
-    email_subject = 'Password Reset OTP'
-    email_body = f" Thank you for using Diabetes Preventer Application. \n Your OTP for password reset is: {otp}\n , Stay healthy.\n Diabetes Preventer Application \n Users Support Team."
+    email_subject = 'Password Reset OTP-Diabetes Preventer Application'
+    email_body = f"Diabetes Preventer Application, Reset Password Service. \n\n\n Your OTP for password reset is: {otp}\n\n\n\n  This message is confidential please don not reply it or share with any third party.\n\n\n\n\n Thank you for using Diabetes Preventer Application.\n\n Stay healthy.\n\n Users Support Team."
     
     try:
         send_mail(
