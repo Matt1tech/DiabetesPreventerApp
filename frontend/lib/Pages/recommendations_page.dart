@@ -156,22 +156,6 @@ class _RecommendationsState extends State<RecommendationsPage> {
               List<Map<String, dynamic>>? meals = snapshot.data;
               return Column(
                 children: [
-                  ElevatedButton(
-                    onPressed: () => _scrollToSection(_section1Key),
-                    child: Text('Main Dish Section 1'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () => _scrollToSection(_section2Key),
-                    child: Text('Desert Section 2'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () => _scrollToSection(_section3Key),
-                    child: Text('Go to Section 3'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () => _scrollToSection(_section4Key),
-                    child: Text('Go to Section 4'),
-                  ),
                   _buildSection(_section1Key, meals, 'Main Dish Section'),
                   _buildSection(_section2Key, meals, 'Desert Section'),
                   _buildSection(_section3Key, meals, 'Salad Section'),
@@ -245,7 +229,11 @@ class _RecommendationsState extends State<RecommendationsPage> {
             ),
           ),
         ),
-        title: Text(meal['name']),
+        title: Text(
+          meal['name'],
+          style: TextStyle(
+              fontSize: 18, color: blueColor, fontWeight: FontWeight.bold),
+        ),
         children: [
           Padding(
             padding:
