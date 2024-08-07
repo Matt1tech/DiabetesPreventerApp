@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import '../Pages/support.dart';
 import '../pages/pages.dart';
 
 const String apiKey =
@@ -61,7 +62,7 @@ Future<void> navigateToPage(BuildContext context, int index) async {
     case 6:
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => UpdateProfilePage()),
+        MaterialPageRoute(builder: (context) => ClientSupportPage()),
       );
       break;
   }

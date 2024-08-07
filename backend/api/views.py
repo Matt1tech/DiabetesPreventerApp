@@ -527,10 +527,10 @@ def update_customizations(request):
         # Create new Customizations
         new_data = {
             'user': user.id,
-            'daily_calories_max': daily_calories_max or 1000,
-            'max_protein': max_protein or 100,
-            'max_fat': max_fat or 100,
-            'max_fiber': max_fiber or 100,
+            'daily_calories_max': daily_calories_max or 0,
+            'max_protein': max_protein or 0,
+            'max_fat': max_fat or 0,
+            'max_fiber': max_fiber or 0,
             'max_cholesterol': max_cholesterol or 0,
             'max_carbs': max_carbs or 0,
             'meals_per_day': meals_per_day or [],
