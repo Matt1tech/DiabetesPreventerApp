@@ -25,8 +25,7 @@ class NutrientationPage extends StatefulWidget {
 
 class _NutrientationPageState extends State<NutrientationPage> {
   Map<String, dynamic>? analysisData;
-  bool isLoading = false; // Added loading state
-
+  bool isLoading = false;
   // Handle the image
   XFile? _profilePicture;
   final ImagePicker _picker = ImagePicker();
@@ -42,9 +41,6 @@ class _NutrientationPageState extends State<NutrientationPage> {
   }
 
   Future<void> _analyzeImage() async {
-    setState(() {
-      isLoading = true;
-    });
     try {
       final data = await analyzeImage(widget.imageFile, widget.apiKey);
       print(
@@ -63,13 +59,12 @@ class _NutrientationPageState extends State<NutrientationPage> {
         setState(() {
           analysisData = {
             'display_name': foodInfo['display_name'] ?? 'Unknown',
-            'proteins': (nutrition['proteins_100g'] ?? '0').toString(),
-            'fat': (nutrition['fat_100g'] ?? '0').toString(),
-            'cholesterol': (nutrition['cholesterol_100g'] ?? '0').toString(),
-            'calories': (nutrition['calories_100g'] ?? '0').toString(),
-            'fibers': (nutrition['fibers_100g'] ?? '0').toString(),
+            'proteins': nutrition['proteins_100g']?.toString() ?? 'N/A',
+            'fat': nutrition['fat_100g']?.toString() ?? 'N/A',
+            'cholesterol': nutrition['cholesterol_100g']?.toString() ?? 'N/A',
+            'calories': nutrition['calories_100g']?.toString() ?? 'N/A',
+            'fibers': nutrition['fibers_100g']?.toString() ?? 'N/A',
           };
-          isLoading = false;
         });
       } else {
         throw Exception('Invalid data structure: "items" not found or empty');
@@ -77,19 +72,15 @@ class _NutrientationPageState extends State<NutrientationPage> {
     } catch (e) {
       // Handle error
       print('Error analyzing image: $e');
-      setState(() {
-        isLoading = false;
-      });
     }
   }
 
-  // Handle the image of the profile picture
+//handle the image of the profile picture
   Future<void> _loadUserInfo() async {
     final userInfo = await loadUserInfo();
     setState(() {
       userName = userInfo['userName'];
       userProfilePicture = userInfo['userProfilePicture'];
-      userId = userInfo['id']; // Added userId
     });
   }
 
@@ -127,8 +118,6 @@ class _NutrientationPageState extends State<NutrientationPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            if (isLoading)
-              CircularProgressIndicator(), // Added loading indicator
             Container(
               child: widget.imageFile != null
                   ? SizedBox(
@@ -151,15 +140,15 @@ class _NutrientationPageState extends State<NutrientationPage> {
                     const SizedBox(height: 10),
                     Text('Name: ${analysisData!['display_name']}',
                         style: const TextStyle(color: blueColor)),
-                    Text('Proteins: ${analysisData!['proteins_100g']} g',
+                    Text('Proteins: ${analysisData!['proteins']} g',
                         style: const TextStyle(color: blueColor)),
-                    Text('Fat: ${analysisData!['fat_100g']} g',
+                    Text('Fat: ${analysisData!['fat']} g',
                         style: const TextStyle(color: blueColor)),
-                    Text('Cholesterol: ${analysisData!['cholesterol_100g']} mg',
+                    Text('Cholesterol: ${analysisData!['cholesterol']} mg',
                         style: const TextStyle(color: blueColor)),
-                    Text('Calories: ${analysisData!['calories_100g']} kcal',
+                    Text('Calories: ${analysisData!['calories']} kcal',
                         style: const TextStyle(color: blueColor)),
-                    Text('Fibers: ${analysisData!['fibers_100g']} g',
+                    Text('Fibers: ${analysisData!['fibers']} g',
                         style: const TextStyle(color: blueColor)),
                     SizedBox(height: 30),
                     Row(
@@ -173,12 +162,14 @@ class _NutrientationPageState extends State<NutrientationPage> {
                         ),
                         ElevatedButton(
                           onPressed: () {
+                            // Add functionality to retake the picture
                             Navigator.pop(context);
                           },
                           child: Text('Retake'),
                         ),
                         ElevatedButton(
                           onPressed: () {
+                            // Add functionality to cancel
                             Navigator.pop(context);
                           },
                           child: Text('Cancel'),
