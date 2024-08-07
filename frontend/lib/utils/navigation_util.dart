@@ -7,7 +7,8 @@ import '../pages/pages.dart';
 const String apiKey =
     'uPsCgdLq.jIrKCQePQaXday8iQYsqEgzpcHT1r7Tr'; // Replace with  API key
 
-Future<void> navigateToPage(BuildContext context, int index) async {
+Future<void> navigateToPage(BuildContext context, int index,
+    {int initialSectionIndex = 1}) async {
   switch (index) {
     case 0:
       Navigator.pushReplacement(
@@ -28,7 +29,6 @@ Future<void> navigateToPage(BuildContext context, int index) async {
       );
       break;
     case 3:
-      // Open camera and take picture for NutrientationPage
       final picker = ImagePicker();
       final pickedFile = await picker.pickImage(source: ImageSource.camera);
 
@@ -44,7 +44,6 @@ Future<void> navigateToPage(BuildContext context, int index) async {
         );
       } else {
         // Handle the case where the user didn't take a picture
-        // For now, we'll just return to the current page
       }
       break;
     case 4:
@@ -56,7 +55,9 @@ Future<void> navigateToPage(BuildContext context, int index) async {
     case 5:
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => RecommendationsPage()),
+        MaterialPageRoute(
+            builder: (context) =>
+                RecommendationsPage(initialSectionIndex: initialSectionIndex)),
       );
       break;
     case 6:

@@ -228,10 +228,10 @@ class _RegisterPageState extends State<RegisterPage> {
                 Row(
                   children: [
                     Container(
-                      width: 130,
+                      width: 140,
                       child: ReusableTextFormField(
                         labelText: 'Height',
-                        icon: null,
+                        icon: Icons.height,
                         validatorMessage: 'Invalid Height',
                         validatorFormat: RegExp(r'^\d+(\.\d+)?$'),
                         controller: _heightController,
@@ -240,7 +240,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                     const SizedBox(width: 25),
                     Container(
-                      width: 150,
+                      width: 160,
                       child: buildDatePickerFieldBirthDate(
                           context, 'Birthday', Icons.cake,
                           width: 180, controller: _dateController),
@@ -251,33 +251,32 @@ class _RegisterPageState extends State<RegisterPage> {
                 Center(
                   child: ElevatedButton(
                     style: ButtonStyle(
-                      minimumSize:
-                          MaterialStateProperty.all(const Size(340, 50)),
-                      backgroundColor: MaterialStateProperty.resolveWith<Color>(
-                        (Set<MaterialState> states) {
-                          if (states.contains(MaterialState.pressed)) {
+                      minimumSize: WidgetStateProperty.all(const Size(340, 50)),
+                      backgroundColor: WidgetStateProperty.resolveWith<Color>(
+                        (Set<WidgetState> states) {
+                          if (states.contains(WidgetState.pressed)) {
                             return Color.fromARGB(255, 68, 37, 135)
                                 .withOpacity(0.8);
-                          } else if (states.contains(MaterialState.hovered)) {
+                          } else if (states.contains(WidgetState.hovered)) {
                             return Color.fromARGB(255, 88, 71, 126)
                                 .withOpacity(0.9);
                           }
                           return pinkColor;
                         },
                       ),
-                      overlayColor: MaterialStateProperty.resolveWith<Color>(
-                        (Set<MaterialState> states) {
-                          if (states.contains(MaterialState.pressed)) {
+                      overlayColor: WidgetStateProperty.resolveWith<Color>(
+                        (Set<WidgetState> states) {
+                          if (states.contains(WidgetState.pressed)) {
                             return Color.fromARGB(255, 68, 37, 135)
                                 .withOpacity(0.8);
-                          } else if (states.contains(MaterialState.hovered)) {
+                          } else if (states.contains(WidgetState.hovered)) {
                             return Color.fromARGB(255, 88, 71, 126)
                                 .withOpacity(0.9);
                           }
                           return pinkColor;
                         },
                       ),
-                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                         RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10.0),
                         ),

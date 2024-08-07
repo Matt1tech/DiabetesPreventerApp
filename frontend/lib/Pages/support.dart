@@ -257,7 +257,7 @@ class _ClientSupportPageState extends State<ClientSupportPage> {
             children: [
               IconButton(
                 icon: const Icon(Icons.facebook, color: Colors.blue),
-                onPressed: () => _launchURL('https://facebook.com/yourpage'),
+                onPressed: () => _launchURL('https://facebook.com/diabets'),
               ),
               IconButton(
                 icon: const Icon(Icons.one_x_mobiledata_outlined,
@@ -300,7 +300,7 @@ class _ClientSupportPageState extends State<ClientSupportPage> {
         title: const Text(
           'Rules and Regulations',
           style: TextStyle(
-            fontSize: 22,
+            fontSize: 20,
             fontWeight: FontWeight.bold,
             color: blueColor,
           ),

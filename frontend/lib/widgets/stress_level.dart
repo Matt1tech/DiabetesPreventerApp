@@ -82,7 +82,7 @@ class _StressLevelSelectorState extends State<StressLevelSelector> {
   Widget build(BuildContext context) {
     return Center(
       child: Container(
-        width: 380,
+        width: 360,
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(5),

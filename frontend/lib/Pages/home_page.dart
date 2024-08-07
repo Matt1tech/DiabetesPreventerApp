@@ -14,6 +14,7 @@ import '../widgets/widgets.dart'; // Barrel file for custom widgets
 import '../utils/utils.dart'; // Barrel file for utilities
 import '../components/components.dart'; // Barrel file for components
 import '../services/user_health_records_service.dart';
+import 'recommendations_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -39,17 +40,28 @@ class _HomePageState extends State<HomePage> {
   String? user_id;
   late LogoutManager logoutManager;
   // Variable to hold user data
-  List<SuitableMenuModel> menu = [];
+  final List<SuitableMenuModel> menu = SuitableMenuModel.getMenu();
+
   int _selectedIndex = 0;
   final PhysicalActivityRecordsService service =
       PhysicalActivityRecordsService();
   Customizations? userCustomizations;
   final ImagePicker _picker = ImagePicker();
+  void _navigateToRecommendationsPage(int initialSectionIndex) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => RecommendationsPage(
+          initialSectionIndex: initialSectionIndex,
+        ),
+      ),
+    );
+  }
 
   @override
   void initState() {
     super.initState();
-    _getMenu();
+
     _loadUserInfo();
     _loadUserData();
     fetchHealthRecordService = FetchHealthRecordService();
@@ -181,10 +193,6 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  void _getMenu() {
-    menu = SuitableMenuModel.getMenu();
-  }
-
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -263,7 +271,7 @@ class _HomePageState extends State<HomePage> {
           width: 420,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: menuSlider,
+            children: _buildMenuSlider(),
           ),
         ),
       ],
@@ -271,79 +279,78 @@ class _HomePageState extends State<HomePage> {
   }
 
   // Suitable menu slider Section
-  List<Widget> get menuSlider {
-    return menu.isNotEmpty
-        ? [
-            const Padding(
-              padding: EdgeInsets.only(left: 16, top: 8),
-              child: Text(
-                'Suitable Menu',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Color.fromARGB(255, 240, 236, 236),
-                  fontSize: 18.0,
+  // Suitable menu slider Section
+  List<Widget> _buildMenuSlider() {
+    return [
+      const Padding(
+        padding: EdgeInsets.only(left: 16, top: 8),
+        child: Text(
+          'Suitable Menu',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+            fontSize: 18.0,
+          ),
+        ),
+      ),
+      const SizedBox(height: 10),
+      Container(
+        height: 95,
+        width: double.infinity,
+        child: ListView.separated(
+          itemCount: menu.length,
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.only(left: 20, right: 20),
+          separatorBuilder: (context, index) => const SizedBox(width: 20),
+          itemBuilder: (context, index) {
+            return InkWell(
+              onTap: () {
+                _navigateToRecommendationsPage(index + 1);
+              },
+              child: Container(
+                width: 90,
+                decoration: BoxDecoration(
+                  color: menu[index].boxColor.withOpacity(0.7),
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 4,
+                      offset: Offset(2, 2),
+                    ),
+                  ],
                 ),
-              ),
-            ),
-            const SizedBox(height: 10),
-            Container(
-              height: 95,
-              width: 400,
-              child: ListView.separated(
-                itemCount: menu.length,
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.only(left: 20, right: 20),
-                separatorBuilder: (context, index) => const SizedBox(width: 20),
-                itemBuilder: (context, index) {
-                  return InkWell(
-                    onTap: () {
-                      // Handle button press
-                    },
-                    child: Container(
-                      width: 90,
-                      decoration: BoxDecoration(
-                        color: menu[index].boxColor.withOpacity(0.7),
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Colors.black26,
-                            blurRadius: 4,
-                            offset: Offset(2, 2),
-                          ),
-                        ],
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Container(
+                      width: 60,
+                      height: 60,
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
                       ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          Container(
-                            width: 60,
-                            height: 60,
-                            decoration: const BoxDecoration(
-                              color: Color.fromARGB(255, 240, 236, 236),
-                              shape: BoxShape.circle,
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: SvgPicture.asset(menu[index].imagePath),
-                            ),
-                          ),
-                          Text(
-                            menu[index].name,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w400,
-                              color: Colors.black,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: SvgPicture.asset(menu[index].imagePath),
                       ),
                     ),
-                  );
-                },
+                    Text(
+                      menu[index].name,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w400,
+                        color: Colors.black,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ]
-        : [];
+            );
+          },
+        ),
+      ),
+    ];
   }
 
   // Nutrients Details Section
@@ -532,7 +539,7 @@ class _HomePageState extends State<HomePage> {
       children: [
         const SizedBox(height: 5),
         const Padding(
-          padding: EdgeInsets.only(left: 5),
+          padding: EdgeInsets.only(left: 32),
           child: Text(
             'Activity Logs',
             style: TextStyle(
@@ -548,8 +555,9 @@ class _HomePageState extends State<HomePage> {
             user_id != null
                 ? ExerciseRecord(userId: user_id!, service: service)
                 : Center(
-                    child:
-                        CircularProgressIndicator()), // Show a loading indicator or a placeholder
+                    child: CircularProgressIndicator(
+                    semanticsLabel: 'Loading..',
+                  )), // Show a loading indicator or a placeholder
 
             const SizedBox(height: 40),
             user_id != null

@@ -200,15 +200,16 @@ class _LoginPageState extends State<LoginPage> {
               ),
               const SizedBox(height: 16),
               isLoading
-                  ? const CircularProgressIndicator()
+                  ? const CircularProgressIndicator(
+                      semanticsLabel: 'Loading...',
+                    )
                   : ElevatedButton(
                       style: ButtonStyle(
                         minimumSize:
-                            MaterialStateProperty.all(const Size(340, 50)),
-                        backgroundColor:
-                            MaterialStateProperty.resolveWith<Color>(
-                                (Set<MaterialState> states) {
-                          if (states.contains(MaterialState.pressed)) {
+                            WidgetStateProperty.all(const Size(340, 50)),
+                        backgroundColor: WidgetStateProperty.resolveWith<Color>(
+                            (Set<WidgetState> states) {
+                          if (states.contains(WidgetState.pressed)) {
                             return const Color.fromARGB(255, 68, 37, 135)
                                 .withOpacity(0.8);
                           } else if (states.contains(MaterialState.hovered)) {
@@ -217,15 +218,14 @@ class _LoginPageState extends State<LoginPage> {
                           }
                           return pinkColor; // Replace with your pinkColor variable
                         }),
-                        overlayColor: MaterialStateProperty.resolveWith<Color>(
-                            (Set<MaterialState> states) {
-                          if (states.contains(MaterialState.pressed)) {
+                        overlayColor: WidgetStateProperty.resolveWith<Color>(
+                            (Set<WidgetState> states) {
+                          if (states.contains(WidgetState.pressed)) {
                             return Colors.black12;
                           }
                           return Colors.transparent;
                         }),
-                        shape:
-                            MaterialStateProperty.all<RoundedRectangleBorder>(
+                        shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                           RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10.0),
                           ),

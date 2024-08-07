@@ -297,7 +297,7 @@ class _MealRecordsPageState extends State<MealRecordsPage> {
 
   Widget _buildTextField(String label, TextEditingController controller) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 12),
       child: TextField(
         decoration: InputDecoration(
           labelText: label,
