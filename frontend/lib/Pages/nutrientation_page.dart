@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:frontend/utils/utilities.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import '../models/meal.dart';
 import '../services/analyze_image.dart'; // Make sure to import your analyzeImage function
 import '../services/fetch_user_data_service.dart';
+import '../services/meal_records_service.dart';
 import '../widgets/widgets.dart'; // Ensure this import path is correct
 import '../utils/utils.dart';
 
@@ -28,13 +30,16 @@ class _NutrientationPageState extends State<NutrientationPage> {
   XFile? _profilePicture;
   final ImagePicker _picker = ImagePicker();
   String? userName;
-  String? userProfilePicture;
+  String? userId; // Added userId
+
   @override
   void initState() {
     super.initState();
     _analyzeImage();
     _loadUserInfo();
   }
+
+  String? userProfilePicture;
 
   Future<void> _analyzeImage() async {
     try {
@@ -60,6 +65,7 @@ class _NutrientationPageState extends State<NutrientationPage> {
             'cholesterol': nutrition['cholesterol_100g']?.toString() ?? 'N/A',
             'calories': nutrition['calories_100g']?.toString() ?? 'N/A',
             'fibers': nutrition['fibers_100g']?.toString() ?? 'N/A',
+            'carbs': nutrition['carbs_100g']?.toString() ?? 'N/A',
           };
         });
       } else {
@@ -181,10 +187,46 @@ class _NutrientationPageState extends State<NutrientationPage> {
     );
   }
 
-  void _saveToDatabase() {
-    // Implement your database saving logic here
-    print('Saving to database...');
-    // Example:
-    // DatabaseService.saveAnalysisData(analysisData);
+  Future<void> _saveToDatabase() async {
+    if (userId == null || userId!.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please log in again to save meal data.')),
+      );
+      return;
+    }
+
+    setState(() {
+      var isLoading = true;
+    });
+
+    try {
+      // Your logic to save analysis data
+      Meal meal = Meal(
+        name: analysisData!['display_name'],
+        quantity: 1.0, // Assuming a default quantity
+        calories: double.tryParse(analysisData!['calories']) ?? 0.0,
+        protein: double.tryParse(analysisData!['proteins']) ?? 0.0,
+        fats: double.tryParse(analysisData!['fat']) ?? 0.0,
+        fiber: double.tryParse(analysisData!['fibers']) ?? 0.0,
+        cholesterol: double.tryParse(analysisData!['cholesterol']) ?? 0.0,
+        carbs: double.tryParse(analysisData!['carbs']) ?? 0.0,
+        user: int.parse(userId!),
+      );
+
+      await MealRecordsService.submitMealData(meal);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Meal data saved successfully!')),
+      );
+      // Optionally reset fields or navigate away
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to save meal data. Please try again.')),
+      );
+    } finally {
+      setState(() {
+        var isLoading = false;
+      });
+    }
   }
 }
