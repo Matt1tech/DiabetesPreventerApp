@@ -342,11 +342,11 @@ class _CustomizationsPageState extends State<CustomizationsPage> {
               ),
               SizedBox(width: 20),
               HealthMeasurementLogsCard(
-                title: 'Max Cholesterol',
-                name: 'totalCholesterol',
+                title: 'Max Carbs',
+                name: 'totalCarbs',
                 onPressed: (int value) {
                   if (user_id != null) {
-                    UserCustomizationService.setMaxDailyCholesterol(
+                    UserCustomizationService.setMaxDailyCarbs(
                         int.parse(user_id!), value);
                   }
                 },

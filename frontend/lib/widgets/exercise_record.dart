@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/utils/utilities.dart';
-
 import '../services/physical_activities_records_service.dart';
 
 class ExerciseRecord extends StatefulWidget {
@@ -56,19 +55,29 @@ class _ExerciseRecordState extends State<ExerciseRecord> {
   Widget build(BuildContext context) {
     return Center(
       child: Container(
-        padding: const EdgeInsets.all(25.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Exercise Record',
-              style: TextStyle(
-                fontSize: 22,
-                color: pinkColor,
-                fontWeight: FontWeight.bold,
-              ),
+        width: 380,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(5),
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black26,
+              blurRadius: 10,
+              offset: Offset(0, 1),
             ),
+          ],
+        ),
+        padding: const EdgeInsets.all(25.0),
+        child: ExpansionTile(
+          title: Text(
+            'Exercise Record',
+            style: TextStyle(
+              fontSize: 22,
+              color: pinkColor,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          children: [
             SizedBox(height: 30),
             Wrap(
               spacing: 12,

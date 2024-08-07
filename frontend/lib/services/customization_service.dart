@@ -26,12 +26,11 @@ class UserCustomizationService {
     }
   }
 
-  static Future<void> setMaxDailyCholesterol(
-      int userId, int maxCholesterol) async {
+  static Future<void> setMaxDailyCarbs(int userId, int maxCholesterol) async {
     final url = Uri.parse('$baseUrl/update-customization/');
     final headers = {'Content-Type': 'application/json'};
     final body = json.encode({
-      'max_cholesterol': maxCholesterol,
+      'max_carbs': maxCholesterol,
       'user': userId,
     });
 
@@ -39,13 +38,13 @@ class UserCustomizationService {
       final response = await http.post(url, headers: headers, body: body);
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        print('Max daily cholesterol set successfully');
+        print('Max daily carbs set successfully');
       } else {
         print(
-            'Failed to submit daily cholesterol max: ${response.statusCode}, ${response.body}');
+            'Failed to submit daily carbs max: ${response.statusCode}, ${response.body}');
       }
     } catch (e) {
-      print('Error submitting  daily cholesterol max data: $e');
+      print('Error submitting  daily carbs max data: $e');
     }
   }
 

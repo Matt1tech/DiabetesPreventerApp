@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/utils/utilities.dart';
-
 import '../services/physical_activities_records_service.dart';
 
 /// A widget that allows users to select their stress level.
@@ -83,76 +82,84 @@ class _StressLevelSelectorState extends State<StressLevelSelector> {
   Widget build(BuildContext context) {
     return Center(
       child: Container(
-        padding: const EdgeInsets.all(25.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Stress Level',
-              style: TextStyle(
-                fontSize: 22,
-                color: pinkColor,
-                fontWeight: FontWeight.bold,
-              ),
+        width: 380,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(5),
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black26,
+              blurRadius: 10,
+              offset: Offset(0, 1),
             ),
+          ],
+        ),
+        padding: const EdgeInsets.all(25.0),
+        child: ExpansionTile(
+          title: Text(
+            'Stress Level',
+            style: TextStyle(
+              fontSize: 22,
+              color: pinkColor,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          children: [
             SizedBox(height: 30),
-            Expanded(
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: stressDescriptions.length,
-                itemBuilder: (context, index) {
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        selectedStressLevel = index;
-                      });
-                    },
-                    child: Container(
-                      margin: const EdgeInsets.symmetric(vertical: 4.0),
-                      padding: const EdgeInsets.all(2.0),
-                      decoration: BoxDecoration(
+            Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              children: List.generate(stressDescriptions.length, (index) {
+                return GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      selectedStressLevel = index;
+                    });
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(vertical: 4.0),
+                    padding: const EdgeInsets.all(2.0),
+                    decoration: BoxDecoration(
+                      color: selectedStressLevel == index
+                          ? stressColors[index].withOpacity(0.3)
+                          : Colors.white,
+                      border: Border.all(
                         color: selectedStressLevel == index
-                            ? stressColors[index].withOpacity(0.3)
-                            : Colors.white,
-                        border: Border.all(
-                          color: selectedStressLevel == index
-                              ? stressColors[index]
-                              : const Color.fromARGB(255, 158, 158, 158),
-                          width: 2.0,
-                        ),
-                        borderRadius: BorderRadius.circular(20.0),
+                            ? stressColors[index]
+                            : const Color.fromARGB(255, 158, 158, 158),
+                        width: 2.0,
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          CircleAvatar(
-                            backgroundColor: Colors.white,
-                            radius: 20, // Make the CircleAvatar slightly larger
-                            child: Icon(
-                              stressIcons[index],
-                              color: selectedStressLevel == index
-                                  ? stressColors[index]
-                                  : Color.fromARGB(255, 235, 200, 6),
-                              size: 30, // Make the emoji icon slightly larger
-                            ),
-                          ),
-                          SizedBox(width: 10),
-                          Text(
-                            stressDescriptions[index],
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: selectedStressLevel == index
-                                  ? stressColors[index]
-                                  : Colors.grey,
-                            ),
-                          ),
-                        ],
-                      ),
+                      borderRadius: BorderRadius.circular(20.0),
                     ),
-                  );
-                },
-              ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        CircleAvatar(
+                          backgroundColor: Colors.white,
+                          radius: 20, // Make the CircleAvatar slightly larger
+                          child: Icon(
+                            stressIcons[index],
+                            color: selectedStressLevel == index
+                                ? stressColors[index]
+                                : Color.fromARGB(255, 235, 200, 6),
+                            size: 30, // Make the emoji icon slightly larger
+                          ),
+                        ),
+                        SizedBox(width: 10),
+                        Text(
+                          stressDescriptions[index],
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: selectedStressLevel == index
+                                ? stressColors[index]
+                                : Colors.grey,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }),
             ),
             SizedBox(height: 20),
             Center(

@@ -490,7 +490,7 @@ def update_customizations(request):
     max_fat = data.get('max_fat')
     max_fiber = data.get('max_fiber')
     max_cholesterol = data.get('max_cholesterol')
-    max_carbs = data.get('max_carbs')  # New field for max carbs
+    max_carbs = data.get('max_carbs')  
     meals_per_day = data.get('meals_per_day')
     allergies = data.get('allergies')
     diets_followed = data.get('diets_followed')

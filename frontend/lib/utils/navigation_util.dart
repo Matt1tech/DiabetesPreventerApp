@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/Pages/support.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
-import '../Pages/support.dart';
 import '../pages/pages.dart';
 
 const String apiKey =

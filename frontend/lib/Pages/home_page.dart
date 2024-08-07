@@ -231,7 +231,7 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   const SizedBox(height: 20),
                   nutrientsDetailsSection(),
-                  const SizedBox(height: 5),
+                  const SizedBox(height: 10),
                   riskOverviewSection(),
                   const SizedBox(height: 50),
                   healthRecordSection(),
@@ -285,7 +285,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
             ),
-            const SizedBox(height: 11),
+            const SizedBox(height: 10),
             Container(
               height: 95,
               width: 400,
@@ -545,51 +545,16 @@ class _HomePageState extends State<HomePage> {
         const SizedBox(height: 20),
         Column(
           children: [
-            Container(
-              width: 370, // Adjusted width for better alignment
-              height: 380,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: Colors.white,
-                boxShadow: const [
-                  BoxShadow(
-                    color: Colors.black26,
-                    blurRadius: 10,
-                    offset: Offset(0, 1),
-                  ),
-                ],
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: user_id != null
-                    ? ExerciseRecord(userId: user_id!, service: service)
-                    : Center(
-                        child:
-                            CircularProgressIndicator()), // Show a loading indicator or a placeholder
-              ),
-            ),
+            user_id != null
+                ? ExerciseRecord(userId: user_id!, service: service)
+                : Center(
+                    child:
+                        CircularProgressIndicator()), // Show a loading indicator or a placeholder
+
             const SizedBox(height: 40),
-            Container(
-              width: 370, // Adjusted width for better alignment
-              height: 380,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: Color.fromARGB(255, 255, 255, 255),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Colors.black26,
-                    blurRadius: 10,
-                    offset: Offset(0, 1),
-                  ),
-                ],
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: user_id != null
-                    ? StressLevelSelector(userId: user_id!, service: service)
-                    : Center(child: CircularProgressIndicator()),
-              ),
-            ),
+            user_id != null
+                ? StressLevelSelector(userId: user_id!, service: service)
+                : Center(child: CircularProgressIndicator()),
           ],
         ),
       ],

@@ -52,8 +52,8 @@ class _ClientSupportPageState extends State<ClientSupportPage> {
           'subject=Support Request&body=Hello, I need support with...'),
     );
 
-    if (await canLaunch(emailLaunchUri.toString())) {
-      await launch(emailLaunchUri.toString());
+    if (await canLaunchUrl(emailLaunchUri)) {
+      await launchUrl(emailLaunchUri);
     } else {
       print('Could not launch email client');
       print('URL: ${emailLaunchUri.toString()}');
@@ -66,8 +66,8 @@ class _ClientSupportPageState extends State<ClientSupportPage> {
       path: adminPhoneNumber,
     );
 
-    if (await canLaunch(phoneLaunchUri.toString())) {
-      await launch(phoneLaunchUri.toString());
+    if (await canLaunchUrl(phoneLaunchUri)) {
+      await launchUrl(phoneLaunchUri);
     } else {
       print('Could not launch phone dialer');
       print('URL: ${phoneLaunchUri.toString()}');
@@ -75,8 +75,8 @@ class _ClientSupportPageState extends State<ClientSupportPage> {
   }
 
   Future<void> _launchURL(String url) async {
-    if (await canLaunch(url)) {
-      await launch(url);
+    if (await canLaunchUrl(url as Uri)) {
+      await launchUrl(url as Uri);
     } else {
       print('Could not launch $url');
     }
