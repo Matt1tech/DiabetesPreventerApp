@@ -762,12 +762,186 @@ def recommendation_list(request):
     return Response(serializer.data)
     
     
+@api_view(['GET'])
+def user_recommendation(request, user_id):
+    # Step 1: Retrieve User Data
+    user = get_object_or_404(User, id=user_id)
+    today = timezone.now().date()
+    customizations = Customizations.objects.filter(user=user, created_at__date=today).order_by('-created_at').first()
+    meals_today = Meal.objects.filter(user=user, created_at__date=today)
+    latest_health_record = HealthRecord.objects.filter(user=user).order_by('-created_at').first()
+    
+    # Calculate Total Cholesterol from Meals
+    total_cholesterol_today = meals_today.aggregate(total_cholesterol=Sum('cholesterol'))['total_cholesterol'] or 0
+
+    # Filter Recommendations Based on Customizations and Health Records
+    recommendations = Recommendation.objects.all()
+    if customizations:
+        if 'low_fat' in customizations.diets_followed:
+            recommendations = recommendations.filter(low_fat=True)
+        if 'low_carb' in customizations.diets_followed:
+            recommendations = recommendations.filter(low_carb=True)
+        if 'high_protein' in customizations.diets_followed:
+            recommendations = recommendations.filter(high_protein=True)
+        if 'no_sugar' in customizations.diets_followed:
+            recommendations = recommendations.filter(no_sugar=True)
+        if 'wheat_free' in customizations.allergies:
+            recommendations = recommendations.filter(wheat_free=True)
+        if 'egg_free' in customizations.allergies:
+            recommendations = recommendations.filter(egg_free=True)
+        if 'soy_free' in customizations.allergies:
+            recommendations = recommendations.filter(soy_free=True)
+        if customizations.meals_per_day:
+            recommendations = recommendations.filter(type__in=customizations.meals_per_day)
+
+    # Consider high blood sugar levels
+    if latest_health_record and latest_health_record.blood_glucose > 140:
+        recommendations = recommendations.filter(no_sugar=True)
+
+    # Check Nutritional Limits
+    nutrition_summary = meals_today.aggregate(
+        total_calories=Sum('calories'),
+        total_protein=Sum('protein'),
+        total_fats=Sum('fats'),
+        total_carbs=Sum('carbs'),
+        total_fiber=Sum('fiber'),
+    )
+    
+    max_protein = customizations.max_protein if customizations else 100
+    max_fat = customizations.max_fat if customizations else 100
+    max_fiber = customizations.max_fiber if customizations else 100
+    max_cholesterol = customizations.max_cholesterol if customizations else 100
+    max_carbs = customizations.max_carbs if customizations else 100
+
+    buffer_factor = 1.1
+
+    remaining_protein = max_protein - (nutrition_summary['total_protein'] or 0)
+    remaining_fat = max_fat - (nutrition_summary['total_fats'] or 0)
+    remaining_fiber = max_fiber - (nutrition_summary['total_fiber'] or 0)
+    remaining_cholesterol = max_cholesterol - total_cholesterol_today
+    remaining_carbs = max_carbs - (nutrition_summary['total_carbs'] or 0)
+
+    # Filter recommendations based on remaining nutritional limits with buffer factor
+    filtered_recommendations = recommendations.filter(
+        protein__lte=remaining_protein * buffer_factor,
+        fat__lte=remaining_fat * buffer_factor,
+        fiber__lte=remaining_fiber * buffer_factor,
+        cholesterol__lte=remaining_cholesterol * buffer_factor,
+        carbs__lte=remaining_carbs * buffer_factor
+    )
+
+    # Ensure at least two recommendations from each category if filtering is too restrictive
+    min_recommendations_per_category = 2
+    categories = recommendations.values_list('category', flat=True).distinct()
+    final_recommendations = []
+
+    for category in categories:
+        category_recommendations = filtered_recommendations.filter(category=category)
+        if category_recommendations.count() < min_recommendations_per_category:
+            fallback_recommendations = recommendations.filter(category=category)[:min_recommendations_per_category]
+            final_recommendations.extend(fallback_recommendations)
+        else:
+            final_recommendations.extend(category_recommendations[:min_recommendations_per_category])
+
+    # Serialize and Return Recommendations
+    serializer = RecommendationSerializer(final_recommendations, many=True, context={'request': request})
+    
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
     
     
     
     
     
+    '''
     
+    
+@api_view(['GET'])
+def user_recommendation(request, user_id):
+    # Step 1: Retrieve User Data
+    user = get_object_or_404(User, id=user_id)
+    today = timezone.now().date()
+    customizations = Customizations.objects.filter(user=user, created_at__date=today).order_by('-created_at').first()
+    meals_today = Meal.objects.filter(user=user, created_at__date=today)
+    latest_health_record = HealthRecord.objects.filter(user=user).order_by('-created_at').first()
+    
+    # Calculate Total Cholesterol from Meals
+    total_cholesterol_today = meals_today.aggregate(total_cholesterol=Sum('cholesterol'))['total_cholesterol'] or 0
+
+    # Filter Recommendations Based on Customizations and Health Records
+    recommendations = Recommendation.objects.all()
+    if customizations:
+        if 'low_fat' in customizations.diets_followed:
+            recommendations = recommendations.filter(low_fat=True)
+        if 'low_carb' in customizations.diets_followed:
+            recommendations = recommendations.filter(low_carb=True)
+        if 'high_protein' in customizations.diets_followed:
+            recommendations = recommendations.filter(high_protein=True)
+        if 'no_sugar' in customizations.diets_followed:
+            recommendations = recommendations.filter(no_sugar=True)
+        if 'wheat_free' in customizations.allergies:
+            recommendations = recommendations.filter(wheat_free=True)
+        if 'egg_free' in customizations.allergies:
+            recommendations = recommendations.filter(egg_free=True)
+        if 'soy_free' in customizations.allergies:
+            recommendations = recommendations.filter(soy_free=True)
+        if customizations.meals_per_day:
+            recommendations = recommendations.filter(type__in=customizations.meals_per_day)
+
+    # Consider high blood sugar levels
+    if latest_health_record and latest_health_record.blood_glucose > 140:
+        recommendations = recommendations.filter(no_sugar=True)
+
+    # Check Nutritional Limits
+    nutrition_summary = meals_today.aggregate(
+        total_calories=Sum('calories'),
+        total_protein=Sum('protein'),
+        total_fats=Sum('fats'),
+        total_carbs=Sum('carbs'),
+        total_fiber=Sum('fiber'),
+    )
+    
+    max_protein = customizations.max_protein if customizations else 100
+    max_fat = customizations.max_fat if customizations else 100
+    max_fiber = customizations.max_fiber if customizations else 100
+    max_cholesterol = customizations.max_cholesterol if customizations else 100
+    max_carbs = customizations.max_carbs if customizations else 100
+
+    buffer_factor = 1.1
+
+    remaining_protein = max_protein - (nutrition_summary['total_protein'] or 0)
+    remaining_fat = max_fat - (nutrition_summary['total_fats'] or 0)
+    remaining_fiber = max_fiber - (nutrition_summary['total_fiber'] or 0)
+    remaining_cholesterol = max_cholesterol - total_cholesterol_today
+    remaining_carbs = max_carbs - (nutrition_summary['total_carbs'] or 0)
+
+    # Adjust the filtering to be more lenient
+    filtered_recommendations = recommendations.filter(
+        Q(protein__lte=remaining_protein * buffer_factor) |
+        Q(fat__lte=remaining_fat * buffer_factor) |
+        Q(fiber__lte=remaining_fiber * buffer_factor) |
+        Q(cholesterol__lte=remaining_cholesterol * buffer_factor) |
+        Q(carbs__lte=remaining_carbs * buffer_factor)
+    )
+
+    # Ensure at least two recommendations from each category if filtering is too restrictive
+    min_recommendations_per_category = 2
+    categories = recommendations.values_list('category', flat=True).distinct()
+    final_recommendations = []
+
+    for category in categories:
+        category_recommendations = filtered_recommendations.filter(category=category)
+        if category_recommendations.count() < min_recommendations_per_category:
+            fallback_recommendations = recommendations.filter(category=category)[:min_recommendations_per_category]
+            final_recommendations.extend(fallback_recommendations)
+        else:
+            final_recommendations.extend(category_recommendations[:min_recommendations_per_category])
+
+    # Serialize and Return Recommendations
+    serializer = RecommendationSerializer(final_recommendations, many=True, context={'request': request})
+    
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 
 @api_view(['GET'])
@@ -776,6 +950,96 @@ def user_recommendation(request, user_id):
     user = get_object_or_404(User, id=user_id)
     customizations = Customizations.objects.filter(user=user, created_at__date=today).order_by('-created_at').first()
     meals_today = Meal.objects.filter(user=user, created_at__date=timezone.now().date())
+    latest_health_record = HealthRecord.objects.filter(user=user).order_by('-created_at').first()
+    
+    # Debug Statements
+    print(f"User: {user}")
+    print(f"Customizations: {customizations}")
+    print(f"Meals Today: {meals_today}")
+    print(f"Latest Health Record: {latest_health_record}")
+
+    # Step 2: Calculate Total Cholesterol from Meals
+    total_cholesterol_today = meals_today.aggregate(total_cholesterol=Sum('cholesterol'))['total_cholesterol'] or 0
+    print(f"Total Cholesterol Today: {total_cholesterol_today}")
+
+    # Step 3: Filter Recommendations Based on Customizations and Health Records
+    recommendations = Recommendation.objects.all()
+    if customizations:
+        if 'low_fat' in customizations.diets_followed:
+            recommendations = recommendations.filter(low_fat=True)
+        if 'low_carb' in customizations.diets_followed:
+            recommendations = recommendations.filter(low_carb=True)
+        if 'high_protein' in customizations.diets_followed:
+            recommendations = recommendations.filter(high_protein=True)
+        if 'no_sugar' in customizations.diets_followed:
+            recommendations = recommendations.filter(no_sugar=True)
+        if 'wheat_free' in customizations.allergies:
+            recommendations = recommendations.filter(wheat_free=True)
+        if 'egg_free' in customizations.allergies:
+            recommendations = recommendations.filter(egg_free=True)
+        if 'soy_free' in customizations.allergies:
+            recommendations = recommendations.filter(soy_free=True)
+        if customizations.meals_per_day:
+            recommendations = recommendations.filter(type__in=customizations.meals_per_day)
+
+    # Consider high blood sugar levels
+    if latest_health_record and latest_health_record.blood_glucose > 140:  # Example threshold for high blood sugar
+        recommendations = recommendations.filter(no_sugar=True)
+    
+    # Debug Statement
+    print(f"Filtered Recommendations after Customizations and Health Records: {recommendations}")
+
+    # Step 4: Check Nutritional Limits
+    nutrition_summary = meals_today.aggregate(
+        total_calories=Sum('calories'),
+        total_protein=Sum('protein'),
+        total_fats=Sum('fats'),
+        total_carbs=Sum('carbs'),
+        total_fiber=Sum('fiber'),
+    )
+    print(f"Nutrition Summary: {nutrition_summary}")
+    
+    max_protein = customizations.max_protein if customizations else 100
+    max_fat = customizations.max_fat if customizations else 100
+    max_fiber = customizations.max_fiber if customizations else 100
+    max_cholesterol = customizations.max_cholesterol if customizations else 100
+    max_carbs = customizations.max_carbs if customizations else 100
+
+    # Allow a small buffer (e.g., 10%) for nutritional limits
+    buffer_factor = 5.1
+
+    remaining_protein = max_protein - (nutrition_summary['total_protein'] or 0)
+    remaining_fat = max_fat - (nutrition_summary['total_fats'] or 0)
+    remaining_fiber = max_fiber - (nutrition_summary['total_fiber'] or 0)
+    remaining_cholesterol = max_cholesterol - total_cholesterol_today
+    remaining_carbs = max_carbs - (nutrition_summary['total_carbs'] or 0)
+
+    recommendations = recommendations.filter(
+        Q(protein__lte=remaining_protein * buffer_factor) |
+        Q(fat__lte=remaining_fat * buffer_factor) |
+        Q(fiber__lte=remaining_fiber * buffer_factor) |
+        Q(cholesterol__lte=remaining_cholesterol * buffer_factor) |
+        Q(carbs__lte=remaining_carbs * buffer_factor)
+    )
+
+    # Debug Statement
+    print(f"Final Filtered Recommendations: {recommendations}")
+
+    # Step 5: Serialize and Return Recommendations
+    serializer = RecommendationSerializer(recommendations, many=True, context={'request': request})
+    print(f"Serialized Recommendations: {serializer.data}")
+    
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+'''
+'''
+@api_view(['GET'])
+def user_recommendation(request, user_id):
+    # Step 1: Retrieve User Data
+    user = get_object_or_404(User, id=user_id)
+    today = timezone.now().date()
+    customizations = Customizations.objects.filter(user=user, created_at__date=today).order_by('-created_at').first()
+    meals_today = Meal.objects.filter(user=user, created_at__date=today)
     latest_health_record = HealthRecord.objects.filter(user=user).order_by('-created_at').first()
     
     # Debug Statements
@@ -841,10 +1105,10 @@ def user_recommendation(request, user_id):
     remaining_carbs = max_carbs - (nutrition_summary['total_carbs'] or 0)
 
     recommendations = recommendations.filter(
-        Q(protein__lte=remaining_protein * buffer_factor) |
-        Q(fat__lte=remaining_fat * buffer_factor) |
-        Q(fiber__lte=remaining_fiber * buffer_factor) |
-        Q(cholesterol__lte=remaining_cholesterol * buffer_factor) |
+        Q(protein__lte=remaining_protein * buffer_factor) &
+        Q(fat__lte=remaining_fat * buffer_factor) &
+        Q(fiber__lte=remaining_fiber * buffer_factor) &
+        Q(cholesterol__lte=remaining_cholesterol * buffer_factor) &
         Q(carbs__lte=remaining_carbs * buffer_factor)
     )
 
@@ -857,78 +1121,4 @@ def user_recommendation(request, user_id):
     
     return Response(serializer.data, status=status.HTTP_200_OK)
 
-
-
 '''
-@api_view(['GET'])
-def user_recommendation(request, user_id):
-    # Step 1: Retrieve User Data
-    user = get_object_or_404(User, id=user_id)
-    customizations = Customizations.objects.filter(user=user).order_by('-created_at').first()
-    meals_today = Meal.objects.filter(user=user, created_at__date=timezone.now().date())
-    latest_health_record = HealthRecord.objects.filter(user=user).order_by('-created_at').first()
-    
-    # Step 2: Calculate Total Cholesterol from Meals
-    total_cholesterol_today = meals_today.aggregate(total_cholesterol=Sum('cholesterol'))['total_cholesterol'] or 0
-
-    # Step 3: Filter Recommendations Based on Customizations and Health Records
-    recommendations = Recommendation.objects.all()
-    if customizations:
-        if 'low_fat' in customizations.diets_followed:
-            recommendations = recommendations.filter(low_fat=True)
-        if 'low_carb' in customizations.diets_followed:
-            recommendations = recommendations.filter(low_carb=True)
-        if 'high_protein' in customizations.diets_followed:
-            recommendations = recommendations.filter(high_protein=True)
-        if 'no_sugar' in customizations.diets_followed:
-            recommendations = recommendations.filter(no_sugar=True)
-        if 'wheat_free' in customizations.allergies:
-            recommendations = recommendations.filter(wheat_free=True)
-        if 'egg_free' in customizations.allergies:
-            recommendations = recommendations.filter(egg_free=True)
-        if 'soy_free' in customizations.allergies:
-            recommendations = recommendations.filter(soy_free=True)
-        if customizations.meals_per_day:
-            recommendations = recommendations.filter(type__in=customizations.meals_per_day)
-
-    # Consider high blood sugar levels
-    if latest_health_record and latest_health_record.blood_glucose > 140:  # Example threshold for high blood sugar
-        recommendations = recommendations.filter(no_sugar=True)
-
-    # Step 4: Check Nutritional Limits
-    nutrition_summary = meals_today.aggregate(
-        total_calories=Sum('calories'),
-        total_protein=Sum('protein'),
-        total_fats=Sum('fats'),
-        total_carbs=Sum('carbs'),
-        total_fiber=Sum('fiber'),
-    )
-    
-    max_protein = customizations.max_protein if customizations else 100
-    max_fat = customizations.max_fat if customizations else 100
-    max_fiber = customizations.max_fiber if customizations else 100
-    max_cholesterol = customizations.max_cholesterol if customizations else 100
-    max_carbs = customizations.max_carbs if customizations else 100
-
-    recommendations = recommendations.filter(
-        protein__lte=max_protein - (nutrition_summary['total_protein'] or 0),
-        fat__lte=max_fat - (nutrition_summary['total_fats'] or 0),
-        fiber__lte=max_fiber - (nutrition_summary['total_fiber'] or 0),
-        cholesterol__lte=max_cholesterol - total_cholesterol_today,
-        carbs__lte=max_carbs - (nutrition_summary['total_carbs'] or 0),
-    )
-
-    # Step 5: Serialize and Return Recommendations
-    serializer = RecommendationSerializer(recommendations, many=True, context={'request': request})
-    return Response(serializer.data, status=status.HTTP_200_OK)
-
-    '''
-    
-    
-    
-    
-    
-    
-
-
-
