@@ -99,8 +99,6 @@ class Meal(models.Model):
     user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='meals')  # One-to-Many relationship with User
     created_at = models.DateTimeField(default=timezone.now)
 
-from django.db import models
-from django.utils import timezone
 
 class Recommendation(models.Model):
     name = models.CharField(max_length=255)
@@ -118,13 +116,12 @@ class Recommendation(models.Model):
     wheat_free = models.BooleanField(default=False)
     egg_free = models.BooleanField(default=False)
     soy_free = models.BooleanField(default=False)
-    image_url = models.URLField(max_length=1024)
-    created_at = models.DateTimeField(default=timezone.now)
+    image = models.CharField(max_length=355)  # Store image path as a string
+    recipe = models.TextField()
+    
+  
 
-class MealRecommendation(models.Model):
-    recommendations = models.ManyToManyField(Recommendation, related_name='meal_recommendations')  # Many-to-Many relationship with Recommendation
-    user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='meal_recommendations')  # One-to-Many relationship with User
-    created_at = models.DateTimeField(default=timezone.now)
+
 
 
 

@@ -32,13 +32,22 @@ class MealAdmin(admin.ModelAdmin):
     search_fields = ('user__name', 'user__email', 'name')
     list_filter = ('calories', 'protein', 'fats', 'carbs', 'fiber', 'created_at')
     ordering = ('-created_at',)
-
-@admin.register(MealRecommendation)
-class MealRecommendationAdmin(admin.ModelAdmin):
-    list_display = ('user', 'created_at')
-    search_fields = ('user__name', 'user__email')
-    list_filter = ('created_at',)
-    ordering = ('-created_at',)
+@admin.register(Recommendation)
+class RecommendationAdmin(admin.ModelAdmin):
+    list_display = ('name', 'category', 'type')
+    search_fields = ('name', 'category')
+    list_filter = ('category', 'type')
+    fieldsets = (
+        (None, {
+            'fields': ('name', 'category', 'type', 'image', 'recipe')
+        }),
+        ('Nutritional Information', {
+            'fields': ('protein', 'fat', 'fiber', 'cholesterol', 'carbs')
+        }),
+        ('Dietary Flags', {
+            'fields': ('low_fat', 'low_carb', 'high_protein', 'no_sugar', 'wheat_free', 'egg_free', 'soy_free')
+        }),
+    )
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):

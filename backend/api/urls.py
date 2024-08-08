@@ -17,4 +17,5 @@ urlpatterns = [
     path('test_model/', views.test_model, name='test_model'),
     path('request_otp/', views.request_otp, name='request_otp'),
     path('verify_otp/', views.verify_otp, name='verify_otp'),
+    path('recommendations/', views.recommendation_list, name='recommendation-list'),
 ]

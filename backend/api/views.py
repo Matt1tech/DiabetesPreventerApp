@@ -640,6 +640,11 @@ def verify_otp(request):
     
 
  
+@api_view(['GET'])
+def recommendation_list(request):
+    recommendations = Recommendation.objects.all()
+    serializer = RecommendationSerializer(recommendations, many=True, context={'request': request})
+    return Response(serializer.data)
     
     
 

@@ -1,6 +1,7 @@
+import base64
 from rest_framework import serializers
 from .models import *
-
+import os 
 class CustomizationsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Customizations
@@ -23,11 +24,31 @@ class MealSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class MealRecommendationSerializer(serializers.ModelSerializer):
+
+
+
+
+class RecommendationSerializer(serializers.ModelSerializer):
+    image_url = serializers.SerializerMethodField()
+
     class Meta:
-        model = MealRecommendation
+        model = Recommendation
         fields = '__all__'
 
+    def get_image_url(self, obj):
+        request = self.context.get('request')
+        print(f"Request: {request}")
+        print(f"Image: {obj.image}")
+        if request is None:
+            return None
+        if obj.image:
+            image_url = request.build_absolute_uri('/media/recommendations_images/' + obj.image)
+            print(f"Image URL: {image_url}")
+            return image_url
+        return None
+
+
+    
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
