@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../utils/utilities.dart';
 
-class CustomTag extends StatelessWidget {
+class CustomTag extends StatefulWidget {
   final String tagName;
   final Function(String) onTagClick;
   final Color backgroundColor;
@@ -13,21 +13,27 @@ class CustomTag extends StatelessWidget {
   CustomTag({
     required this.tagName,
     required this.onTagClick,
-    this.backgroundColor =
-        const Color.fromARGB(197, 206, 206, 206), // Darker background color
-    this.textColor = pinkColor,
+    this.backgroundColor = pinkColor,
+    this.textColor = Colors.white,
     this.iconColor = pinkColor,
     this.iconBackgroundColor = Colors.white,
   });
 
   @override
+  _CustomTagState createState() => _CustomTagState();
+}
+
+class _CustomTagState extends State<CustomTag> {
+  bool _isHovered = false;
+
+  @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () => onTagClick(tagName),
+      onTap: () => widget.onTagClick(widget.tagName),
       child: Container(
         decoration: BoxDecoration(
-          color: backgroundColor,
-          borderRadius: BorderRadius.circular(25.0),
+          color: widget.backgroundColor,
+          borderRadius: BorderRadius.circular(24.0),
           boxShadow: [
             BoxShadow(
               color: Colors.black26,
@@ -36,27 +42,44 @@ class CustomTag extends StatelessWidget {
             ),
           ],
         ),
-        padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 12.0),
+        padding: EdgeInsets.symmetric(vertical: 6.0, horizontal: 15.0),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              decoration: BoxDecoration(
-                color: iconBackgroundColor,
-                shape: BoxShape.circle,
-              ),
-              padding: EdgeInsets.all(8.0),
-              child: Icon(
-                Icons.add,
-                color: iconColor,
-                size: 20.0,
+            MouseRegion(
+              cursor: SystemMouseCursors.click,
+              onEnter: (_) => _onHoverEnter(),
+              onExit: (_) => _onHoverExit(),
+              child: AnimatedContainer(
+                duration: Duration(milliseconds: 200),
+                decoration: BoxDecoration(
+                  color: _isHovered
+                      ? Colors.grey[300]
+                      : widget.iconBackgroundColor,
+                  shape: BoxShape.circle,
+                  boxShadow: _isHovered
+                      ? [
+                          BoxShadow(
+                            color: Colors.black26,
+                            blurRadius: 10.0,
+                            offset: Offset(0, 4),
+                          )
+                        ]
+                      : [],
+                ),
+                padding: EdgeInsets.all(8.0),
+                child: Icon(
+                  Icons.add,
+                  color: widget.iconColor,
+                  size: 20.0,
+                ),
               ),
             ),
             SizedBox(width: 10.0),
             Text(
-              tagName,
+              widget.tagName,
               style: TextStyle(
-                color: textColor,
+                color: widget.textColor,
                 fontSize: 15,
               ),
             ),
@@ -64,5 +87,17 @@ class CustomTag extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _onHoverEnter() {
+    setState(() {
+      _isHovered = true;
+    });
+  }
+
+  void _onHoverExit() {
+    setState(() {
+      _isHovered = false;
+    });
   }
 }

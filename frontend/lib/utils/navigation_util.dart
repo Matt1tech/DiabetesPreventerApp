@@ -5,7 +5,7 @@ import 'dart:io';
 import '../pages/pages.dart';
 
 const String apiKey =
-    'uPsCgdLq.jIrKCQePQaXday8iQYsqEgzpcHT1r7Tr'; // Replace with  API key
+    '81Ui4uhu.gOwMjEjooeRcjDXLyPgVe4EU3CkSxYa8'; // Replace with  API key
 
 Future<void> navigateToPage(BuildContext context, int index,
     {int initialSectionIndex = 1}) async {

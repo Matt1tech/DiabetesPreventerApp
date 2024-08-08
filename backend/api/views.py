@@ -1,6 +1,7 @@
 from datetime import date, timezone
 from django.contrib.auth.hashers import check_password, make_password
 from django.core.files.storage import default_storage
+from django.db.models import Q
 from django.core.files.base import ContentFile
 from django.shortcuts import get_object_or_404
 from rest_framework import status
@@ -89,17 +90,37 @@ def logout(request):
 @parser_classes([MultiPartParser, FormParser])
 def update_user_profile(request):
     user_id = request.data.get('user_id')
+    current_password = request.data.get('current_password')
     user = get_object_or_404(User, id=user_id)
+
+    if not check_password(current_password, user.password):
+        return Response({"error": "Current password is incorrect"}, status=status.HTTP_401_UNAUTHORIZED)
 
     data = request.data.dict()
     image = request.FILES.get('profile_picture')
+
     if image:
         image_path = default_storage.save('profile_pictures/' + image.name, ContentFile(image.read()))
         data['profile_picture'] = image_path
+    elif 'remove_profile_picture' in request.data and request.data['remove_profile_picture'] == 'true':
+        data['profile_picture'] = None
     else:
-        # If 'remove_profile_picture' is set in the request, clear the profile picture
-        if request.data.get('remove_profile_picture') == 'true':
-            data['profile_picture'] = None
+        data.pop('profile_picture', None) 
+
+    # Remove fields that should not be updated
+    fields_to_remove = []
+    if 'name' not in data or not data['name']:
+        fields_to_remove.append('name')
+    if 'email' not in data or not data['email']:
+        fields_to_remove.append('email')
+    if 'password' not in data or not data['password']:
+        fields_to_remove.append('password')
+    if 'marital_status' not in data or not data['marital_status']:
+        fields_to_remove.append('marital_status')
+    if 'height' not in data or not data['height']:
+        fields_to_remove.append('height')
+    for field in fields_to_remove:
+        data.pop(field, None)
 
     serializer = UserSerializer(user, data=data, partial=True)
     if serializer.is_valid():
@@ -108,7 +129,6 @@ def update_user_profile(request):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 
 
@@ -566,13 +586,109 @@ def get_user_customization(request, user_id):
    
    
    
-   
-    
+  
+
 @api_view(['GET'])
-def monthely_risk(request):
-    pass 
+def monthly_risk(request, user_id):
+    try:
+        user = get_object_or_404(User, pk=user_id)
+        end_date = timezone.now().date()
+        monthly_risk_data = []
 
+        # Get the first day of the current month
+        current_month_start = end_date.replace(day=2)
 
+        for i in range(6):
+            month_start = (current_month_start - timedelta(days=1)).replace(day=1) - timedelta(days=30 * i)
+            month_end = (month_start + timedelta(days=31)).replace(day=1)
+
+            health_records = HealthRecord.objects.filter(
+                user=user,
+                created_at__date__gte=month_start,
+                created_at__date__lt=month_end
+            )
+
+            if health_records.exists():
+                risks = []
+                for record in health_records:
+                    try:
+                        weight = float(record.weight) if record.weight else 0.0
+                        blood_glucose = float(record.blood_glucose) if record.blood_glucose else 0.0
+                        blood_pressure = int(record.blood_pressure) if record.blood_pressure else 0
+                        
+                        logger.debug(f"Weight: {weight} (type: {type(weight)})")
+                        logger.debug(f"Blood Glucose: {blood_glucose} (type: {type(blood_glucose)})")
+                        logger.debug(f"Blood Pressure: {blood_pressure} (type: {type(blood_pressure)})")
+
+                        bmi = calculate_bmi(weight, user.height)
+                        age = calculate_age(user.birthdate)
+                        high_bp = is_high_bp(blood_pressure)
+                        high_chol = is_high_cholesterol(user)
+                        ment_hlth = calculate_mental_health(user, month_start)
+                        phys_hlth = calculate_physical_health(user, month_start)
+                        gen_hlth = calculate_general_health(user, month_start)
+                        fruits = check_fruit_intake(user, month_start)
+                        veggies = check_veggie_intake(user, month_start)
+                        glucose = calculate_average_blood_glucose(user)
+                        diabetes_pedigree_function = calculate_diabetes_pedigree_function(user)
+                        family_history = 1 if user.family_history else 0
+
+                        features_dict = {
+                            'HighBP': int(high_bp),  # Ensure boolean to int conversion
+                            'HighChol': int(high_chol),  # Ensure boolean to int conversion
+                            'BMI': float(bmi),  # Ensure float conversion
+                            'PhysActivity': int(phys_hlth),  # Ensure boolean to int conversion
+                            'Fruits': int(fruits),  # Ensure boolean to int conversion
+                            'Veggies': int(veggies),  # Ensure boolean to int conversion
+                            'GenHlth': int(gen_hlth),  # Ensure boolean to int conversion
+                            'MentHlth': int(ment_hlth),  # Ensure boolean to int conversion
+                            'PhysHlth': int(phys_hlth),  # Ensure boolean to int conversion
+                            'Sex': 1 if user.gender.lower() == 'male' else 0,
+                            'Age': int(age),  # Ensure int conversion
+                            'DiabetesPedigreeFunction': float(diabetes_pedigree_function),  # Ensure float conversion
+                            'Glucose': float(glucose),  # Ensure float conversion
+                            'FamilyHistory': int(family_history)  # Ensure boolean to int conversion
+                        }
+
+                        for key, value in features_dict.items():
+                            logger.debug(f"{key}: {value} (type: {type(value)})")
+
+                        features_df = pd.DataFrame([features_dict])[FEATURE_ORDER]
+
+                        try:
+                            prediction_prob = model.predict_proba(features_df)[0]
+                            risks.append(prediction_prob[1])
+                        except ValueError as e:
+                            logger.error(f"Error during model prediction: {str(e)}")
+                            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+                    except Exception as e:
+                        logger.error(f"Error processing health record: {str(e)}")
+                        return Response({'error': f'Error processing health record: {str(e)}'}, status=status.HTTP_400_BAD_REQUEST)
+
+                avg_risk = sum(risks) / len(risks) if risks else 0
+            else:
+                avg_risk = 0
+
+            monthly_risk_data.append({
+                'month': month_start.strftime('%Y-%m'),
+                'risk': avg_risk
+            })
+
+            logger.debug(f"Month: {month_start.strftime('%Y-%m')}, Avg Risk: {avg_risk}")
+
+        return Response(monthly_risk_data, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        logger.error(f"Error calculating monthly risk for user {user_id}: {str(e)}")
+        return Response({'error': 'An error occurred while calculating monthly risk.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    
+    
+    
+    
+    
+    
 
 def generate_otp():
     return str(random.randint(100000, 999999))
@@ -639,7 +755,6 @@ def verify_otp(request):
     
     
 
- 
 @api_view(['GET'])
 def recommendation_list(request):
     recommendations = Recommendation.objects.all()
@@ -647,8 +762,167 @@ def recommendation_list(request):
     return Response(serializer.data)
     
     
-
     
+    
+    
+    
+    
+    
+
+
+@api_view(['GET'])
+def user_recommendation(request, user_id):
+    # Step 1: Retrieve User Data
+    user = get_object_or_404(User, id=user_id)
+    customizations = Customizations.objects.filter(user=user, created_at__date=today).order_by('-created_at').first()
+    meals_today = Meal.objects.filter(user=user, created_at__date=timezone.now().date())
+    latest_health_record = HealthRecord.objects.filter(user=user).order_by('-created_at').first()
+    
+    # Debug Statements
+    print(f"User: {user}")
+    print(f"Customizations: {customizations}")
+    print(f"Meals Today: {meals_today}")
+    print(f"Latest Health Record: {latest_health_record}")
+
+    # Step 2: Calculate Total Cholesterol from Meals
+    total_cholesterol_today = meals_today.aggregate(total_cholesterol=Sum('cholesterol'))['total_cholesterol'] or 0
+    print(f"Total Cholesterol Today: {total_cholesterol_today}")
+
+    # Step 3: Filter Recommendations Based on Customizations and Health Records
+    recommendations = Recommendation.objects.all()
+    if customizations:
+        if 'low_fat' in customizations.diets_followed:
+            recommendations = recommendations.filter(low_fat=True)
+        if 'low_carb' in customizations.diets_followed:
+            recommendations = recommendations.filter(low_carb=True)
+        if 'high_protein' in customizations.diets_followed:
+            recommendations = recommendations.filter(high_protein=True)
+        if 'no_sugar' in customizations.diets_followed:
+            recommendations = recommendations.filter(no_sugar=True)
+        if 'wheat_free' in customizations.allergies:
+            recommendations = recommendations.filter(wheat_free=True)
+        if 'egg_free' in customizations.allergies:
+            recommendations = recommendations.filter(egg_free=True)
+        if 'soy_free' in customizations.allergies:
+            recommendations = recommendations.filter(soy_free=True)
+        if customizations.meals_per_day:
+            recommendations = recommendations.filter(type__in=customizations.meals_per_day)
+
+    # Consider high blood sugar levels
+    if latest_health_record and latest_health_record.blood_glucose > 140:  # Example threshold for high blood sugar
+        recommendations = recommendations.filter(no_sugar=True)
+    
+    # Debug Statement
+    print(f"Filtered Recommendations after Customizations and Health Records: {recommendations}")
+
+    # Step 4: Check Nutritional Limits
+    nutrition_summary = meals_today.aggregate(
+        total_calories=Sum('calories'),
+        total_protein=Sum('protein'),
+        total_fats=Sum('fats'),
+        total_carbs=Sum('carbs'),
+        total_fiber=Sum('fiber'),
+    )
+    print(f"Nutrition Summary: {nutrition_summary}")
+    
+    max_protein = customizations.max_protein if customizations else 100
+    max_fat = customizations.max_fat if customizations else 100
+    max_fiber = customizations.max_fiber if customizations else 100
+    max_cholesterol = customizations.max_cholesterol if customizations else 100
+    max_carbs = customizations.max_carbs if customizations else 100
+
+    # Allow a small buffer (e.g., 10%) for nutritional limits
+    buffer_factor = 1.1
+
+    remaining_protein = max_protein - (nutrition_summary['total_protein'] or 0)
+    remaining_fat = max_fat - (nutrition_summary['total_fats'] or 0)
+    remaining_fiber = max_fiber - (nutrition_summary['total_fiber'] or 0)
+    remaining_cholesterol = max_cholesterol - total_cholesterol_today
+    remaining_carbs = max_carbs - (nutrition_summary['total_carbs'] or 0)
+
+    recommendations = recommendations.filter(
+        Q(protein__lte=remaining_protein * buffer_factor) |
+        Q(fat__lte=remaining_fat * buffer_factor) |
+        Q(fiber__lte=remaining_fiber * buffer_factor) |
+        Q(cholesterol__lte=remaining_cholesterol * buffer_factor) |
+        Q(carbs__lte=remaining_carbs * buffer_factor)
+    )
+
+    # Debug Statement
+    print(f"Final Filtered Recommendations: {recommendations}")
+
+    # Step 5: Serialize and Return Recommendations
+    serializer = RecommendationSerializer(recommendations, many=True, context={'request': request})
+    print(f"Serialized Recommendations: {serializer.data}")
+    
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+
+'''
+@api_view(['GET'])
+def user_recommendation(request, user_id):
+    # Step 1: Retrieve User Data
+    user = get_object_or_404(User, id=user_id)
+    customizations = Customizations.objects.filter(user=user).order_by('-created_at').first()
+    meals_today = Meal.objects.filter(user=user, created_at__date=timezone.now().date())
+    latest_health_record = HealthRecord.objects.filter(user=user).order_by('-created_at').first()
+    
+    # Step 2: Calculate Total Cholesterol from Meals
+    total_cholesterol_today = meals_today.aggregate(total_cholesterol=Sum('cholesterol'))['total_cholesterol'] or 0
+
+    # Step 3: Filter Recommendations Based on Customizations and Health Records
+    recommendations = Recommendation.objects.all()
+    if customizations:
+        if 'low_fat' in customizations.diets_followed:
+            recommendations = recommendations.filter(low_fat=True)
+        if 'low_carb' in customizations.diets_followed:
+            recommendations = recommendations.filter(low_carb=True)
+        if 'high_protein' in customizations.diets_followed:
+            recommendations = recommendations.filter(high_protein=True)
+        if 'no_sugar' in customizations.diets_followed:
+            recommendations = recommendations.filter(no_sugar=True)
+        if 'wheat_free' in customizations.allergies:
+            recommendations = recommendations.filter(wheat_free=True)
+        if 'egg_free' in customizations.allergies:
+            recommendations = recommendations.filter(egg_free=True)
+        if 'soy_free' in customizations.allergies:
+            recommendations = recommendations.filter(soy_free=True)
+        if customizations.meals_per_day:
+            recommendations = recommendations.filter(type__in=customizations.meals_per_day)
+
+    # Consider high blood sugar levels
+    if latest_health_record and latest_health_record.blood_glucose > 140:  # Example threshold for high blood sugar
+        recommendations = recommendations.filter(no_sugar=True)
+
+    # Step 4: Check Nutritional Limits
+    nutrition_summary = meals_today.aggregate(
+        total_calories=Sum('calories'),
+        total_protein=Sum('protein'),
+        total_fats=Sum('fats'),
+        total_carbs=Sum('carbs'),
+        total_fiber=Sum('fiber'),
+    )
+    
+    max_protein = customizations.max_protein if customizations else 100
+    max_fat = customizations.max_fat if customizations else 100
+    max_fiber = customizations.max_fiber if customizations else 100
+    max_cholesterol = customizations.max_cholesterol if customizations else 100
+    max_carbs = customizations.max_carbs if customizations else 100
+
+    recommendations = recommendations.filter(
+        protein__lte=max_protein - (nutrition_summary['total_protein'] or 0),
+        fat__lte=max_fat - (nutrition_summary['total_fats'] or 0),
+        fiber__lte=max_fiber - (nutrition_summary['total_fiber'] or 0),
+        cholesterol__lte=max_cholesterol - total_cholesterol_today,
+        carbs__lte=max_carbs - (nutrition_summary['total_carbs'] or 0),
+    )
+
+    # Step 5: Serialize and Return Recommendations
+    serializer = RecommendationSerializer(recommendations, many=True, context={'request': request})
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+    '''
     
     
     

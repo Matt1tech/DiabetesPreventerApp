@@ -116,8 +116,9 @@ class Recommendation(models.Model):
     wheat_free = models.BooleanField(default=False)
     egg_free = models.BooleanField(default=False)
     soy_free = models.BooleanField(default=False)
-    image = models.CharField(max_length=355)  # Store image path as a string
+    image = models.ImageField(upload_to='recommendations_images/',null=True, blank=True)  # Store image path as an ImageField
     recipe = models.TextField()
+    total_calories = models.FloatField(default=0)
     
   
 

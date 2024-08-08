@@ -88,66 +88,75 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
 
   void _updateProfile() async {
     if (_formKey.currentState!.validate()) {
-      // Collect current password from the user for confirmation
       String currentPassword = await _promptForPassword();
 
-      // Collecting update details
-      String userId = (await storage.read(key: 'user_id'))!;
-      String name = _nameController.text;
-      String email = userEmail.toString();
-      String? password =
-          _passwordController.text.isEmpty ? null : _passwordController.text;
-      String maritalStatus = isSelectedMaritalStatus[0] ? 'Married' : 'Single';
+      if (currentPassword.isEmpty) {
+        final snackBar =
+            SnackBar(content: Text('Current password is required.'));
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        return;
+      }
 
-      // Corrected assignment of height
-      double? height = _heightController.text.isNotEmpty
-          ? double.tryParse(_heightController.text)
-          : userHeight;
+      String userId = (await storage.read(key: 'user_id'))!;
+      Map<String, String> updatedFields = {};
+
+      if (_nameController.text.isNotEmpty) {
+        updatedFields['name'] = _nameController.text;
+      }
+      if (_passwordController.text.isNotEmpty) {
+        updatedFields['password'] = _passwordController.text;
+      }
+      if (_heightController.text.isNotEmpty) {
+        updatedFields['height'] = _heightController.text;
+      }
+      updatedFields['marital_status'] =
+          isSelectedMaritalStatus[0] ? 'Married' : 'Single';
+      updatedFields['current_password'] = currentPassword;
+
+      bool removeProfilePicture =
+          _profilePicture == null && userProfilePicture == null;
 
       var response = await AuthService().updateUserProfile(
         userId,
-        name,
-        email,
-        password,
-        height, // Pass the nullable height
-        maritalStatus,
+        updatedFields,
         _profilePicture != null ? File(_profilePicture!.path) : null,
-        currentPassword,
+        removeProfilePicture,
       );
 
       if (response.statusCode == 200) {
-        // Parse the response body to get updated user info
         final updatedUser = jsonDecode(response.body);
 
         setState(() {
-          userName = name;
-          userEmail = email;
+          if (updatedFields.containsKey('name')) {
+            userName = updatedFields['name'];
+          }
+          if (updatedFields.containsKey('password')) {
+            // Handle any specific UI updates for password change if needed
+          }
+          if (updatedFields.containsKey('height')) {
+            userHeight = double.tryParse(updatedFields['height']!);
+          }
           userProfilePicture = _profilePicture != null
               ? _profilePicture!.path
               : userProfilePicture;
-          // Update other fields directly
-          _heightController.text = height?.toString() ?? '';
           isSelectedMaritalStatus = [
-            maritalStatus == 'Married',
-            maritalStatus == 'Single'
+            updatedFields['marital_status'] == 'Married',
+            updatedFields['marital_status'] == 'Single'
           ];
-          // Update any other relevant fields
         });
 
-        // Update secure storage with new user data
-        await storage.write(key: 'user_name', value: name);
-        await storage.write(key: 'email', value: email);
+        await storage.write(key: 'user_name', value: userName!);
         await storage.write(
-            key: 'user_profile_picture', value: userProfilePicture);
-        await storage.write(key: 'user_id', value: userId);
+            key: 'user_profile_picture', value: userProfilePicture!);
         await storage.write(key: 'user_data', value: jsonEncode(updatedUser));
 
         final snackBar =
             SnackBar(content: Text('Profile updated successfully!'));
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
       } else {
+        final errorResponse = jsonDecode(response.body);
         final snackBar =
-            SnackBar(content: Text('Update failed: ${response.body}'));
+            SnackBar(content: Text('Update failed: ${errorResponse['error']}'));
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
       }
     }
@@ -202,7 +211,10 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
             );
           },
         ),
-        title: Text('Update Profile'),
+        title: Text(
+          'Update Profile',
+          style: TextStyle(color: Colors.white),
+        ),
         actions: [
           IconButton(
             icon: Icon(Icons.delete,

@@ -179,34 +179,18 @@ class AuthService {
 
   Future<http.Response> updateUserProfile(
       String userId,
-      String name,
-      String email,
-      String? password,
-      double? height,
-      String maritalStatus,
+      Map<String, String> updatedFields,
       File? profilePicture,
-      String currentPassword) async {
+      bool removeProfilePicture) async {
     var uri = Uri.parse('$baseUrl/update_user/');
     var request = http.MultipartRequest('PUT', uri)
-      ..fields['user_id'] = userId
-      ..fields['name'] = name
-      ..fields['email'] = email
-      ..fields['current_password'] = currentPassword
-      ..fields['marital_status'] = maritalStatus;
-
-    if (password != null && password.isNotEmpty) {
-      request.fields['password'] = password;
-    }
-
-    if (height != null) {
-      request.fields['height'] =
-          height.toString(); // Add height only if not null
-    }
+      ..fields.addAll(updatedFields)
+      ..fields['user_id'] = userId;
 
     if (profilePicture != null) {
       request.files.add(await http.MultipartFile.fromPath(
           'profile_picture', profilePicture.path));
-    } else {
+    } else if (removeProfilePicture) {
       request.fields['remove_profile_picture'] = 'true';
     }
 

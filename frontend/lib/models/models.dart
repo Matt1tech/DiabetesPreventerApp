@@ -4,5 +4,5 @@ export 'user.dart';
 export 'meal.dart';
 export 'customizations.dart';
 export 'health_records.dart';
-export 'meals_recommendations.dart';
+export 'recommendation.dart';
 export 'physical_records.dart';

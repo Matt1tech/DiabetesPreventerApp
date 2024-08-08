@@ -442,7 +442,7 @@ class _CustomizationsPageState extends State<CustomizationsPage> {
     );
   }
 
-  void handleTagClick(String tagName) {
+  void handleTagClick(String tagName) async {
     if (user_id == null) {
       print("User ID is null");
       return;
@@ -452,15 +452,25 @@ class _CustomizationsPageState extends State<CustomizationsPage> {
 
     // Determine the category of the tag
     if (tagName.contains('-free')) {
-      UserCustomizationService.allergies(int.parse(user_id!), tagList);
+      await UserCustomizationService.allergies(int.parse(user_id!), tagList);
     } else if (tagName.contains('Low') ||
         tagName.contains('High') ||
         tagName.contains('No')) {
-      UserCustomizationService.dietsFollowed(int.parse(user_id!), tagList);
+      await UserCustomizationService.dietsFollowed(
+          int.parse(user_id!), tagList);
     } else {
-      UserCustomizationService.setMealPerDay(int.parse(user_id!), tagList);
+      await UserCustomizationService.setMealPerDay(
+          int.parse(user_id!), tagList);
     }
 
     print("Tag clicked: $tagName");
+
+    // Show snackbar upon successful submission
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('$tagName saved successfully!'),
+        duration: Duration(seconds: 2),
+      ),
+    );
   }
 }

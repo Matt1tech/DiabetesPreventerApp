@@ -1,4 +1,6 @@
 import base64
+
+from django.conf import settings
 from rest_framework import serializers
 from .models import *
 import os 
@@ -25,9 +27,6 @@ class MealSerializer(serializers.ModelSerializer):
 
 
 
-
-
-
 class RecommendationSerializer(serializers.ModelSerializer):
     image_url = serializers.SerializerMethodField()
 
@@ -37,14 +36,8 @@ class RecommendationSerializer(serializers.ModelSerializer):
 
     def get_image_url(self, obj):
         request = self.context.get('request')
-        print(f"Request: {request}")
-        print(f"Image: {obj.image}")
-        if request is None:
-            return None
-        if obj.image:
-            image_url = request.build_absolute_uri('/media/recommendations_images/' + obj.image)
-            print(f"Image URL: {image_url}")
-            return image_url
+        if request and obj.image:
+            return request.build_absolute_uri(settings.MEDIA_URL +  'recommendations_images/' + str(obj.image))
         return None
 
 
@@ -53,6 +46,12 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = '__all__'
+    def get_image_url(self, obj):
+        request = self.context.get('request')
+        if request and obj.image:
+            return request.build_absolute_uri(settings.MEDIA_URL +  'profile_pictures/' + str(obj.image))
+        return None        
+    
 
 
 

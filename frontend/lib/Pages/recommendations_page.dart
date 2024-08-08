@@ -4,6 +4,7 @@ import 'package:frontend/utils/utilities.dart';
 import 'package:image_picker/image_picker.dart';
 import '../services/auth_service.dart';
 import '../services/fetch_user_data_service.dart';
+import '../services/recommendation_service.dart';
 import '../utils/logout_utility.dart';
 import '../widgets/drawer_widget.dart';
 import '../widgets/user_header.dart';
@@ -42,9 +43,15 @@ class _RecommendationsState extends State<RecommendationsPage> {
     super.initState();
     _loadUserInfo();
     _loadUserData();
-    _mealsFuture = Future.value(getMockMeals()); // Use mock data
+    _mealsFuture =
+        _fetchRecommendations(); // Fetch recommendations from the service
     WidgetsBinding.instance
         .addPostFrameCallback((_) => _scrollToInitialSection());
+  }
+
+  Future<List<Map<String, dynamic>>> _fetchRecommendations() async {
+    RecommendationService recommendationService = RecommendationService();
+    return await recommendationService.fetchRecommendations();
   }
 
   void _onItemTapped(int index) {
@@ -128,7 +135,7 @@ class _RecommendationsState extends State<RecommendationsPage> {
           imageProvider: imageProvider,
           pageName: 'Recommendations',
           welcomeMessage: 'Hello Again!',
-          userName: 'Matt',
+          userName: userName,
           userStatus: 'Active',
           rightIcon: Icons.notifications,
           showWelcomeMessage: true,
@@ -149,17 +156,17 @@ class _RecommendationsState extends State<RecommendationsPage> {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(child: CircularProgressIndicator());
             } else if (snapshot.hasError) {
-              return Center(child: Text('Failed to load meals'));
+              return Center(child: Text('Failed to load recommendations'));
             } else {
               WidgetsBinding.instance
                   .addPostFrameCallback((_) => _scrollToInitialSection());
               List<Map<String, dynamic>>? meals = snapshot.data;
               return Column(
                 children: [
-                  _buildSection(_section1Key, meals, 'Main Dish Section'),
-                  _buildSection(_section2Key, meals, 'Desert Section'),
-                  _buildSection(_section3Key, meals, 'Salad Section'),
-                  _buildSection(_section4Key, meals, 'Snack Section'),
+                  _buildSection(_section1Key, meals, 'Main'),
+                  _buildSection(_section2Key, meals, 'Dessert'),
+                  _buildSection(_section3Key, meals, 'Salad'),
+                  _buildSection(_section4Key, meals, 'Snack'),
                 ],
               );
             }
@@ -174,7 +181,9 @@ class _RecommendationsState extends State<RecommendationsPage> {
   }
 
   Widget _buildSection(
-      GlobalKey key, List<Map<String, dynamic>>? meals, String sectionTitle) {
+      GlobalKey key, List<Map<String, dynamic>>? meals, String category) {
+    final categoryMeals =
+        meals?.where((meal) => meal['category'] == category).toList();
     return Container(
       key: key,
       padding: EdgeInsets.all(10),
@@ -185,17 +194,24 @@ class _RecommendationsState extends State<RecommendationsPage> {
             padding: const EdgeInsets.only(
                 left: 10.0), // Add padding to move text to the right
             child: Text(
-              sectionTitle,
+              '$category Section',
               style: TextStyle(
                   color: blueColor, fontSize: 24, fontWeight: FontWeight.bold),
             ),
           ),
           SizedBox(height: 10),
-          meals != null
+          categoryMeals != null && categoryMeals.isNotEmpty
               ? Column(
-                  children: meals.map((meal) => _buildMealCard(meal)).toList(),
+                  children: categoryMeals
+                      .map((meal) => _buildMealCard(meal))
+                      .toList(),
                 )
-              : Center(child: Text('No meals available')),
+              : Center(
+                  child: Text('No suitable menue..',
+                      style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: pinkColor))),
         ],
       ),
     );
@@ -203,7 +219,7 @@ class _RecommendationsState extends State<RecommendationsPage> {
 
   Widget _buildMealCard(Map<String, dynamic> meal) {
     return Container(
-      padding: const EdgeInsets.all(20.0),
+      padding: const EdgeInsets.all(15.0),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -215,24 +231,33 @@ class _RecommendationsState extends State<RecommendationsPage> {
           ),
         ],
       ),
-      margin: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+      margin: EdgeInsets.symmetric(vertical: 10, horizontal: 12),
       child: ExpansionTile(
-        leading: Container(
-          margin: EdgeInsets.all(5.0), // Add margin to ensure spacing
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(8.0), // Reduced image border
-            child: Image.network(
-              meal['imageUrl'],
-              width: 80,
-              height: 80,
-              fit: BoxFit.cover,
+        leading: GestureDetector(
+          onTap: () {
+            _showExpandedImage(context, meal['imageUrl']);
+          },
+          child: Container(
+            margin: EdgeInsets.all(5.0),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(6.0),
+              child: AspectRatio(
+                aspectRatio: 1,
+                child: Image.network(
+                  meal['imageUrl'],
+                  width: 120,
+                  height: 120,
+                  fit: BoxFit.cover,
+                ),
+              ),
             ),
           ),
         ),
         title: Text(
+          overflow: TextOverflow.ellipsis,
           meal['name'],
           style: TextStyle(
-              fontSize: 18, color: blueColor, fontWeight: FontWeight.bold),
+              fontSize: 16, color: blueColor, fontWeight: FontWeight.bold),
         ),
         children: [
           Padding(
@@ -246,20 +271,23 @@ class _RecommendationsState extends State<RecommendationsPage> {
                   style:
                       TextStyle(color: blueColor, fontWeight: FontWeight.bold),
                 ),
-                SizedBox(height: 10),
+                SizedBox(height: 15),
                 Text(
-                  meal['recipe'],
+                  meal['recipe'].replaceAll('\\n', '\n'),
                   style: TextStyle(color: pinkColor),
                 ),
-                SizedBox(height: 10),
+                SizedBox(height: 15),
                 _buildNutrientInfo(Icons.local_fire_department, 'Calories',
-                    meal['calories'].toString(), Colors.red),
-                _buildNutrientInfo(
-                    Icons.opacity, 'Fat', meal['fat'].toString(), Colors.blue),
+                    meal['total_calories'].toString(), Colors.red),
+                SizedBox(height: 5),
                 _buildNutrientInfo(Icons.fitness_center, 'Protein',
-                    meal['protein'].toString(), Colors.green),
+                    meal['protein'].toString(), Colors.orange),
+                _buildNutrientInfo(
+                    Icons.opacity, 'Fat', meal['fat'].toString(), pinkColor),
+                _buildNutrientInfo(Icons.opacity, 'Carbs',
+                    meal['carbs'].toString(), blueColor),
                 _buildNutrientInfo(Icons.grass, 'Fiber',
-                    meal['fiber'].toString(), Colors.orange),
+                    meal['fiber'].toString(), Colors.green),
               ],
             ),
           ),
@@ -287,59 +315,30 @@ class _RecommendationsState extends State<RecommendationsPage> {
       ),
     );
   }
-}
 
-List<Map<String, dynamic>> getMockMeals() {
-  return [
-    {
-      'name': 'Spaghetti Carbonara',
-      'imageUrl': 'https://via.placeholder.com/150',
-      'recipe':
-          '1. Boil pasta\n2. Cook pancetta\n3. Mix eggs and cheese\n4. Combine all',
-      'calories': 1200,
-      'fat': 10,
-      'protein': 30,
-      'fiber': 5,
-    },
-    {
-      'name': 'Chicken Salad',
-      'imageUrl': 'https://via.placeholder.com/150',
-      'recipe':
-          '1. Cook chicken\n2. Prepare vegetables\n3. Mix ingredients\n4. Serve with dressing',
-      'calories': 1200,
-      'fat': 10,
-      'protein': 30,
-      'fiber': 5,
-    },
-    {
-      'name': 'Beef Tacos',
-      'imageUrl': 'https://via.placeholder.com/150',
-      'recipe':
-          '1. Cook beef\n2. Prepare toppings\n3. Assemble tacos\n4. Serve with salsa',
-      'calories': 1200,
-      'fat': 10,
-      'protein': 30,
-      'fiber': 5,
-    },
-    {
-      'name': 'Beef Tacos',
-      'imageUrl': 'https://via.placeholder.com/150',
-      'recipe':
-          '1. Cook beef\n2. Prepare toppings\n3. Assemble tacos\n4. Serve with salsa',
-      'calories': 1200,
-      'fat': 10,
-      'protein': 30,
-      'fiber': 5,
-    },
-    {
-      'name': 'Beef Tacos',
-      'imageUrl': 'https://via.placeholder.com/150',
-      'recipe':
-          '1. Cook beef\n2. Prepare toppings\n3. Assemble tacos\n4. Serve with salsa',
-      'calories': 1200,
-      'fat': 10,
-      'protein': 30,
-      'fiber': 5,
-    },
-  ];
+  void _showExpandedImage(BuildContext context, String imageUrl) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+            ),
+            child: GestureDetector(
+              onTap: () {
+                Navigator.of(context).pop();
+              },
+              child: Center(
+                child: Image.network(
+                  imageUrl,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
 }

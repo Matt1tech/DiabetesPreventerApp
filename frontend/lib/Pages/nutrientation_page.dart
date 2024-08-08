@@ -3,16 +3,12 @@ import 'package:frontend/utils/utilities.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../models/meal.dart';
-import '../services/analyze_image.dart'; // Make sure to import your analyzeImage function
+import '../services/analyze_image.dart';
 import '../services/fetch_user_data_service.dart';
 import '../services/meal_records_service.dart';
-import '../widgets/widgets.dart'; // Ensure this import path is correct
+import '../widgets/widgets.dart';
 import '../utils/utils.dart';
 
-//TODO need to add isloading
-//TODO need to handle the button to save and cancel
-//TODO need to fix the output
-// If click save save should store the data in the user meal record
 class NutrientationPage extends StatefulWidget {
   final File imageFile;
   final String apiKey;
@@ -26,12 +22,11 @@ class NutrientationPage extends StatefulWidget {
 class _NutrientationPageState extends State<NutrientationPage> {
   Map<String, dynamic>? analysisData;
   bool isLoading = false;
-  // Handle the image
   XFile? _profilePicture;
   final ImagePicker _picker = ImagePicker();
   String? userName;
   String? userProfilePicture;
-  String? userId; // Added userId
+  String? user_id;
 
   @override
   void initState() {
@@ -41,20 +36,22 @@ class _NutrientationPageState extends State<NutrientationPage> {
   }
 
   Future<void> _analyzeImage() async {
+    setState(() {
+      isLoading = true;
+    });
+
     try {
       final data = await analyzeImage(widget.imageFile, widget.apiKey);
-      print(
-          'Full Response data: $data'); // Debug print to see the full response structure
+      print('Full Response data: $data');
 
-      // Ensure the data contains the expected fields
       if (data['items'] != null && data['items'].isNotEmpty) {
         final foodItem = data['items'][0]['food'][0];
         final foodInfo = foodItem['food_info'] ?? {};
         final nutrition = foodInfo['nutrition'] ?? {};
 
-        print('Food Item: $foodItem'); // Debug print to see the food item
-        print('Food Info: $foodInfo'); // Debug print to see the food info
-        print('Nutrition: $nutrition'); // Debug print to see the nutrition data
+        print('Food Item: $foodItem');
+        print('Food Info: $foodInfo');
+        print('Nutrition: $nutrition');
 
         setState(() {
           analysisData = {
@@ -64,38 +61,87 @@ class _NutrientationPageState extends State<NutrientationPage> {
             'cholesterol': nutrition['cholesterol_100g']?.toString() ?? 'N/A',
             'calories': nutrition['calories_100g']?.toString() ?? 'N/A',
             'fibers': nutrition['fibers_100g']?.toString() ?? 'N/A',
+            'carbs': nutrition['carbohydrates_100g']?.toString() ?? 'N/A',
           };
         });
       } else {
         throw Exception('Invalid data structure: "items" not found or empty');
       }
     } catch (e) {
-      // Handle error
       print('Error analyzing image: $e');
-    }
-  }
-
-//handle the image of the profile picture
-  Future<void> _loadUserInfo() async {
-    final userInfo = await loadUserInfo();
-    setState(() {
-      userName = userInfo['userName'];
-      userProfilePicture = userInfo['userProfilePicture'];
-    });
-  }
-
-  Future<void> _pickProfilePicture() async {
-    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
-    if (image != null) {
+    } finally {
       setState(() {
-        _profilePicture = image;
+        isLoading = false;
       });
     }
   }
 
-  @override
-  void dispose() {
-    super.dispose();
+  Future<void> _saveMealData() async {
+    if (user_id == null || user_id!.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please log in again to save meal data.')),
+      );
+      return;
+    }
+
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      Meal meal = Meal(
+        name: analysisData!['display_name'],
+        quantity: 100.0, // Assuming the quantity is 100g
+        calories: double.tryParse(analysisData!['calories']) ?? 0.0,
+        protein: double.tryParse(analysisData!['proteins']) ?? 0.0,
+        fats: double.tryParse(analysisData!['fat']) ?? 0.0,
+        carbs: double.tryParse(analysisData!['carbs']) ?? 0.0,
+        fiber: double.tryParse(analysisData!['fibers']) ?? 0.0,
+        cholesterol: double.tryParse(analysisData!['cholesterol']) ?? 0.0,
+        user: int.parse(user_id!),
+      );
+
+      await MealRecordsService.submitMealData(meal);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Meal data saved successfully!')),
+      );
+      _resetFields();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to save meal data. Please try again.')),
+      );
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  void _resetFields() {
+    setState(() {
+      analysisData = {
+        'display_name': '',
+        'proteins': '',
+        'fat': '',
+        'carbs': '',
+        'fiber': '',
+        'cholesterol': '',
+        'calories': '',
+      };
+      _profilePicture = null;
+    });
+  }
+
+  Future<void> _loadUserInfo() async {
+    final userInfo = await loadUserInfo();
+    if (mounted) {
+      setState(() {
+        userName = userInfo['userName'];
+        userProfilePicture = userInfo['userProfilePicture'];
+        user_id = userInfo['id'];
+      });
+    }
   }
 
   @override
@@ -115,115 +161,129 @@ class _NutrientationPageState extends State<NutrientationPage> {
         topPadding: 50.0,
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              child: widget.imageFile != null
-                  ? SizedBox(
-                      width: 200, // Set the desired width
-                      height: 200, // Set the desired height
-                      child: Image.file(widget.imageFile),
-                    )
-                  : Text('No image selected'),
-            ),
-            if (analysisData != null)
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  children: [
-                    const Text('Analysis Results:',
-                        style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: pinkColor)),
-                    const SizedBox(height: 10),
-                    Text('Name: ${analysisData!['display_name']}',
-                        style: const TextStyle(color: blueColor)),
-                    Text('Proteins: ${analysisData!['proteins']} g',
-                        style: const TextStyle(color: blueColor)),
-                    Text('Fat: ${analysisData!['fat']} g',
-                        style: const TextStyle(color: blueColor)),
-                    Text('Cholesterol: ${analysisData!['cholesterol']} mg',
-                        style: const TextStyle(color: blueColor)),
-                    Text('Calories: ${analysisData!['calories']} kcal',
-                        style: const TextStyle(color: blueColor)),
-                    Text('Fibers: ${analysisData!['fibers']} g',
-                        style: const TextStyle(color: blueColor)),
-                    SizedBox(height: 30),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        ElevatedButton(
-                          onPressed: () {
-                            _saveToDatabase();
-                          },
-                          child: Text('Save'),
-                        ),
-                        ElevatedButton(
-                          onPressed: () {
-                            // Add functionality to retake the picture
-                            Navigator.pop(context);
-                          },
-                          child: Text('Retake'),
-                        ),
-                        ElevatedButton(
-                          onPressed: () {
-                            // Add functionality to cancel
-                            Navigator.pop(context);
-                          },
-                          child: Text('Cancel'),
-                        ),
-                      ],
+        child: isLoading
+            ? Text(
+                'Analyzing...',
+                style: TextStyle(
+                    color: pinkColor,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold),
+              )
+            : Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    child: widget.imageFile != null
+                        ? SizedBox(
+                            width: 300,
+                            height: 200,
+                            child: Image.file(widget.imageFile),
+                          )
+                        : Text('No image selected'),
+                  ),
+                  if (analysisData != null)
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text('Analysis Results:',
+                              style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: pinkColor)),
+                          const SizedBox(height: 10),
+                          Row(
+                            children: [
+                              Text('Name: ',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: blueColor)),
+                              Text('${analysisData!['display_name']}',
+                                  style: const TextStyle(color: pinkColor)),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Text('Proteins: ',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: blueColor)),
+                              Text('${analysisData!['proteins']} g',
+                                  style: const TextStyle(color: pinkColor)),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Text('Fat: ',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: blueColor)),
+                              Text('${analysisData!['fat']} g',
+                                  style: const TextStyle(color: pinkColor)),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Text('Cholesterol: ',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: blueColor)),
+                              Text('${analysisData!['cholesterol']} mg',
+                                  style: const TextStyle(color: pinkColor)),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Text('Calories: ',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: blueColor)),
+                              Text('${analysisData!['calories']} kcal',
+                                  style: const TextStyle(color: pinkColor)),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Text('Fibers: ',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: blueColor)),
+                              Text('${analysisData!['fibers']} g',
+                                  style: const TextStyle(color: pinkColor)),
+                            ],
+                          ),
+                          SizedBox(height: 30),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              ElevatedButton(
+                                onPressed: () {
+                                  _saveMealData();
+                                },
+                                child: Text('Save'),
+                              ),
+                              ElevatedButton(
+                                onPressed: () {
+                                  _resetFields();
+                                  Navigator.pop(context);
+                                },
+                                child: Text('Retake'),
+                              ),
+                              ElevatedButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                child: Text('Cancel'),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
-                  ],
-                ),
+                ],
               ),
-          ],
-        ),
       ),
     );
-  }
-
-  Future<void> _saveToDatabase() async {
-    if (userId == null || userId!.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please log in again to save meal data.')),
-      );
-      return;
-    }
-
-    setState(() {
-      isLoading = true;
-    });
-
-    try {
-      Meal meal = Meal(
-        name: analysisData!['display_name'],
-        quantity: double.tryParse(analysisData!['quantity']) ?? 0.0,
-        calories: double.tryParse(analysisData!['calories_100g']) ?? 0.0,
-        protein: double.tryParse(analysisData!['proteins_100g']) ?? 0.0,
-        fats: double.tryParse(analysisData!['fat_100g']) ?? 0.0,
-        fiber: double.tryParse(analysisData!['fibers_100g']) ?? 0.0,
-        cholesterol: double.tryParse(analysisData!['cholesterol_100g']) ?? 0.0,
-        carbs: double.tryParse(analysisData!['carbs_100g']) ?? 0.0,
-        user: int.parse(userId!),
-      );
-
-      await MealRecordsService.submitMealData(meal);
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Meal data saved successfully!')),
-      );
-      // Optionally reset fields or navigate away
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to save meal data. Please try again.')),
-      );
-    } finally {
-      setState(() {
-        isLoading = false;
-      });
-    }
   }
 }

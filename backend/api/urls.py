@@ -18,4 +18,7 @@ urlpatterns = [
     path('request_otp/', views.request_otp, name='request_otp'),
     path('verify_otp/', views.verify_otp, name='verify_otp'),
     path('recommendations/', views.recommendation_list, name='recommendation-list'),
+    path('user_recommendations/<int:user_id>/', views.user_recommendation, name='user_recommendation'),
+    path('monthly_risk/<int:user_id>/', views.monthly_risk, name='monthly_risk'),
+    
 ]
