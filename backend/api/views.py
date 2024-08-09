@@ -25,8 +25,40 @@ from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.conf import settings
 import random
+logger = logging.getLogger(__name__)
 
 
+
+#------------------------------------------------------------------
+#   User  Management Authentication Module
+#------------------------------------------------------------------
+
+'''
+    Creates a new user in the system.
+
+    Expected Input:
+    - `POST` request with the following form data:
+        - `name`: (string) The name of the user.
+        - `email`: (string) The email address of the user.
+        - `password`: (string) The password for the user.
+        - `gender`: (string) The gender of the user (e.g., 'male', 'female').
+        - `marital_status`: (string) The marital status of the user.
+        - `height`: (float) The height of the user in centimeters.
+        - `birthdate`: (string) The birthdate of the user in 'YYYY-MM-DD' format.
+        - `family_history`: (boolean) Whether the user has a family history of diabetes.
+        - `profile_picture`: (file, optional) The profile picture of the user.
+
+    Expected Output:
+    - On success: JSON response with the user's details (status 201 CREATED).
+    - On failure: JSON response with error details (status 400 BAD REQUEST).
+
+    How It Works:
+    - The view first converts the incoming request data to a dictionary.
+    - If a profile picture is provided, it is saved using `default_storage`, and the path is added to the data.
+    - The data is then serialized using `UserSerializer`.
+    - If the data is valid, the password is hashed, and the user is saved to the database.
+    - If the data is invalid, an error response is returned.
+  '''
 @api_view(['POST'])
 @parser_classes([MultiPartParser, FormParser])
 def create_user(request):
@@ -43,7 +75,28 @@ def create_user(request):
             user = serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    
+  #-------------------------------------------------------------------------------------------------------  
+'''
+ Authenticates a user and returns JWT tokens if the credentials are valid.
 
+    Expected Input:
+    - `POST` request with the following JSON data:
+        - `email`: (string) The email address of the user.
+        - `password`: (string) The password of the user.
+
+    Expected Output:
+    - On success: JSON response with JWT tokens and user details (status 200 OK).
+    - On failure: JSON response with an error message indicating invalid credentials (status 401 UNAUTHORIZED).
+
+    How It Works:
+    - The view retrieves the user from the database using the provided email.
+    - If the user is found, the provided password is checked against the stored hashed password using `check_password`.
+    - If the password is correct, JWT tokens are generated using `RefreshToken.for_user(user)`.
+    - The user's details and tokens are then returned in the response.
+    - If the email or password is incorrect, an error response is returned.
+'''
 @api_view(['POST'])
 def login(request):
     email = request.data.get("email")
@@ -80,12 +133,44 @@ def login(request):
     else:
         return Response({"error": "Invalid Credentials"}, status=status.HTTP_401_UNAUTHORIZED)
     
-    
+#------------------------------------------------------------------------------------------------------    
+'''
+Logs out the user by returning a reset content status.
+
+    Expected Input:
+    - `POST` request. No specific input required.
+
+    Expected Output:
+    - Response with status 205 RESET CONTENT.
+
+    How It Works:
+    - This view simply returns a response with status 205, which can be used by the client to clear tokens or perform other logout-related actions.
+'''
 @api_view(['POST'])
 def logout(request):
     return Response(status=status.HTTP_205_RESET_CONTENT)
-    
+#-------------------------------------------------------------------------------------------------------------------------      
+'''
+ Updates the user's profile information.
 
+    Expected Input:
+    - `PUT` request with the following form data:
+        - `user_id`: (int) The ID of the user.
+        - `current_password`: (string) The current password of the user (required for verification).
+        - Optional fields to be updated: `name`, `email`, `password`, `profile_picture`, `marital_status`, `height`.
+
+    Expected Output:
+    - On success: JSON response with the updated user details (status 200 OK).
+    - On failure: JSON response with error details (status 400 BAD REQUEST or 401 UNAUTHORIZED).
+
+    How It Works:
+    - The view first verifies the user's identity by checking the provided current password.
+    - It then processes the provided data, saving or removing the profile picture as necessary.
+    - Only fields that are provided and valid are updated.
+    - The user's password is hashed if it's being changed.
+    - The updated user data is saved and returned in the response.
+    - If the password verification fails or the data is invalid, an error response is returned.
+'''
 @api_view(['PUT'])
 @parser_classes([MultiPartParser, FormParser])
 def update_user_profile(request):
@@ -130,62 +215,41 @@ def update_user_profile(request):
         return Response(serializer.data, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+#************************************************************************************************
+# The end of User Authentication Module
+#************************************************************************************************
 
 
-@api_view(['POST'])
-def test_model(request):
-    # Extract features from the request data
-    feature_data = request.data
-    
-    # Check if all required features are provided
-    required_features = [
-        'HighBP', 'HighChol', 'BMI', 'PhysActivity', 'Fruits', 
-        'Veggies', 'GenHlth', 'MentHlth', 'PhysHlth', 'Sex', 
-        'Age', 'DiabetesPedigreeFunction', 'FamilyHistory', 'Glucose'
-    ]
-    
-    for feature in required_features:
-        if feature not in feature_data:
-            return Response({'error': f'Missing feature: {feature}'}, status=status.HTTP_400_BAD_REQUEST)
-    
-    # Convert the input data to a DataFrame
-    input_df = pd.DataFrame([feature_data])
-
-    # Ensure the input features match the training feature order
-    model_features = model.feature_names_in_
-    input_df = input_df[model_features]
-
-    # Make a prediction
-    prediction = model.predict(input_df)
-    prediction_prob = model.predict_proba(input_df)
-
-    return Response({
-        'prediction': prediction[0],
-        'prediction_probabilities': prediction_prob[0].tolist()
-    }, status=status.HTTP_200_OK)
+#&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
 
 
 
+#------------------------------------------------------------------
+#   User Health Records Module
+#------------------------------------------------------------------
 
 
+'''
+ Creates or updates a health record for the user for the current day.
 
+    Expected Input:
+    - `POST` request with the following JSON data:
+        - `user`: (int) The ID of the user.
+        - Optional fields: `weight`, `blood_glucose`, `blood_pressure`.
 
+    Expected Output:
+    - On success: JSON response with the created or updated health record (status 200 OK or 201 CREATED).
+    - On failure: JSON response with error details (status 400 BAD REQUEST or 404 NOT FOUND).
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-logger = logging.getLogger(__name__)
+    How It Works:
+    - The view first verifies the user's existence.
+    - It then checks if any of the optional fields (`weight`, `blood_glucose`, `blood_pressure`) are provided.
+    - Various health metrics are calculated, including BMI, age, and diabetes risk using the model.
+    - If a health record exists for today, it is updated; otherwise, a new record is created.
+    - The health record is saved and returned in the response.
+    - If required fields are missing or the user is not found, an error response is returned.
+'''
 @api_view(['POST'])
 def create_or_update_health_record(request):
     today = timezone.now().date()
@@ -295,6 +359,335 @@ def create_or_update_health_record(request):
             serializer.save(user=user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+#----------------------------------------------------------------------------------------------------  
+    
+'''
+Retrieves the latest health record for the specified user and calculates additional features.
+
+    Expected Input:
+    - `GET` request with the user ID provided in the URL.
+
+    Expected Output:
+    - On success: JSON response with the last health record details and calculated features like BMI and diabetes risk (status 200 OK).
+    - On failure: JSON response with error details (status 404 NOT FOUND or 500 INTERNAL SERVER ERROR).
+
+    How It Works:
+    - The view verifies the user's existence.
+    - It retrieves the most recent health record for the user.
+    - Various health metrics are calculated, including BMI, age, and diabetes risk using the model.
+    - The health record details and calculated metrics are returned in the response.
+    - If the user or health record is not found, an error response is returned.
+'''
+@api_view(['GET'])
+def get_last_health_record(request, user_id):
+    # Retrieve the user
+    try:
+        user = get_object_or_404(User, pk=user_id)
+        print(f"User found: {user}")
+    except Exception as e:
+        print(f"Error retrieving user: {e}")
+        return Response({'error': 'User not found.'}, status=404)
+
+    # Retrieve the last health record for the user
+    try:
+        last_health_record = HealthRecord.objects.filter(user=user).order_by('-created_at').first()
+        print(f"Last Health Record: {last_health_record}")
+
+        if last_health_record:
+            # Extract necessary information from the last health record
+            weight = last_health_record.weight
+            blood_glucose = last_health_record.blood_glucose
+            blood_pressure = last_health_record.blood_pressure
+
+            # Calculate additional features
+            bmi = calculate_bmi(weight, user.height)
+            age = calculate_age(user.birthdate)
+            high_bp = is_high_bp(blood_pressure)
+            high_chol = is_high_cholesterol(user)
+            start_date = timezone.now().date() - timedelta(days=30)
+            ment_hlth = calculate_mental_health(user, start_date)
+            phys_hlth = calculate_physical_health(user, start_date)
+            gen_hlth = calculate_general_health(user, start_date)
+            fruits = check_fruit_intake(user, timezone.now().date())
+            veggies = check_veggie_intake(user, timezone.now().date())
+            glucose = calculate_average_blood_glucose(user)
+            diabetes_pedigree_function = calculate_diabetes_pedigree_function(user)
+            family_history = 1 if user.family_history else 0
+
+            # Prepare features for the model
+            features_dict = {
+                'HighBP': high_bp,
+                'HighChol': high_chol,
+                'BMI': bmi,
+                'PhysActivity': phys_hlth,
+                'Fruits': fruits,
+                'Veggies': veggies,
+                'GenHlth': gen_hlth,
+                'MentHlth': ment_hlth,
+                'PhysHlth': phys_hlth,
+                'Sex': 1 if user.gender.lower() == 'male' else 0,
+                'Age': age,
+                'DiabetesPedigreeFunction': diabetes_pedigree_function,
+                'Glucose': glucose,
+                'FamilyHistory': family_history
+            }
+
+            # Ensure the features are in the correct order
+            features_df = pd.DataFrame([features_dict])[FEATURE_ORDER]
+
+            # Log the ordered features for debugging
+            print("Model expects features:", model.feature_names_in_)
+            print("Ordered features:", features_df.columns.tolist())
+            print("Feature values:", features_df.iloc[0].to_dict())
+
+            # Ensure the input features match the training feature order
+            if list(features_df.columns) != list(model.feature_names_in_):
+                return Response({'error': 'Feature names do not match the model.'}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Predict diabetes risk using the machine learning model
+            try:
+                prediction_prob = model.predict_proba(features_df)[0]
+                prediction = model.predict(features_df)[0]
+            except ValueError as e:
+                print("Error during model prediction:", str(e))
+                return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Prepare the response data
+            response_data = {
+                'blood_glucose': last_health_record.blood_glucose,
+                'blood_pressure': last_health_record.blood_pressure,
+                'weight': last_health_record.weight,
+                'bmi': bmi,
+                'diabetes_risk_probability_class_0': prediction_prob[0],
+                'diabetes_risk_probability_class_1': prediction_prob[1],
+                'diabetes_risk_probability_class_2': prediction_prob[2],
+            }
+            print(f"Retrieved data: {response_data}")
+            return Response(response_data)
+        else:
+            print("No health records found for this user.")
+            return Response({'error': 'No health records found for this user.'}, status=404)
+    except Exception as e:
+        print(f"Error retrieving health records: {e}")
+        return Response({'error': 'Error retrieving health records.'}, status=500)
+    
+    
+#-----------------------------------------------------------------------------------------------------------    
+    
+    
+'''
+    Calculates the average diabetes risk for each month over the past six months for the specified user.
+
+    Expected Input:
+    - `GET` request with the user ID provided in the URL.
+
+    Expected Output:
+    - On success: JSON response with the monthly average risk data (status 200 OK).
+    - On failure: JSON response with error details (status 500 INTERNAL SERVER ERROR).
+
+    How It Works:
+    - The view verifies the user's existence.
+    - It calculates the monthly average diabetes risk based on the user's health records over the past six months.
+    - The risk data is aggregated and returned in the response.
+    - If an error occurs during calculation, an error response is returned.
+'''
+@api_view(['GET'])
+def monthly_risk(request, user_id):
+    try:
+        user = get_object_or_404(User, pk=user_id)
+        end_date = timezone.now().date()
+        monthly_risk_data = []
+
+        # Get the first day of the current month
+        current_month_start = end_date.replace(day=2)
+
+        for i in range(6):
+            month_start = (current_month_start - timedelta(days=1)).replace(day=1) - timedelta(days=30 * i)
+            month_end = (month_start + timedelta(days=31)).replace(day=1)
+
+            health_records = HealthRecord.objects.filter(
+                user=user,
+                created_at__date__gte=month_start,
+                created_at__date__lt=month_end
+            )
+
+            if health_records.exists():
+                risks = []
+                for record in health_records:
+                    try:
+                        weight = float(record.weight) if record.weight else 0.0
+                        blood_glucose = float(record.blood_glucose) if record.blood_glucose else 0.0
+                        blood_pressure = int(record.blood_pressure) if record.blood_pressure else 0
+                        
+                        logger.debug(f"Weight: {weight} (type: {type(weight)})")
+                        logger.debug(f"Blood Glucose: {blood_glucose} (type: {type(blood_glucose)})")
+                        logger.debug(f"Blood Pressure: {blood_pressure} (type: {type(blood_pressure)})")
+
+                        bmi = calculate_bmi(weight, user.height)
+                        age = calculate_age(user.birthdate)
+                        high_bp = is_high_bp(blood_pressure)
+                        high_chol = is_high_cholesterol(user)
+                        ment_hlth = calculate_mental_health(user, month_start)
+                        phys_hlth = calculate_physical_health(user, month_start)
+                        gen_hlth = calculate_general_health(user, month_start)
+                        fruits = check_fruit_intake(user, month_start)
+                        veggies = check_veggie_intake(user, month_start)
+                        glucose = calculate_average_blood_glucose(user)
+                        diabetes_pedigree_function = calculate_diabetes_pedigree_function(user)
+                        family_history = 1 if user.family_history else 0
+
+                        features_dict = {
+                            'HighBP': int(high_bp),  # Ensure boolean to int conversion
+                            'HighChol': int(high_chol),  # Ensure boolean to int conversion
+                            'BMI': float(bmi),  # Ensure float conversion
+                            'PhysActivity': int(phys_hlth),  # Ensure boolean to int conversion
+                            'Fruits': int(fruits),  # Ensure boolean to int conversion
+                            'Veggies': int(veggies),  # Ensure boolean to int conversion
+                            'GenHlth': int(gen_hlth),  # Ensure boolean to int conversion
+                            'MentHlth': int(ment_hlth),  # Ensure boolean to int conversion
+                            'PhysHlth': int(phys_hlth),  # Ensure boolean to int conversion
+                            'Sex': 1 if user.gender.lower() == 'male' else 0,
+                            'Age': int(age),  # Ensure int conversion
+                            'DiabetesPedigreeFunction': float(diabetes_pedigree_function),  # Ensure float conversion
+                            'Glucose': float(glucose),  # Ensure float conversion
+                            'FamilyHistory': int(family_history)  # Ensure boolean to int conversion
+                        }
+
+                        for key, value in features_dict.items():
+                            logger.debug(f"{key}: {value} (type: {type(value)})")
+
+                        features_df = pd.DataFrame([features_dict])[FEATURE_ORDER]
+
+                        try:
+                            prediction_prob = model.predict_proba(features_df)[0]
+                            risks.append(prediction_prob[1])
+                        except ValueError as e:
+                            logger.error(f"Error during model prediction: {str(e)}")
+                            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+                    except Exception as e:
+                        logger.error(f"Error processing health record: {str(e)}")
+                        return Response({'error': f'Error processing health record: {str(e)}'}, status=status.HTTP_400_BAD_REQUEST)
+
+                avg_risk = sum(risks) / len(risks) if risks else 0
+            else:
+                avg_risk = 0
+
+            monthly_risk_data.append({
+                'month': month_start.strftime('%Y-%m'),
+                'risk': avg_risk
+            })
+
+            logger.debug(f"Month: {month_start.strftime('%Y-%m')}, Avg Risk: {avg_risk}")
+
+        return Response(monthly_risk_data, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        logger.error(f"Error calculating monthly risk for user {user_id}: {str(e)}")
+        return Response({'error': 'An error occurred while calculating monthly risk.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+
+
+#************************************************************************************************
+# The end of user health Module 
+#************************************************************************************************
+
+
+#&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+
+
+
+
+
+#------------------------------------------------------------------
+#   User Physical Activity Module
+#------------------------------------------------------------------
+
+
+#------------------------------------------------------------------
+#   User Customization Module
+#------------------------------------------------------------------
+
+#------------------------------------------------------------------
+#   Diabetes Risk Analysis Module
+#------------------------------------------------------------------
+
+#------------------------------------------------------------------
+#   Meal Recommendation Module
+#------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@api_view(['POST'])
+def test_model(request):
+    # Extract features from the request data
+    feature_data = request.data
+    
+    # Check if all required features are provided
+    required_features = [
+        'HighBP', 'HighChol', 'BMI', 'PhysActivity', 'Fruits', 
+        'Veggies', 'GenHlth', 'MentHlth', 'PhysHlth', 'Sex', 
+        'Age', 'DiabetesPedigreeFunction', 'FamilyHistory', 'Glucose'
+    ]
+    
+    for feature in required_features:
+        if feature not in feature_data:
+            return Response({'error': f'Missing feature: {feature}'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    # Convert the input data to a DataFrame
+    input_df = pd.DataFrame([feature_data])
+
+    # Ensure the input features match the training feature order
+    model_features = model.feature_names_in_
+    input_df = input_df[model_features]
+
+    # Make a prediction
+    prediction = model.predict(input_df)
+    prediction_prob = model.predict_proba(input_df)
+
+    return Response({
+        'prediction': prediction[0],
+        'prediction_probabilities': prediction_prob[0].tolist()
+    }, status=status.HTTP_200_OK)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -392,98 +785,7 @@ def physical_record(request):
 
 
 
-@api_view(['GET'])
-def get_last_health_record(request, user_id):
-    # Retrieve the user
-    try:
-        user = get_object_or_404(User, pk=user_id)
-        print(f"User found: {user}")
-    except Exception as e:
-        print(f"Error retrieving user: {e}")
-        return Response({'error': 'User not found.'}, status=404)
 
-    # Retrieve the last health record for the user
-    try:
-        last_health_record = HealthRecord.objects.filter(user=user).order_by('-created_at').first()
-        print(f"Last Health Record: {last_health_record}")
-
-        if last_health_record:
-            # Extract necessary information from the last health record
-            weight = last_health_record.weight
-            blood_glucose = last_health_record.blood_glucose
-            blood_pressure = last_health_record.blood_pressure
-
-            # Calculate additional features
-            bmi = calculate_bmi(weight, user.height)
-            age = calculate_age(user.birthdate)
-            high_bp = is_high_bp(blood_pressure)
-            high_chol = is_high_cholesterol(user)
-            start_date = timezone.now().date() - timedelta(days=30)
-            ment_hlth = calculate_mental_health(user, start_date)
-            phys_hlth = calculate_physical_health(user, start_date)
-            gen_hlth = calculate_general_health(user, start_date)
-            fruits = check_fruit_intake(user, timezone.now().date())
-            veggies = check_veggie_intake(user, timezone.now().date())
-            glucose = calculate_average_blood_glucose(user)
-            diabetes_pedigree_function = calculate_diabetes_pedigree_function(user)
-            family_history = 1 if user.family_history else 0
-
-            # Prepare features for the model
-            features_dict = {
-                'HighBP': high_bp,
-                'HighChol': high_chol,
-                'BMI': bmi,
-                'PhysActivity': phys_hlth,
-                'Fruits': fruits,
-                'Veggies': veggies,
-                'GenHlth': gen_hlth,
-                'MentHlth': ment_hlth,
-                'PhysHlth': phys_hlth,
-                'Sex': 1 if user.gender.lower() == 'male' else 0,
-                'Age': age,
-                'DiabetesPedigreeFunction': diabetes_pedigree_function,
-                'Glucose': glucose,
-                'FamilyHistory': family_history
-            }
-
-            # Ensure the features are in the correct order
-            features_df = pd.DataFrame([features_dict])[FEATURE_ORDER]
-
-            # Log the ordered features for debugging
-            print("Model expects features:", model.feature_names_in_)
-            print("Ordered features:", features_df.columns.tolist())
-            print("Feature values:", features_df.iloc[0].to_dict())
-
-            # Ensure the input features match the training feature order
-            if list(features_df.columns) != list(model.feature_names_in_):
-                return Response({'error': 'Feature names do not match the model.'}, status=status.HTTP_400_BAD_REQUEST)
-
-            # Predict diabetes risk using the machine learning model
-            try:
-                prediction_prob = model.predict_proba(features_df)[0]
-                prediction = model.predict(features_df)[0]
-            except ValueError as e:
-                print("Error during model prediction:", str(e))
-                return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-            # Prepare the response data
-            response_data = {
-                'blood_glucose': last_health_record.blood_glucose,
-                'blood_pressure': last_health_record.blood_pressure,
-                'weight': last_health_record.weight,
-                'bmi': bmi,
-                'diabetes_risk_probability_class_0': prediction_prob[0],
-                'diabetes_risk_probability_class_1': prediction_prob[1],
-                'diabetes_risk_probability_class_2': prediction_prob[2],
-            }
-            print(f"Retrieved data: {response_data}")
-            return Response(response_data)
-        else:
-            print("No health records found for this user.")
-            return Response({'error': 'No health records found for this user.'}, status=404)
-    except Exception as e:
-        print(f"Error retrieving health records: {e}")
-        return Response({'error': 'Error retrieving health records.'}, status=500)
 
    
    
@@ -588,101 +890,7 @@ def get_user_customization(request, user_id):
    
   
 
-@api_view(['GET'])
-def monthly_risk(request, user_id):
-    try:
-        user = get_object_or_404(User, pk=user_id)
-        end_date = timezone.now().date()
-        monthly_risk_data = []
 
-        # Get the first day of the current month
-        current_month_start = end_date.replace(day=2)
-
-        for i in range(6):
-            month_start = (current_month_start - timedelta(days=1)).replace(day=1) - timedelta(days=30 * i)
-            month_end = (month_start + timedelta(days=31)).replace(day=1)
-
-            health_records = HealthRecord.objects.filter(
-                user=user,
-                created_at__date__gte=month_start,
-                created_at__date__lt=month_end
-            )
-
-            if health_records.exists():
-                risks = []
-                for record in health_records:
-                    try:
-                        weight = float(record.weight) if record.weight else 0.0
-                        blood_glucose = float(record.blood_glucose) if record.blood_glucose else 0.0
-                        blood_pressure = int(record.blood_pressure) if record.blood_pressure else 0
-                        
-                        logger.debug(f"Weight: {weight} (type: {type(weight)})")
-                        logger.debug(f"Blood Glucose: {blood_glucose} (type: {type(blood_glucose)})")
-                        logger.debug(f"Blood Pressure: {blood_pressure} (type: {type(blood_pressure)})")
-
-                        bmi = calculate_bmi(weight, user.height)
-                        age = calculate_age(user.birthdate)
-                        high_bp = is_high_bp(blood_pressure)
-                        high_chol = is_high_cholesterol(user)
-                        ment_hlth = calculate_mental_health(user, month_start)
-                        phys_hlth = calculate_physical_health(user, month_start)
-                        gen_hlth = calculate_general_health(user, month_start)
-                        fruits = check_fruit_intake(user, month_start)
-                        veggies = check_veggie_intake(user, month_start)
-                        glucose = calculate_average_blood_glucose(user)
-                        diabetes_pedigree_function = calculate_diabetes_pedigree_function(user)
-                        family_history = 1 if user.family_history else 0
-
-                        features_dict = {
-                            'HighBP': int(high_bp),  # Ensure boolean to int conversion
-                            'HighChol': int(high_chol),  # Ensure boolean to int conversion
-                            'BMI': float(bmi),  # Ensure float conversion
-                            'PhysActivity': int(phys_hlth),  # Ensure boolean to int conversion
-                            'Fruits': int(fruits),  # Ensure boolean to int conversion
-                            'Veggies': int(veggies),  # Ensure boolean to int conversion
-                            'GenHlth': int(gen_hlth),  # Ensure boolean to int conversion
-                            'MentHlth': int(ment_hlth),  # Ensure boolean to int conversion
-                            'PhysHlth': int(phys_hlth),  # Ensure boolean to int conversion
-                            'Sex': 1 if user.gender.lower() == 'male' else 0,
-                            'Age': int(age),  # Ensure int conversion
-                            'DiabetesPedigreeFunction': float(diabetes_pedigree_function),  # Ensure float conversion
-                            'Glucose': float(glucose),  # Ensure float conversion
-                            'FamilyHistory': int(family_history)  # Ensure boolean to int conversion
-                        }
-
-                        for key, value in features_dict.items():
-                            logger.debug(f"{key}: {value} (type: {type(value)})")
-
-                        features_df = pd.DataFrame([features_dict])[FEATURE_ORDER]
-
-                        try:
-                            prediction_prob = model.predict_proba(features_df)[0]
-                            risks.append(prediction_prob[1])
-                        except ValueError as e:
-                            logger.error(f"Error during model prediction: {str(e)}")
-                            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-                    except Exception as e:
-                        logger.error(f"Error processing health record: {str(e)}")
-                        return Response({'error': f'Error processing health record: {str(e)}'}, status=status.HTTP_400_BAD_REQUEST)
-
-                avg_risk = sum(risks) / len(risks) if risks else 0
-            else:
-                avg_risk = 0
-
-            monthly_risk_data.append({
-                'month': month_start.strftime('%Y-%m'),
-                'risk': avg_risk
-            })
-
-            logger.debug(f"Month: {month_start.strftime('%Y-%m')}, Avg Risk: {avg_risk}")
-
-        return Response(monthly_risk_data, status=status.HTTP_200_OK)
-
-    except Exception as e:
-        logger.error(f"Error calculating monthly risk for user {user_id}: {str(e)}")
-        return Response({'error': 'An error occurred while calculating monthly risk.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
     
     
     

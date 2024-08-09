@@ -134,7 +134,7 @@ class _RecommendationsState extends State<RecommendationsPage> {
         child: UserHeader(
           imageProvider: imageProvider,
           pageName: 'Recommendations',
-          welcomeMessage: 'Hello Again!',
+          welcomeMessage: 'What to eat!',
           userName: userName,
           userStatus: 'Active',
           rightIcon: Icons.notifications,
