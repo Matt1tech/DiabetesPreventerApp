@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/models.dart';
+import '../models/monthly_risk.dart';
 import '../urls.dart';
 
 class UserHealthRecordsService {
@@ -93,6 +94,33 @@ class FetchHealthRecordService {
     } catch (e) {
       print('Exception in fetchLastHealthRecord: $e');
       return null;
+    }
+  }
+}
+
+class RiskService {
+  static Future<List<MonthlyRisk>> fetchMonthlyRisk(int userId) async {
+    final url = Uri.parse('$baseUrl/monthly_risk/$userId');
+    print('Requesting URL: $url');
+
+    try {
+      final response = await http.get(url);
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        print('Parsed JSON data: $data');
+        print('Response body: ${response.body}');
+
+        return data.map((json) => MonthlyRisk.fromJson(json)).toList();
+      } else {
+        print('Error fetching monthly risk data: ${response.statusCode}');
+        return [];
+      }
+    } catch (e) {
+      print('Exception in fetchMonthlyRisk: $e');
+      return [];
     }
   }
 }

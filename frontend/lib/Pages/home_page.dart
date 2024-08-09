@@ -47,6 +47,8 @@ class _HomePageState extends State<HomePage> {
       PhysicalActivityRecordsService();
   Customizations? userCustomizations;
   final ImagePicker _picker = ImagePicker();
+  List<double> monthlyRiskValues = []; // Default value
+
   void _navigateToRecommendationsPage(int initialSectionIndex) {
     Navigator.push(
       context,
@@ -70,6 +72,38 @@ class _HomePageState extends State<HomePage> {
     fetchDailyNutrition();
     fetchUserCustomizations();
     logoutManager = LogoutManager(context: context, authService: _authService);
+    fetchRiskData(); // Fetch the risk data
+  }
+
+  Future<List<double>> fetchMonthlyRisk() async {
+    if (user_id != null) {
+      final int? userIdInt = int.tryParse(user_id!);
+      if (userIdInt != null) {
+        try {
+          final monthlyRiskList = await RiskService.fetchMonthlyRisk(userIdInt);
+          print(
+              "Fetched monthly risk data: ${monthlyRiskList.map((risk) => risk.risk)}");
+          return monthlyRiskList
+              .map((risk) => double.parse((risk.risk).toStringAsFixed(6)))
+              .toList();
+        } catch (e) {
+          print('Error fetching monthly risk data: $e');
+        }
+      }
+    }
+    return List.filled(
+        6, 0.0); // Default to 0.0 for six months if there's an error
+  }
+
+  Future<void> fetchRiskData() async {
+    final riskData = await fetchMonthlyRisk();
+    if (mounted) {
+      setState(() {
+        monthlyRiskValues =
+            riskData.reversed.toList(); // Reverse the list to correct order
+        print("Monthly risk values set in state: $monthlyRiskValues");
+      });
+    }
   }
 
   Future<void> fetchLastHealthRecord() async {
@@ -181,6 +215,7 @@ class _HomePageState extends State<HomePage> {
       fetchLastHealthRecord();
       fetchDailyNutrition();
       fetchUserCustomizations();
+      fetchRiskData(); // Fetch the risk data
     }
   }
 
@@ -278,7 +313,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // Suitable menu slider Section
   // Suitable menu slider Section
   List<Widget> _buildMenuSlider() {
     return [
@@ -406,7 +440,8 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         const SizedBox(height: 15),
-        const MonthlyRiskChart(monthlyRiskValues: [1, 1, 1, 1, 5, 22]),
+        MonthlyRiskChart(
+            monthlyRiskValues: monthlyRiskValues), // Use dynamic values here
         const SizedBox(height: 40),
         diabetesInfectionStatus(),
       ],

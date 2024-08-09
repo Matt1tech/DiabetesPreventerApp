@@ -24,71 +24,103 @@ class _OverallHealthStatusPieChartState
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    bool hasNoData = widget.healthyPercentage == 0 &&
+        widget.preDiabetesPercentage == 0 &&
+        widget.diabetesPercentage == 0;
+
+    return Stack(
       children: <Widget>[
-        Row(
+        Column(
           children: <Widget>[
-            const SizedBox(
-              height: 18,
-            ),
-            Expanded(
-              child: AspectRatio(
-                aspectRatio: 1,
-                child: PieChart(
-                  PieChartData(
-                    pieTouchData: PieTouchData(
-                      touchCallback: (FlTouchEvent event, pieTouchResponse) {
-                        setState(() {
-                          if (!event.isInterestedForInteractions ||
-                              pieTouchResponse == null ||
-                              pieTouchResponse.touchedSection == null) {
-                            touchedIndex = -1;
-                            return;
-                          }
-                          touchedIndex = pieTouchResponse
-                              .touchedSection!.touchedSectionIndex;
-                        });
-                      },
+            Row(
+              children: <Widget>[
+                const SizedBox(
+                  height: 18,
+                ),
+                Expanded(
+                  child: AspectRatio(
+                    aspectRatio: 1,
+                    child: PieChart(
+                      PieChartData(
+                        pieTouchData: PieTouchData(
+                          touchCallback:
+                              (FlTouchEvent event, pieTouchResponse) {
+                            setState(() {
+                              if (!event.isInterestedForInteractions ||
+                                  pieTouchResponse == null ||
+                                  pieTouchResponse.touchedSection == null) {
+                                touchedIndex = -1;
+                                return;
+                              }
+                              touchedIndex = pieTouchResponse
+                                  .touchedSection!.touchedSectionIndex;
+                            });
+                          },
+                        ),
+                        borderData: FlBorderData(
+                          show: false,
+                        ),
+                        sectionsSpace: 0,
+                        centerSpaceRadius: 30,
+                        sections: hasNoData ? [] : showingSections(),
+                      ),
                     ),
-                    borderData: FlBorderData(
-                      show: false,
-                    ),
-                    sectionsSpace: 0,
-                    centerSpaceRadius: 30,
-                    sections: showingSections(),
                   ),
                 ),
-              ),
-            ),
-            const SizedBox(
-              width: 40,
-            ),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Indicator(
-                  color: Color.fromARGB(
-                      255, 207, 62, 52), // Adjust this color as needed
-                  text: 'Diabetes',
-                  isSquare: true,
+                const SizedBox(
+                  width: 40,
                 ),
-                SizedBox(height: 4),
-                Indicator(
-                  color: pinkColor, // Adjust this color as needed
-                  text: 'Pre-diabetes',
-                  isSquare: true,
-                ),
-                SizedBox(height: 4),
-                Indicator(
-                  color: blueColor, // Adjust this color as needed
-                  text: 'Healthy',
-                  isSquare: true,
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Indicator(
+                      color: Color.fromARGB(
+                          255, 207, 62, 52), // Solid color for Diabetes
+                      text: 'Diabetes',
+                      isSquare: true,
+                    ),
+                    SizedBox(height: 4),
+                    Indicator(
+                      color: pinkColor, // Solid color for Pre-diabetes
+                      text: 'Pre-diabetes',
+                      isSquare: true,
+                    ),
+                    SizedBox(height: 4),
+                    ShaderMask(
+                      shaderCallback: (Rect bounds) {
+                        return LinearGradient(
+                          colors: [blueColor, Colors.lightBlueAccent],
+                          begin: Alignment.bottomCenter,
+                          end: Alignment.topCenter,
+                        ).createShader(bounds);
+                      },
+                      child: Indicator(
+                        color: Colors
+                            .white, // Base color, won't be visible due to ShaderMask
+                        text: 'Healthy',
+                        isSquare: true,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
           ],
         ),
+        if (hasNoData)
+          Positioned(
+            left: 12.0, // Adjust this value to move it to the left
+            top: 50.0, // Adjust the vertical position as needed
+            child: Text(
+              'No available data..',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: pinkColor,
+              ),
+            ),
+          ),
       ],
     );
   }
@@ -96,7 +128,11 @@ class _OverallHealthStatusPieChartState
   List<PieChartSectionData> showingSections() {
     return [
       PieChartSectionData(
-        color: blueColor,
+        gradient: LinearGradient(
+          colors: [blueColor, Colors.lightBlueAccent],
+          begin: Alignment.bottomCenter,
+          end: Alignment.topCenter,
+        ),
         value: widget.healthyPercentage,
         title: '${widget.healthyPercentage}%',
         radius: touchedIndex == 0 ? 60.0 : 50.0,
@@ -108,7 +144,11 @@ class _OverallHealthStatusPieChartState
         ),
       ),
       PieChartSectionData(
-        color: Color.fromARGB(255, 207, 62, 52),
+        gradient: LinearGradient(
+          colors: [Color.fromARGB(255, 207, 62, 52), Colors.red],
+          begin: Alignment.bottomCenter,
+          end: Alignment.topCenter,
+        ),
         value: widget.diabetesPercentage,
         title: '${widget.diabetesPercentage}%',
         radius: touchedIndex == 1 ? 60.0 : 50.0,
@@ -120,7 +160,11 @@ class _OverallHealthStatusPieChartState
         ),
       ),
       PieChartSectionData(
-        color: pinkColor,
+        gradient: LinearGradient(
+          colors: [pinkColor, Colors.pinkAccent],
+          begin: Alignment.bottomCenter,
+          end: Alignment.topCenter,
+        ),
         value: widget.preDiabetesPercentage,
         title: '${widget.preDiabetesPercentage}%',
         radius: touchedIndex == 2 ? 60.0 : 50.0,
