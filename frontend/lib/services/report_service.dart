@@ -21,4 +21,26 @@ class ReportService {
       throw Exception('Failed to load activity report');
     }
   }
+
+  static Future<Map<String, dynamic>> fetchRiskSummaryReport(
+      String userId, String startDate, String endDate) async {
+    final url = Uri.parse(
+        '$baseUrl/risk_summary_report/$userId/?start_date=$startDate&end_date=$endDate');
+    final response = await http.get(url, headers: {
+      'Content-Type': 'application/json',
+    });
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+
+      // The response should include both 'summary' and 'all_probabilities'
+      return {
+        'summary': Map<String, dynamic>.from(data['summary']),
+        'all_probabilities':
+            List<Map<String, dynamic>>.from(data['all_probabilities'])
+      };
+    } else {
+      throw Exception('Failed to load risk summary report');
+    }
+  }
 }

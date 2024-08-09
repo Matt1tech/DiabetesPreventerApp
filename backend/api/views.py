@@ -1214,10 +1214,110 @@ def get_physical_activity_report(request, user_id):
     }
 
     return Response(response_data, status=status.HTTP_200_OK)
+#--------------------------------------------------------------------------------------
 
 
+@api_view(['GET'])
+def get_risk_summary_report(request, user_id):
+    user = get_object_or_404(User, pk=user_id)
 
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
 
+    if not start_date or not end_date:
+        return Response({'error': 'Start date and end date are required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        start_date = timezone.datetime.strptime(start_date, '%Y-%m-%d').date()
+        end_date = timezone.datetime.strptime(end_date, '%Y-%m-%d').date()
+    except ValueError:
+        return Response({'error': 'Invalid date format. Use YYYY-MM-DD.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    health_records = HealthRecord.objects.filter(user=user, created_at__range=[start_date, end_date])
+
+    if not health_records.exists():
+        return Response({'error': 'No health records found for the selected period.'}, status=status.HTTP_404_NOT_FOUND)
+
+    all_probabilities = []
+    total_weight = 0
+    total_blood_glucose = 0
+    total_blood_pressure = 0
+    count = 0
+
+    for record in health_records:
+        if record.weight is not None:
+            total_weight += record.weight
+        if record.blood_glucose is not None:
+            total_blood_glucose += record.blood_glucose
+        if record.blood_pressure is not None:
+            total_blood_pressure += record.blood_pressure
+        count += 1
+
+        # Calculate features for the current record
+        bmi = calculate_bmi(record.weight, user.height)
+        age = calculate_age(user.birthdate)
+        high_bp = is_high_bp(record.blood_pressure)
+        high_chol = is_high_cholesterol(user)
+        ment_hlth = calculate_mental_health(user, start_date)
+        phys_hlth = calculate_physical_health(user, start_date)
+        gen_hlth = calculate_general_health(user, start_date)
+        fruits = check_fruit_intake(user, timezone.now().date())
+        veggies = check_veggie_intake(user, timezone.now().date())
+        glucose = calculate_average_blood_glucose(user)
+        diabetes_pedigree_function = calculate_diabetes_pedigree_function(user)
+        family_history = 1 if user.family_history else 0
+
+        features_dict = {
+            'HighBP': high_bp,
+            'HighChol': high_chol,
+            'BMI': bmi,
+            'PhysActivity': phys_hlth,
+            'Fruits': fruits,
+            'Veggies': veggies,
+            'GenHlth': gen_hlth,
+            'MentHlth': ment_hlth,
+            'PhysHlth': phys_hlth,
+            'Sex': 1 if user.gender.lower() == 'male' else 0,
+            'Age': age,
+            'DiabetesPedigreeFunction': diabetes_pedigree_function,
+            'Glucose': glucose,
+            'FamilyHistory': family_history
+        }
+
+        features_df = pd.DataFrame([features_dict])[FEATURE_ORDER]
+
+        try:
+            prediction_prob = model.predict_proba(features_df)[0]
+        except ValueError as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Append the probabilities for this record
+        all_probabilities.append({
+            'date': record.created_at.strftime('%d/%m/%Y'),
+            'probabilities': {
+                'Healthy': prediction_prob[0],
+                'Prediabetes': prediction_prob[1],
+                'Diabetes': prediction_prob[2]
+            }
+        })
+
+    # Calculate overall summary (average of probabilities)
+    avg_probs = {
+        'Healthy': sum(prob['probabilities']['Healthy'] for prob in all_probabilities) / count,
+        'Prediabetes': sum(prob['probabilities']['Prediabetes'] for prob in all_probabilities) / count,
+        'Diabetes': sum(prob['probabilities']['Diabetes'] for prob in all_probabilities) / count,
+    }
+
+    highest_risk = max(avg_probs, key=avg_probs.get)
+
+    # Prepare the summary
+    summary = {
+        'date': timezone.now().strftime('%d/%m/%Y'),
+        'risk_classification': highest_risk,
+        'risk_probabilities': avg_probs
+    }
+
+    return Response({'summary': summary, 'all_probabilities': all_probabilities}, status=status.HTTP_200_OK)
 
 
 

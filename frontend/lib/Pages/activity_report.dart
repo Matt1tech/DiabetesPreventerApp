@@ -1,4 +1,10 @@
+import 'dart:typed_data';
+import 'dart:ui';
+
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:frontend/utils/logout_utility.dart';
 import 'package:image_picker/image_picker.dart';
@@ -10,6 +16,10 @@ import '../widgets/drawer_widget.dart';
 import '../widgets/user_header.dart';
 import '../widgets/customized_navigation_bar.dart';
 import '../utils/utils.dart';
+
+import 'package:printing/printing.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
 
 class ActivityRecordReport extends StatefulWidget {
   final String startDate;
@@ -36,6 +46,8 @@ class _ActivityRecordReportState extends State<ActivityRecordReport> {
   bool _isLoading = true;
   String? _errorMessage;
   XFile? _profilePicture;
+  bool _showMore = false;
+  final GlobalKey chartKey = GlobalKey(); // Define the GlobalKey here
 
   @override
   void initState() {
@@ -105,10 +117,140 @@ class _ActivityRecordReportState extends State<ActivityRecordReport> {
     }
   }
 
+  void _printReport() async {
+    final pdf = pw.Document();
+
+    // Load the image from assets
+    final image = pw.MemoryImage(
+      (await rootBundle.load('assets/images/diabetesLogo.png'))
+          .buffer
+          .asUint8List(),
+    );
+
+    // Capture the chart as an image
+    final chartImage =
+        await _captureChartAsImage(); // Make sure this is done after rendering
+
+    pdf.addPage(
+      pw.Page(
+        build: (pw.Context context) {
+          return pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                children: [
+                  pw.Text(
+                    'Activity Report',
+                    style: pw.TextStyle(
+                      fontSize: 24,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                  ),
+                  pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.center,
+                    children: [
+                      pw.SizedBox(height: 60),
+                      pw.Image(
+                        image,
+                        width: 70,
+                        height: 70,
+                      ),
+                      pw.SizedBox(height: 10),
+                      pw.Text(
+                        'Diabetes Preventer',
+                        style: pw.TextStyle(
+                          fontSize: 12,
+                          fontWeight: pw.FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              pw.SizedBox(height: 10),
+              pw.Text('Generation Date: $formattedDate'),
+              pw.SizedBox(height: 10),
+              pw.Text('Name: ${userName ?? "Unknown"}'),
+              pw.SizedBox(height: 10),
+              pw.Text('Activity Summary'),
+              pw.Divider(),
+              ..._activityRecords.map((record) {
+                return pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  children: [
+                    pw.Text(record['date'] ?? 'N/A'),
+                    pw.Text(record['activity_type'] ?? '-'),
+                    pw.Text(record['time_spent']?.toString() ?? '0.0 hr'),
+                  ],
+                );
+              }).toList(),
+              pw.SizedBox(height: 20),
+              pw.Text(
+                'Total Workout Time: ${_calculateTotalWorkoutTime().toStringAsFixed(1)} hrs',
+                style: pw.TextStyle(
+                  fontSize: 18,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+              ),
+              pw.SizedBox(height: 20),
+              // Include the chart image if it's available
+              if (chartImage != null)
+                pw.Image(
+                  pw.MemoryImage(chartImage),
+                  height: 200, // Adjust the size as needed
+                ),
+            ],
+          );
+        },
+      ),
+    );
+
+    await Printing.layoutPdf(
+      onLayout: (PdfPageFormat format) async => pdf.save(),
+    );
+  }
+
+  Future<Uint8List?> _captureChartAsImage() async {
+    try {
+      await Future.delayed(Duration(milliseconds: 300)); // Small delay
+      final RenderRepaintBoundary boundary =
+          chartKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+
+      if (boundary == null) {
+        print('RenderRepaintBoundary is null');
+        return null;
+      }
+
+      final image = await boundary.toImage(pixelRatio: 2.0);
+      final byteData = await image.toByteData(format: ImageByteFormat.png);
+      return byteData?.buffer.asUint8List();
+    } catch (e) {
+      print('Error capturing chart as image: $e');
+      return null;
+    }
+  }
+
+  double _calculateTotalWorkoutTime() {
+    return _activityRecords.fold(
+      0.0,
+      (sum, record) =>
+          sum +
+          (double.tryParse(record['time_spent'].toString().split(' ')[0]) ??
+              0.0),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     ImageProvider<Object> imageProvider =
         getImageProvider(_profilePicture, userProfilePicture);
+    double totalWorkoutTime = _activityRecords.fold(
+        0.0,
+        (sum, record) =>
+            sum +
+            (double.tryParse(record['time_spent'].toString().split(' ')[0]) ??
+                0.0));
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -141,15 +283,24 @@ class _ActivityRecordReportState extends State<ActivityRecordReport> {
                   : Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Report Title and Date
-                        Text(
-                          'Activity Report -  ',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 20.0,
-                            color: Colors.black,
-                          ),
-                        ),
+                        Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Activity Report -  ',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 20.0,
+                                  color: Colors.black,
+                                ),
+                              ),
+                              IconButton(
+                                icon: Icon(Icons.print),
+                                onPressed:
+                                    _printReport, // Call the print function
+                              ),
+                            ]), // Report Title and Date
+
                         SizedBox(height: 40),
                         Row(
                           children: [
@@ -165,6 +316,7 @@ class _ActivityRecordReportState extends State<ActivityRecordReport> {
                               '$formattedDate',
                               style: TextStyle(
                                 color: Colors.red,
+                                fontWeight: FontWeight.bold,
                               ),
                             )
                           ],
@@ -181,6 +333,9 @@ class _ActivityRecordReportState extends State<ActivityRecordReport> {
                         SizedBox(height: 16),
                         // Summary and Note
                         _buildSummarySection(),
+                        SizedBox(height: 20),
+                        // Chart
+                        _buildTotalWorkoutChart(totalWorkoutTime),
                       ],
                     ),
         ),
@@ -276,15 +431,30 @@ class _ActivityRecordReportState extends State<ActivityRecordReport> {
   }
 
   Widget _buildActivitySummaryTable() {
+    List<Map<String, dynamic>> recordsToShow =
+        _showMore ? _activityRecords : _activityRecords.take(5).toList();
     return Column(
-      children: _activityRecords.map((record) {
-        return _buildTableRow(
-          record['date'] ?? 'N/A',
-          record['activity_type'] ?? '-',
-          record['time_spent']?.toString() ?? '0.0 hr',
-          blueColor,
-        );
-      }).toList(),
+      children: [
+        Column(
+          children: recordsToShow.map((record) {
+            return _buildTableRow(
+              record['date'] ?? 'N/A',
+              record['activity_type'] ?? '-',
+              record['time_spent']?.toString() ?? '0.0 hr',
+              blueColor,
+            );
+          }).toList(),
+        ),
+        if (_activityRecords.length > 5)
+          TextButton(
+            onPressed: () {
+              setState(() {
+                _showMore = !_showMore;
+              });
+            },
+            child: Text(_showMore ? 'Show Less' : 'Show More'),
+          ),
+      ],
     );
   }
 
@@ -313,7 +483,9 @@ class _ActivityRecordReportState extends State<ActivityRecordReport> {
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 16.0,
-            color: color == Colors.transparent ? Colors.black : color,
+            color: color == Colors.transparent
+                ? const Color.fromARGB(255, 124, 18, 18)
+                : color,
           ),
         ),
       ),
@@ -341,6 +513,7 @@ class _ActivityRecordReportState extends State<ActivityRecordReport> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Expanded(
               child: Text(
@@ -352,7 +525,7 @@ class _ActivityRecordReportState extends State<ActivityRecordReport> {
                 ),
               ),
             ),
-            SizedBox(width: 16),
+            SizedBox(width: 30),
             Column(
               children: [
                 Text(
@@ -375,7 +548,7 @@ class _ActivityRecordReportState extends State<ActivityRecordReport> {
             ),
           ],
         ),
-        SizedBox(height: 8),
+        SizedBox(height: 10),
         Text(
           'Note: ${summary['note']}',
           style: TextStyle(
@@ -384,6 +557,67 @@ class _ActivityRecordReportState extends State<ActivityRecordReport> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildTotalWorkoutChart(double totalWorkoutTime) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+          vertical: 10.0), // Adjust padding if needed
+      child: Column(
+        children: [
+          Text(
+            'Total Workout Time',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 18.0,
+              color: pinkColor,
+            ),
+          ),
+          SizedBox(height: 10),
+          Container(
+            height: 200,
+            child: RepaintBoundary(
+              key: chartKey, // Assign the GlobalKey here
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  PieChart(
+                    PieChartData(
+                      sections: [
+                        PieChartSectionData(
+                          color: blueColor,
+                          value: totalWorkoutTime,
+                          title: '',
+                          radius: 30,
+                        ),
+                        PieChartSectionData(
+                          color: pinkColor,
+                          value: 24 - totalWorkoutTime > 0
+                              ? 24 - totalWorkoutTime
+                              : 0,
+                          title: '',
+                          radius: 10,
+                        ),
+                      ],
+                      sectionsSpace: 0,
+                      centerSpaceRadius: 40,
+                    ),
+                  ),
+                  Text(
+                    '${totalWorkoutTime.toStringAsFixed(1)} hrs',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: pinkColor,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

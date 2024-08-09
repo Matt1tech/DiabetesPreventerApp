@@ -21,6 +21,7 @@ urlpatterns = [
     path('user_recommendations/<int:user_id>/', views.user_recommendation, name='user_recommendation'),
     path('monthly_risk/<int:user_id>/', views.monthly_risk, name='monthly_risk'),
     path('activity_report/<int:user_id>/', views.get_physical_activity_report, name='get_physical_activity_report'),
+    path('risk_summary_report/<int:user_id>/', views.get_risk_summary_report, name='get_risk_summary_report'),
 
     
 ]
