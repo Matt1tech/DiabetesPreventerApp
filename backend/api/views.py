@@ -1160,7 +1160,26 @@ def physical_record(request):
 #------------------------------------------------------------------
 
 
+@api_view(['GET'])
+def get_activity_report(request, user_id):
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return Response({'error': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+    
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    
+    # Fetch the activity records for the user between the start and end dates
+    activity_records = ActivityRecord.objects.filter(
+        user=user,
+        created_at__range=[start_date, end_date]
+    ).values('created_at', 'activity_type', 'duration')
 
+    # Format the data as needed for the report
+    report_data = list(activity_records)
+
+    return JsonResponse(report_data, safe=False, status=status.HTTP_200_OK)
 
 
 

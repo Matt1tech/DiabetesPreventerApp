@@ -95,6 +95,7 @@ class AuthService {
       await storage.write(key: 'user_profile_picture', value: profilePicture);
       await storage.write(key: 'user_id', value: user['id'].toString());
       await storage.write(key: 'user_data', value: jsonEncode(user));
+      await storage.write(key: 'gender', value: user['gender']);
 
       print('Stored user_name: ${user['name']}');
     } else {

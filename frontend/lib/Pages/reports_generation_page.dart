@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:frontend/Pages/activity_report.dart';
+import 'package:frontend/Pages/healt_summary_report.dart';
+import 'package:frontend/Pages/risk_summary_report.dart';
 import 'package:frontend/services/auth_service.dart';
 import 'package:image_picker/image_picker.dart';
 import '../services/fetch_user_data_service.dart';
@@ -75,15 +78,38 @@ class _ReportsGenerationPageState extends State<ReportsGenerationPage> {
       return;
     }
 
-    // Send data to backend if dates are valid
-    final Map<String, String> reportData = {
-      'userId': userId,
-      'reportName': reportName,
-      'startDate': startDate,
-      'endDate': endDate,
-    };
-    // TODO: Implement backend call here
-    print('Report data: $reportData');
+    // Navigate to the corresponding report page based on the reportName
+    if (reportName == 'Risk Summary Report') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => RiskSummaryReportPage(
+            startDate: startDate,
+            endDate: endDate,
+          ),
+        ),
+      );
+    } else if (reportName == 'Activity Reports') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ActivityRecordReport(
+            startDate: startDate,
+            endDate: endDate,
+          ),
+        ),
+      );
+    } else if (reportName == 'Health Report') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => HealthSummaryReport(
+            startDate: startDate,
+            endDate: endDate,
+          ),
+        ),
+      );
+    }
   }
 
   void _resetFields(TextEditingController startController,

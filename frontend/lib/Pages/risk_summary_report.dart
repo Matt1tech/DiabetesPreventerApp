@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:percent_indicator/circular_percent_indicator.dart';
 import '../services/auth_service.dart';
 import '../services/fetch_user_data_service.dart';
 import '../utils/logout_utility.dart';
@@ -9,14 +10,21 @@ import '../widgets/user_header.dart';
 import '../widgets/customized_navigation_bar.dart';
 import '../utils/utils.dart';
 
-class RiskSummaryReport extends StatefulWidget {
-  RiskSummaryReport({Key? key}) : super(key: key);
+class RiskSummaryReportPage extends StatefulWidget {
+  final String startDate;
+  final String endDate;
+
+  RiskSummaryReportPage({
+    Key? key,
+    required this.startDate,
+    required this.endDate,
+  }) : super(key: key);
 
   @override
   _RiskSummaryReportState createState() => _RiskSummaryReportState();
 }
 
-class _RiskSummaryReportState extends State<RiskSummaryReport> {
+class _RiskSummaryReportState extends State<RiskSummaryReportPage> {
   int _selectedIndex = 1;
   XFile? _profilePicture;
   final ImagePicker _picker = ImagePicker();
@@ -71,7 +79,7 @@ class _RiskSummaryReportState extends State<RiskSummaryReport> {
         getImageProvider(_profilePicture, userProfilePicture);
 
     return Scaffold(
-      backgroundColor: Color.fromARGB(255, 217, 217, 217),
+      backgroundColor: Color.fromARGB(255, 255, 255, 255),
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(170.0),
         child: UserHeader(
@@ -183,7 +191,7 @@ class _RiskSummaryReportState extends State<RiskSummaryReport> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'From: 01/01/2024         To: 01/02/2024',
+          'From: ${widget.startDate}         To: ${widget.endDate}',
           style: TextStyle(fontSize: 16.0, color: Colors.grey[700]),
         ),
         SizedBox(height: 8),

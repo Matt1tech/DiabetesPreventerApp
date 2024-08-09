@@ -17,6 +17,7 @@ Future<Map<String, String?>> loadUserInfo() async {
     final userName = user.name;
     final userId = user.id;
     final email = user.email;
+    final gender = user.gender;
     // Construct the full URL for the profile picture
     final userProfilePicture = '${'$baseUrl'}/media/${user.profile_picture}';
     print('User Profile Picture: $userProfilePicture'); // Debug statement
@@ -24,7 +25,8 @@ Future<Map<String, String?>> loadUserInfo() async {
       'userName': userName,
       'userProfilePicture': userProfilePicture,
       'user_id': userId.toString(),
-      'email': email
+      'email': email,
+      'gender': gender,
     };
   } else {
     print('No user data found in storage'); // Debug statement
@@ -33,6 +35,7 @@ Future<Map<String, String?>> loadUserInfo() async {
       'userProfilePicture': null,
       'userId': null,
       'email': null,
+      'gender': null,
     };
   }
 }
