@@ -29,8 +29,7 @@ class _ReportsGenerationPageState extends State<ReportsGenerationPage> {
   // Variable to hold user data
   String? userName;
   String? userProfilePicture;
-  final String userId = "12233"; // Example userId, replace with actual user id
-
+  final String userId = "12233"; //
   // Controllers for the date pickers
   final TextEditingController riskStartDateController = TextEditingController();
   final TextEditingController riskEndDateController = TextEditingController();
@@ -159,7 +158,7 @@ class _ReportsGenerationPageState extends State<ReportsGenerationPage> {
         child: UserHeader(
           imageProvider: imageProvider,
           pageName: 'Reports',
-          welcomeMessage: 'Hello Again!',
+          welcomeMessage: 'Share the records!',
           userName: userName,
           userStatus: 'Active',
           rightIcon: Icons.notifications,

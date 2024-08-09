@@ -215,7 +215,7 @@ class _MealRecordsPageState extends State<MealRecordsPage> {
         child: UserHeader(
           imageProvider: imageProvider,
           pageName: 'Meal Records',
-          welcomeMessage: 'Hello Again!',
+          welcomeMessage: 'Meal time, yay!',
           userName: userName ?? 'user name',
           userStatus: 'Active',
           rightIcon: Icons.notifications,

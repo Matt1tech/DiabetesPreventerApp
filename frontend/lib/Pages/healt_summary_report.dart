@@ -88,7 +88,6 @@ class _HealthSummaryReportState extends State<HealthSummaryReport> {
           welcomeMessage: 'Hello Again!',
           userName: userName ?? 'user name',
           userStatus: 'Active',
-          rightIcon: Icons.notifications,
           showWelcomeMessage: true,
           topPadding: 50.0,
         ),

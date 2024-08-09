@@ -1,18 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:frontend/utils/logout_utility.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:percent_indicator/circular_percent_indicator.dart';
 import '../services/auth_service.dart';
 import '../services/fetch_user_data_service.dart';
-import '../utils/logout_utility.dart';
+import '../services/report_service.dart';
 import '../widgets/drawer_widget.dart';
 import '../widgets/user_header.dart';
 import '../widgets/customized_navigation_bar.dart';
 import '../utils/utils.dart';
-import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart' as pw;
-import 'package:printing/printing.dart';
 
 class ActivityRecordReport extends StatefulWidget {
   final String startDate;
@@ -30,22 +27,22 @@ class ActivityRecordReport extends StatefulWidget {
 
 class _ActivityRecordReportState extends State<ActivityRecordReport> {
   int _selectedIndex = 1;
-  XFile? _profilePicture;
-  final ImagePicker _picker = ImagePicker();
   String? userName;
   String? userProfilePicture;
   String? user_id;
   final storage = FlutterSecureStorage();
-  final AuthService _authService = AuthService();
   String formattedDate = DateFormat('dd/MM/yyyy').format(DateTime.now());
-
-  bool _isLoading = false;
+  List<Map<String, dynamic>> _activityRecords = [];
+  bool _isLoading = true;
+  String? _errorMessage;
+  XFile? _profilePicture;
 
   @override
   void initState() {
     super.initState();
     _loadUserInfo();
-    _loadUserData();
+    _loadUserData(); // Load user information
+    fetchActivityReport(); // Fetch report data after user info is loaded
   }
 
   void _onItemTapped(int index) {
@@ -62,6 +59,7 @@ class _ActivityRecordReportState extends State<ActivityRecordReport> {
         userName = userInfo['userName'];
         userProfilePicture = userInfo['userProfilePicture'];
         user_id = userInfo['id'];
+        print("User Info Loaded: user_id = $user_id"); // Debug statement
       });
     }
   }
@@ -74,29 +72,37 @@ class _ActivityRecordReportState extends State<ActivityRecordReport> {
         this.userName = userName;
         userProfilePicture = userProfilePicture;
         user_id = userId;
+        print("User Data Loaded: user_id = $user_id"); // Debug statement
       });
+      fetchActivityReport();
     }
   }
 
-  void _printReport() async {
-    await Printing.layoutPdf(onLayout: (PdfPageFormat format) async {
-      final doc = pw.Document();
-
-      doc.addPage(
-        pw.Page(
-          build: (context) {
-            return pw.Center(
-              child: pw.Text(
-                'Your Report',
-                style: pw.TextStyle(fontSize: 40),
-              ),
-            ); // Center
-          },
-        ),
-      );
-
-      return doc.save();
-    });
+  Future<void> fetchActivityReport() async {
+    if (user_id != null) {
+      print('fetchActivityReport called with user_id: $user_id');
+      try {
+        final activityRecords = await ReportService.fetchActivityReport(
+            user_id!, widget.startDate, widget.endDate);
+        print('Fetched activity records: $activityRecords');
+        setState(() {
+          _activityRecords = activityRecords;
+          _isLoading = false;
+          print("Updated _activityRecords: $_activityRecords");
+        });
+      } catch (e) {
+        print('Error fetching activity report: $e');
+        setState(() {
+          _errorMessage = 'Failed to fetch activity report';
+          _isLoading = false;
+        });
+      }
+    } else {
+      print('Error: user_id is null');
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -105,7 +111,7 @@ class _ActivityRecordReportState extends State<ActivityRecordReport> {
         getImageProvider(_profilePicture, userProfilePicture);
 
     return Scaffold(
-      backgroundColor: Color.fromARGB(255, 255, 255, 255),
+      backgroundColor: Colors.white,
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(170.0),
         child: UserHeader(
@@ -123,54 +129,60 @@ class _ActivityRecordReportState extends State<ActivityRecordReport> {
         userName: userName,
         imageProvider: imageProvider,
         logoutManager:
-            LogoutManager(context: context, authService: _authService),
+            LogoutManager(context: context, authService: AuthService()),
       ),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Report Title and Date
-              Text(
-                'Title: Activity Record',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20.0,
-                  color: pinkColor,
-                ),
-              ),
-              SizedBox(height: 4),
-              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                Text(
-                  'Generation Date:',
-                  style: TextStyle(
-                      fontSize: 16.0,
-                      color: pinkColor,
-                      fontWeight: FontWeight.w700),
-                ),
-                Text(
-                  '$formattedDate',
-                  style: TextStyle(
-                    color: Colors.red,
-                  ),
-                )
-              ]),
-
-              SizedBox(height: 5),
-              // User Details
-              _buildUserDetails(),
-              SizedBox(height: 16),
-              // Date Range and Table Header
-              _buildDateRangeAndTableHeader(),
-              SizedBox(height: 8),
-              // Activity Summary Table
-              _buildActivitySummaryTable(),
-              SizedBox(height: 16),
-              // Summary and Note
-              _buildSummarySection(),
-            ],
-          ),
+          child: _isLoading
+              ? Center(child: CircularProgressIndicator())
+              : _errorMessage != null
+                  ? Text(_errorMessage!)
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Report Title and Date
+                        Text(
+                          'Activity Report -  ',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20.0,
+                            color: Colors.black,
+                          ),
+                        ),
+                        SizedBox(height: 40),
+                        Row(
+                          children: [
+                            Text(
+                              'Generation Date:',
+                              style: TextStyle(
+                                  fontSize: 16.0,
+                                  color: pinkColor,
+                                  fontWeight: FontWeight.w700),
+                            ),
+                            SizedBox(width: 110),
+                            Text(
+                              '$formattedDate',
+                              style: TextStyle(
+                                color: Colors.red,
+                              ),
+                            )
+                          ],
+                        ),
+                        SizedBox(height: 5),
+                        // User Details
+                        _buildUserDetails(),
+                        SizedBox(height: 16),
+                        // Date Range and Table Header
+                        _buildDateRangeAndTableHeader(),
+                        SizedBox(height: 8),
+                        // Activity Summary Table
+                        _buildActivitySummaryTable(),
+                        SizedBox(height: 16),
+                        // Summary and Note
+                        _buildSummarySection(),
+                      ],
+                    ),
         ),
       ),
       bottomNavigationBar: CustomNavigationBar(
@@ -185,9 +197,11 @@ class _ActivityRecordReportState extends State<ActivityRecordReport> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(height: 8),
-        Row(children: [
-          _buildUserDetailRow('Name:', userName ?? 'user name'),
-        ])
+        Row(
+          children: [
+            _buildUserDetailRow('Name:', userName ?? 'user name'),
+          ],
+        )
       ],
     );
   }
@@ -204,13 +218,13 @@ class _ActivityRecordReportState extends State<ActivityRecordReport> {
             color: blueColor,
           ),
         ),
-        SizedBox(width: 245),
+        SizedBox(width: 200),
         Text(
           value,
           style: TextStyle(
-            fontSize: 16.0,
-            color: Colors.red,
-          ),
+              fontSize: 18.0,
+              color: Color.fromARGB(255, 4, 99, 12),
+              fontWeight: FontWeight.bold),
         ),
       ],
     );
@@ -220,17 +234,21 @@ class _ActivityRecordReportState extends State<ActivityRecordReport> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          Text('From: ${widget.startDate}',
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text('From: ${widget.startDate}',
+                style: TextStyle(
+                    fontSize: 16.0,
+                    color: const Color.fromARGB(255, 221, 71, 11))),
+            Text(
+              'To: ${widget.endDate}',
               style: TextStyle(
                   fontSize: 16.0,
-                  color: const Color.fromARGB(255, 221, 71, 11))),
-          Text(
-            'To: ${widget.endDate}',
-            style: TextStyle(
-                fontSize: 16.0, color: const Color.fromARGB(255, 221, 71, 11)),
-          ),
-        ]),
+                  color: const Color.fromARGB(255, 221, 71, 11)),
+            ),
+          ],
+        ),
         SizedBox(height: 50),
         Row(
           children: [
@@ -259,35 +277,35 @@ class _ActivityRecordReportState extends State<ActivityRecordReport> {
 
   Widget _buildActivitySummaryTable() {
     return Column(
-      children: [
-        _buildTableRow('01/01/2024', 'Dance', '1.00 hr', blueColor),
-        _buildTableRow('', '', '', Colors.transparent),
-        _buildTableRow('', '', '', Colors.transparent),
-        _buildTableRow('', '', '', Colors.transparent),
-        _buildTableRow('', '', '', Colors.transparent),
-        _buildTableRow('', '', '', Colors.transparent),
-      ],
+      children: _activityRecords.map((record) {
+        return _buildTableRow(
+          record['date'] ?? 'N/A',
+          record['activity_type'] ?? '-',
+          record['time_spent']?.toString() ?? '0.0 hr',
+          blueColor,
+        );
+      }).toList(),
     );
   }
 
   Widget _buildTableRow(
       String date, String activity, String timeSpent, Color statusColor) {
+    String numericPart = timeSpent.split(' ')[0]; // Extract numeric part
     return Row(
       children: [
         _buildTableCell(date),
         _buildTableCell(activity, color: statusColor),
-        _buildTableCell(timeSpent),
+        _buildTableCell(numericPart), // Use the numeric part
       ],
     );
   }
 
-  Widget _buildTableCell(String content,
-      {Color color = const Color.fromARGB(0, 255, 255, 255)}) {
+  Widget _buildTableCell(String content, {Color color = Colors.transparent}) {
     return Expanded(
       child: Container(
-        padding: EdgeInsets.symmetric(vertical: 8.0),
+        padding: EdgeInsets.symmetric(vertical: 6.0),
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey),
+          border: Border.all(color: Color.fromARGB(255, 255, 255, 255)),
           color: color.withOpacity(0.2),
         ),
         child: Text(
@@ -303,6 +321,22 @@ class _ActivityRecordReportState extends State<ActivityRecordReport> {
   }
 
   Widget _buildSummarySection() {
+    if (_activityRecords.isEmpty) {
+      return Center(
+          child:
+              Text('No activity records found for the selected date range.'));
+    }
+
+    final summary = _activityRecords.fold<Map<String, dynamic>>(
+        {'most_activity': '', 'most_activity_time': 0, 'note': 'Workout More'},
+        (acc, record) {
+      // Extract only the numeric part of the time_spent and parse it safely
+      String numericPart = record['time_spent'].toString().split(' ')[0];
+      acc['most_activity_time'] += double.tryParse(numericPart) ?? 0.0;
+      acc['most_activity'] = record['activity_type'];
+      return acc;
+    });
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -330,7 +364,7 @@ class _ActivityRecordReportState extends State<ActivityRecordReport> {
                 ),
                 SizedBox(height: 8),
                 Text(
-                  'Dance',
+                  summary['most_activity'],
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 18.0,
@@ -339,30 +373,15 @@ class _ActivityRecordReportState extends State<ActivityRecordReport> {
                 ),
               ],
             ),
-            SizedBox(width: 16),
-            CircularPercentIndicator(
-              radius: 40.0,
-              lineWidth: 10.0,
-              percent: 0.49,
-              center: new Text("Active",
-                  style: TextStyle(color: pinkColor, fontSize: 14)),
-              progressColor: Colors.orange,
-              backgroundColor: Colors.grey[300]!,
-            ),
           ],
         ),
         SizedBox(height: 8),
         Text(
-          'Note: Workout More',
+          'Note: ${summary['note']}',
           style: TextStyle(
             fontSize: 16.0,
             color: Colors.red,
           ),
-        ),
-        SizedBox(height: 8),
-        ElevatedButton(
-          onPressed: _printReport,
-          child: Text('Print'),
         ),
       ],
     );

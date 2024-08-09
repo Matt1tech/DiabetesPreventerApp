@@ -58,7 +58,7 @@ class UserHeader extends StatelessWidget implements PreferredSizeWidget {
                           Scaffold.of(context).openDrawer();
                         },
                       ),
-                      const SizedBox(width: 5),
+                      const SizedBox(width: 10),
                       CircleAvatar(
                         radius: 35,
                         backgroundColor: Colors.white,
@@ -73,7 +73,7 @@ class UserHeader extends StatelessWidget implements PreferredSizeWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(width: 30), // Space between avatar and text
+                  const SizedBox(width: 35), // Space between avatar and text
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -82,7 +82,7 @@ class UserHeader extends StatelessWidget implements PreferredSizeWidget {
                         Text(
                           welcomeMessage, // Now showing the welcome message
                           style: const TextStyle(
-                            fontSize: 21,
+                            fontSize: 22,
                             color: Colors.white,
                           ),
                           overflow: TextOverflow.ellipsis,
@@ -102,15 +102,6 @@ class UserHeader extends StatelessWidget implements PreferredSizeWidget {
                       ],
                     ),
                   ),
-                  if (rightIcon != null)
-                    IconButton(
-                      icon: Icon(
-                        rightIcon,
-                        color: Colors.white,
-                      ),
-                      iconSize: 30.0,
-                      onPressed: () {},
-                    ),
                 ],
               ),
             ),

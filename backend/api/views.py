@@ -1161,7 +1161,7 @@ def physical_record(request):
 
 
 @api_view(['GET'])
-def get_activity_report(request, user_id):
+def get_physical_activity_report(request, user_id):
     try:
         user = User.objects.get(id=user_id)
     except User.DoesNotExist:
@@ -1170,16 +1170,50 @@ def get_activity_report(request, user_id):
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
     
-    # Fetch the activity records for the user between the start and end dates
-    activity_records = ActivityRecord.objects.filter(
+    # Fetch the physical records for the user between the start and end dates
+    physical_records = PhysicalRecord.objects.filter(
         user=user,
         created_at__range=[start_date, end_date]
-    ).values('created_at', 'activity_type', 'duration')
+    ).values('created_at', 'type', 'duration')
 
     # Format the data as needed for the report
-    report_data = list(activity_records)
+    report_data = []
+    activity_summary = {}
 
-    return JsonResponse(report_data, safe=False, status=status.HTTP_200_OK)
+    for record in physical_records:
+        # Format date to dd/MM/yyyy
+        formatted_date = record['created_at'].strftime('%d/%m/%Y')
+        
+        # Update the summary for "Most Activity"
+        activity_type = record['type']
+        if activity_type in activity_summary:
+            activity_summary[activity_type] += record['duration']
+        else:
+            activity_summary[activity_type] = record['duration']
+        
+        # Add the record to the report data
+        report_data.append({
+            'date': formatted_date,
+            'activity_type': activity_type,
+            'time_spent': f"{record['duration']} hr"  # Assuming duration is in hours
+        })
+    
+    # Determine the "Most Activity"
+    most_activity = max(activity_summary, key=activity_summary.get) if activity_summary else None
+    most_activity_time = activity_summary[most_activity] if most_activity else 0
+
+    summary = {
+        'most_activity': most_activity,
+        'most_activity_time': most_activity_time,
+        'note': 'Workout More'  # You can customize this based on conditions
+    }
+
+    response_data = {
+        'report': report_data,
+        'summary': summary
+    }
+
+    return Response(response_data, status=status.HTTP_200_OK)
 
 
 
