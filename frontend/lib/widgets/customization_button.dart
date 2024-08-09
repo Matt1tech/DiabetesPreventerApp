@@ -25,14 +25,22 @@ class CustomTag extends StatefulWidget {
 
 class _CustomTagState extends State<CustomTag> {
   bool _isHovered = false;
+  bool _isClicked = false;
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () => widget.onTagClick(widget.tagName),
+      onTap: () {
+        setState(() {
+          _isClicked = !_isClicked;
+        });
+        widget.onTagClick(widget.tagName);
+      },
       child: Container(
         decoration: BoxDecoration(
-          color: widget.backgroundColor,
+          color: _isClicked
+              ? widget.backgroundColor.withOpacity(0.7)
+              : widget.backgroundColor,
           borderRadius: BorderRadius.circular(24.0),
           boxShadow: [
             BoxShadow(
@@ -51,7 +59,7 @@ class _CustomTagState extends State<CustomTag> {
               onEnter: (_) => _onHoverEnter(),
               onExit: (_) => _onHoverExit(),
               child: AnimatedContainer(
-                duration: Duration(milliseconds: 200),
+                duration: Duration(milliseconds: 50), // Very fast animation
                 decoration: BoxDecoration(
                   color: _isHovered
                       ? Colors.grey[300]

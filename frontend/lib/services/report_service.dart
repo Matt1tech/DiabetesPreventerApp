@@ -43,4 +43,20 @@ class ReportService {
       throw Exception('Failed to load risk summary report');
     }
   }
+
+  static Future<Map<String, dynamic>> fetchHealthSummaryReport(
+      String userId, String startDate, String endDate) async {
+    final url = Uri.parse(
+        '$baseUrl/health_summary_report/$userId/?start_date=$startDate&end_date=$endDate');
+    final response = await http.get(url, headers: {
+      'Content-Type': 'application/json',
+    });
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      return Map<String, dynamic>.from(data);
+    } else {
+      throw Exception('Failed to load health summary report');
+    }
+  }
 }

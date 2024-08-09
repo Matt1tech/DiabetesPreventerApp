@@ -529,6 +529,31 @@ class _RiskSummaryReportState extends State<RiskSummaryReportPage> {
   }
 
   Widget _buildRiskProbabilitiesChart() {
+    // Check if _riskSummary and risk_probabilities exist and are not null
+    if (_riskSummary == null || _riskSummary['risk_probabilities'] == null) {
+      return Center(
+        child: Text(
+          'No risk probabilities available.',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 16.0,
+            color: pinkColor,
+          ),
+        ),
+      );
+    }
+
+    // Safely access the risk probabilities
+    final riskProbabilities = _riskSummary['risk_probabilities'];
+
+    // Safely assign the values or default to 0.0
+    final healthyValue = riskProbabilities['Healthy'] ?? 0.0;
+    final prediabetesValue = riskProbabilities['Prediabetes'] ?? 0.0;
+    final diabetesValue = riskProbabilities['Diabetes'] ?? 0.0;
+
+    // Safely assign the risk classification or default to 'Unknown'
+    final riskClassification = _riskSummary['risk_classification'] ?? 'Unknown';
+
     return Padding(
       padding: const EdgeInsets.symmetric(
           vertical: 10.0), // Adjust padding if needed
@@ -555,20 +580,19 @@ class _RiskSummaryReportState extends State<RiskSummaryReportPage> {
                       sections: [
                         PieChartSectionData(
                           color: Colors.green,
-                          value: _riskSummary['risk_probabilities']['Healthy'],
+                          value: healthyValue,
                           title: '',
                           radius: 30,
                         ),
                         PieChartSectionData(
                           color: Colors.orange,
-                          value: _riskSummary['risk_probabilities']
-                              ['Prediabetes'],
+                          value: prediabetesValue,
                           title: '',
                           radius: 30,
                         ),
                         PieChartSectionData(
                           color: Colors.red,
-                          value: _riskSummary['risk_probabilities']['Diabetes'],
+                          value: diabetesValue,
                           title: '',
                           radius: 30,
                         ),
@@ -578,7 +602,7 @@ class _RiskSummaryReportState extends State<RiskSummaryReportPage> {
                     ),
                   ),
                   Text(
-                    '${_riskSummary['risk_classification']}',
+                    riskClassification,
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
