@@ -182,8 +182,8 @@ class _NutrientationPageState extends State<NutrientationPage> {
                         : Text('No image selected'),
                   ),
                   if (analysisData != null)
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
+                    Center(
+                      // padding: const EdgeInsets.all(8.0),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
