@@ -68,10 +68,10 @@ class _ActivityRecordReportState extends State<ActivityRecordReport> {
     final userInfo = await loadUserInfo();
     if (mounted) {
       setState(() {
-        userName = userInfo['userName'];
+        userName = userInfo['userName'] ??
+            'Unknown'; // Provide a default value if null
         userProfilePicture = userInfo['userProfilePicture'];
         user_id = userInfo['id'];
-        print("User Info Loaded: user_id = $user_id"); // Debug statement
       });
     }
   }
@@ -81,10 +81,10 @@ class _ActivityRecordReportState extends State<ActivityRecordReport> {
     final userId = await storage.read(key: 'user_id');
     if (mounted) {
       setState(() {
-        this.userName = userName;
+        this.userName =
+            userName ?? 'Unknown'; // Provide a default value if null
         userProfilePicture = userProfilePicture;
         user_id = userId;
-        print("User Data Loaded: user_id = $user_id"); // Debug statement
       });
       fetchActivityReport();
     }
@@ -105,7 +105,9 @@ class _ActivityRecordReportState extends State<ActivityRecordReport> {
       } catch (e) {
         print('Error fetching activity report: $e');
         setState(() {
-          _errorMessage = 'Failed to fetch activity report';
+          setState(() {
+            _errorMessage = e.toString();
+          });
           _isLoading = false;
         });
       }
@@ -493,21 +495,49 @@ class _ActivityRecordReportState extends State<ActivityRecordReport> {
   }
 
   Widget _buildSummarySection() {
-    if (_activityRecords.isEmpty) {
+    if (_activityRecords == null || _activityRecords.isEmpty) {
       return Center(
-          child:
-              Text('No activity records found for the selected date range.'));
+        child: Text(
+          'No activity records found for the selected date range.',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 16.0,
+            color: pinkColor,
+          ),
+        ),
+      );
     }
 
-    final summary = _activityRecords.fold<Map<String, dynamic>>(
-        {'most_activity': '', 'most_activity_time': 0, 'note': 'Workout More'},
-        (acc, record) {
-      // Extract only the numeric part of the time_spent and parse it safely
-      String numericPart = record['time_spent'].toString().split(' ')[0];
-      acc['most_activity_time'] += double.tryParse(numericPart) ?? 0.0;
-      acc['most_activity'] = record['activity_type'];
-      return acc;
+    Map<String, double> activityTimeMap = {};
+
+    // Calculate total time spent on each activity type
+    for (var record in _activityRecords) {
+      String activityType = record['activity_type'] ?? 'Unknown';
+      double timeSpent = double.tryParse(
+              record['time_spent']?.toString().split(' ')[0] ?? '0') ??
+          0.0;
+
+      if (activityTimeMap.containsKey(activityType)) {
+        activityTimeMap[activityType] =
+            activityTimeMap[activityType]! + timeSpent;
+      } else {
+        activityTimeMap[activityType] = timeSpent;
+      }
+    }
+
+    // Find the activity type with the maximum time spent
+    String mostActivity = 'Unknown';
+    double mostActivityTime = 0.0;
+
+    activityTimeMap.forEach((activity, timeSpent) {
+      if (timeSpent > mostActivityTime) {
+        mostActivity = activity;
+        mostActivityTime = timeSpent;
+      }
     });
+
+    // Prepare the note
+    String note = 'Workout More'; // This could be dynamic based on conditions
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -537,7 +567,7 @@ class _ActivityRecordReportState extends State<ActivityRecordReport> {
                 ),
                 SizedBox(height: 8),
                 Text(
-                  summary['most_activity'],
+                  mostActivity,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 18.0,
@@ -550,7 +580,7 @@ class _ActivityRecordReportState extends State<ActivityRecordReport> {
         ),
         SizedBox(height: 10),
         Text(
-          'Note: ${summary['note']}',
+          'Note: $note',
           style: TextStyle(
             fontSize: 16.0,
             color: Colors.red,
@@ -560,7 +590,10 @@ class _ActivityRecordReportState extends State<ActivityRecordReport> {
     );
   }
 
-  Widget _buildTotalWorkoutChart(double totalWorkoutTime) {
+  Widget _buildTotalWorkoutChart(double? totalWorkoutTime) {
+    // Provide a default value if totalWorkoutTime is null
+    double safeTotalWorkoutTime = totalWorkoutTime ?? 0.0;
+
     return Padding(
       padding: const EdgeInsets.symmetric(
           vertical: 10.0), // Adjust padding if needed
@@ -587,14 +620,14 @@ class _ActivityRecordReportState extends State<ActivityRecordReport> {
                       sections: [
                         PieChartSectionData(
                           color: blueColor,
-                          value: totalWorkoutTime,
+                          value: safeTotalWorkoutTime,
                           title: '',
                           radius: 30,
                         ),
                         PieChartSectionData(
                           color: pinkColor,
-                          value: 24 - totalWorkoutTime > 0
-                              ? 24 - totalWorkoutTime
+                          value: 24 - safeTotalWorkoutTime > 0
+                              ? 24 - safeTotalWorkoutTime
                               : 0,
                           title: '',
                           radius: 10,
@@ -605,7 +638,7 @@ class _ActivityRecordReportState extends State<ActivityRecordReport> {
                     ),
                   ),
                   Text(
-                    '${totalWorkoutTime.toStringAsFixed(1)} hrs',
+                    '${safeTotalWorkoutTime.toStringAsFixed(1)} hrs',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,

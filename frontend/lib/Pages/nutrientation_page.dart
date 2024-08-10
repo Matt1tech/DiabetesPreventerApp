@@ -183,17 +183,19 @@ class _NutrientationPageState extends State<NutrientationPage> {
                   ),
                   if (analysisData != null)
                     Center(
-                      // padding: const EdgeInsets.all(8.0),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Text('Analysis Results:',
-                              style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: pinkColor)),
+                          const Text(
+                            'Analysis Results:',
+                            style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: pinkColor),
+                          ),
                           const SizedBox(height: 10),
                           Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text('Name: ',
                                   style: TextStyle(
@@ -204,6 +206,7 @@ class _NutrientationPageState extends State<NutrientationPage> {
                             ],
                           ),
                           Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text('Proteins: ',
                                   style: TextStyle(
@@ -214,6 +217,7 @@ class _NutrientationPageState extends State<NutrientationPage> {
                             ],
                           ),
                           Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text('Fat: ',
                                   style: TextStyle(
@@ -224,6 +228,7 @@ class _NutrientationPageState extends State<NutrientationPage> {
                             ],
                           ),
                           Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text('Cholesterol: ',
                                   style: TextStyle(
@@ -234,6 +239,7 @@ class _NutrientationPageState extends State<NutrientationPage> {
                             ],
                           ),
                           Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text('Calories: ',
                                   style: TextStyle(
@@ -244,6 +250,7 @@ class _NutrientationPageState extends State<NutrientationPage> {
                             ],
                           ),
                           Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text('Fibers: ',
                                   style: TextStyle(
@@ -253,34 +260,34 @@ class _NutrientationPageState extends State<NutrientationPage> {
                                   style: const TextStyle(color: pinkColor)),
                             ],
                           ),
-                          SizedBox(height: 30),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              ElevatedButton(
-                                onPressed: () {
-                                  _saveMealData();
-                                },
-                                child: Text('Save'),
-                              ),
-                              ElevatedButton(
-                                onPressed: () {
-                                  _resetFields();
-                                  Navigator.pop(context);
-                                },
-                                child: Text('Retake'),
-                              ),
-                              ElevatedButton(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                },
-                                child: Text('Cancel'),
-                              ),
-                            ],
-                          ),
                         ],
                       ),
                     ),
+                  SizedBox(height: 30),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          _saveMealData();
+                        },
+                        child: Text('Save'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          _resetFields();
+                          Navigator.pop(context);
+                        },
+                        child: Text('Retake'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: Text('Cancel'),
+                      ),
+                    ],
+                  ),
                 ],
               ),
       ),

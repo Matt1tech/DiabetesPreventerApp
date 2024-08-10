@@ -186,11 +186,12 @@ class _RiskSummaryReportState extends State<RiskSummaryReportPage> {
               ),
               pw.Text('Risk Probabilities:'),
               ..._riskSummary['risk_probabilities'].entries.map((entry) {
+                final percentageValue = (entry.value * 100).toStringAsFixed(1);
                 return pw.Row(
                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                   children: [
                     pw.Text(entry.key),
-                    pw.Text(entry.value.toString()),
+                    pw.Text('$percentageValue%'),
                   ],
                 );
               }).toList(),

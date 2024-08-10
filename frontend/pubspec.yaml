@@ -51,6 +51,7 @@ dependencies:
   percent_indicator: ^4.2.3
   printing: ^5.13.2
   pdf: ^3.10.0  
+  app_links: ^6.2.0
 
 dev_dependencies:
   flutter_test:
