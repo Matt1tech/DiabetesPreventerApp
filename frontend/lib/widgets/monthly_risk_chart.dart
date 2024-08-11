@@ -189,7 +189,7 @@ class MonthlyRiskChart extends StatelessWidget {
   List<BarChartGroupData> getBarGroups() {
     return List.generate(monthlyRiskValues.length, (index) {
       return BarChartGroupData(
-        x: index, // Ensure this matches the correct index order
+        x: index,
         barRods: [
           BarChartRodData(
             toY: monthlyRiskValues[index] * 100, // Convert to percentage

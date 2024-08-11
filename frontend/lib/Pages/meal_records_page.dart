@@ -106,13 +106,14 @@ class _MealRecordsPageState extends State<MealRecordsPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Select Image Source'),
+        title: Text('Select Image Source', style: TextStyle(color: pinkColor)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             ListTile(
               leading: Icon(Icons.camera_alt),
-              title: Text('Capture from Camera'),
+              title: Text('Capture from Camera',
+                  style: TextStyle(color: blueColor)),
               onTap: () {
                 Navigator.of(context).pop();
                 _pickImage(ImageSource.camera);
@@ -120,7 +121,8 @@ class _MealRecordsPageState extends State<MealRecordsPage> {
             ),
             ListTile(
               leading: Icon(Icons.photo_library),
-              title: Text('Select from Gallery'),
+              title: Text('Select from Gallery',
+                  style: TextStyle(color: blueColor)),
               onTap: () {
                 Navigator.of(context).pop();
                 _pickImage(ImageSource.gallery);
