@@ -569,7 +569,7 @@ class _ActivityRecordReportState extends State<ActivityRecordReport> {
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 18.0,
-                    color: blueColor,
+                    color: pinkColor,
                   ),
                 ),
               ],

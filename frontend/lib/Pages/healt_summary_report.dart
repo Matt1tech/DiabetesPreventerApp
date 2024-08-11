@@ -604,14 +604,14 @@ class _HealthSummaryReportState extends State<HealthSummaryReport> {
                     PieChartData(
                       sections: [
                         PieChartSectionData(
-                          color: Colors.green,
+                          color: blueColor,
                           value: _healthSummary['risk_probabilities']
                               ['Healthy'],
                           title: '',
                           radius: 30,
                         ),
                         PieChartSectionData(
-                          color: Colors.orange,
+                          color: pinkColor,
                           value: _healthSummary['risk_probabilities']
                               ['Prediabetes'],
                           title: '',

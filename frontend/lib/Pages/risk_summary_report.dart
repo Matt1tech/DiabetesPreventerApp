@@ -578,13 +578,13 @@ class _RiskSummaryReportState extends State<RiskSummaryReportPage> {
                     PieChartData(
                       sections: [
                         PieChartSectionData(
-                          color: Colors.green,
+                          color: blueColor,
                           value: healthyValue,
                           title: '',
                           radius: 30,
                         ),
                         PieChartSectionData(
-                          color: Colors.orange,
+                          color: pinkColor,
                           value: prediabetesValue,
                           title: '',
                           radius: 30,
