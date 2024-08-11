@@ -60,10 +60,45 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
   }
 
   Future<void> _pickProfilePicture() async {
-    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
-    setState(() {
-      _profilePicture = image;
-    });
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Profile Picture'),
+          content:
+              Text('Would you like to update or remove your profile picture?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+                _removeProfilePicture(); // Call the remove method
+              },
+              child: Text('Remove'),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.of(context).pop(); // Close the dialog
+                final XFile? image = await _picker.pickImage(
+                    source: ImageSource.gallery); // Pick new image
+                if (image != null) {
+                  setState(() {
+                    _profilePicture = image;
+                  });
+                }
+              },
+              child: Text('Update'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context)
+                    .pop(); // Close the dialog without doing anything
+              },
+              child: Text('Cancel'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _removeProfilePicture() {
@@ -215,8 +250,7 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.delete,
-                color: Colors.white), // Set the color to white
+            icon: Icon(Icons.delete, color: Colors.white),
             onPressed: _removeProfilePicture,
           ),
         ],
@@ -232,8 +266,7 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
                 const SizedBox(height: 16),
                 Center(
                   child: GestureDetector(
-                    onTap:
-                        _pickProfilePicture, // Ensure this is the tap handler
+                    onTap: _pickProfilePicture, // Shows dialog with options
                     child: CircleAvatar(
                       radius: 40,
                       backgroundColor: Colors.grey[200],
@@ -242,11 +275,11 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
                           : (userProfilePicture != null
                               ? NetworkImage(userProfilePicture!)
                               : null) as ImageProvider?,
-                      child:
-                          _profilePicture == null && userProfilePicture == null
-                              ? Icon(Icons.camera_alt,
-                                  size: 40, color: Colors.grey[800])
-                              : null,
+                      child: (_profilePicture == null &&
+                              userProfilePicture == null)
+                          ? Icon(Icons.camera_alt,
+                              size: 40, color: Colors.grey[800])
+                          : null, // Show icon if there's no image
                     ),
                   ),
                 ),
