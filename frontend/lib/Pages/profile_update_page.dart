@@ -65,15 +65,16 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Profile Picture'),
-          content:
-              Text('Would you like to update or remove your profile picture?',style: TextStyle(color: pinkColor)),
+          content: const Text(
+              'Would you like to update or remove your profile picture?',
+              style: TextStyle(color: pinkColor)),
           actions: <Widget>[
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop(); // Close the dialog
                 _removeProfilePicture(); // Call the remove method
               },
-              child: Text('Remove',style: TextStyle(color: pinkColor)),
+              child: const Text('Remove', style: TextStyle(color: pinkColor)),
             ),
             TextButton(
               onPressed: () async {
@@ -86,7 +87,7 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
                   });
                 }
               },
-              child: Text('Update',style: TextStyle(color: blueColor)),
+              child: const Text('Update', style: TextStyle(color: blueColor)),
             ),
             TextButton(
               onPressed: () {
@@ -201,7 +202,8 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Enter Current Password',style: TextStyle(color: pinkColor)),
+          title: Text('Enter Current Password',
+              style: TextStyle(color: pinkColor)),
           content: TextField(
             obscureText: true,
             onChanged: (value) {
