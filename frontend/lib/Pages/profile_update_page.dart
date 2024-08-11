@@ -2,12 +2,10 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import '../services/fetch_user_data_service.dart';
 import '../utils/utilities.dart';
 import '../widgets/widgets.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../services/auth_service.dart';
-import '../models/user.dart';
 import 'home_page.dart';
 
 class UpdateProfilePage extends StatefulWidget {

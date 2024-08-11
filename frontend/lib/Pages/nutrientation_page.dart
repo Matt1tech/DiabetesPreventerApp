@@ -23,7 +23,6 @@ class _NutrientationPageState extends State<NutrientationPage> {
   Map<String, dynamic>? analysisData;
   bool isLoading = false;
   XFile? _profilePicture;
-  final ImagePicker _picker = ImagePicker();
   String? userName;
   String? userProfilePicture;
   String? user_id;
@@ -33,6 +32,7 @@ class _NutrientationPageState extends State<NutrientationPage> {
     super.initState();
     _analyzeImage();
     _loadUserInfo();
+    _loadUserData();
   }
 
   Future<void> _analyzeImage() async {
@@ -55,6 +55,7 @@ class _NutrientationPageState extends State<NutrientationPage> {
 
         setState(() {
           analysisData = {
+            'quantity': foodInfo['quantity'] ?? 'Unknown',
             'display_name': foodInfo['display_name'] ?? 'Unknown',
             'proteins': nutrition['proteins_100g']?.toString() ?? 'N/A',
             'fat': nutrition['fat_100g']?.toString() ?? 'N/A',
@@ -79,7 +80,7 @@ class _NutrientationPageState extends State<NutrientationPage> {
   Future<void> _saveMealData() async {
     if (user_id == null || user_id!.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please log in again to save meal data.')),
+        const SnackBar(content: Text('Please log in again to save meal data.')),
       );
       return;
     }
@@ -91,7 +92,7 @@ class _NutrientationPageState extends State<NutrientationPage> {
     try {
       Meal meal = Meal(
         name: analysisData!['display_name'],
-        quantity: 100.0, // Assuming the quantity is 100g
+        quantity: double.tryParse(analysisData!['quantity']) ?? 0.0,
         calories: double.tryParse(analysisData!['calories']) ?? 0.0,
         protein: double.tryParse(analysisData!['proteins']) ?? 0.0,
         fats: double.tryParse(analysisData!['fat']) ?? 0.0,
@@ -104,12 +105,13 @@ class _NutrientationPageState extends State<NutrientationPage> {
       await MealRecordsService.submitMealData(meal);
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Meal data saved successfully!')),
+        const SnackBar(content: Text('Meal data saved successfully!')),
       );
       _resetFields();
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to save meal data. Please try again.')),
+        const SnackBar(
+            content: Text('Failed to save meal data. Please try again.')),
       );
     } finally {
       setState(() {
@@ -140,6 +142,18 @@ class _NutrientationPageState extends State<NutrientationPage> {
         userName = userInfo['userName'];
         userProfilePicture = userInfo['userProfilePicture'];
         user_id = userInfo['id'];
+      });
+    }
+  }
+
+  Future<void> _loadUserData() async {
+    final userName = await storage.read(key: 'user_name');
+    final userId = await storage.read(key: 'user_id');
+    if (mounted) {
+      setState(() {
+        this.userName = userName;
+        userProfilePicture = userProfilePicture;
+        user_id = userId;
       });
     }
   }
@@ -202,6 +216,17 @@ class _NutrientationPageState extends State<NutrientationPage> {
                                       fontWeight: FontWeight.bold,
                                       color: blueColor)),
                               Text('${analysisData!['display_name']}',
+                                  style: const TextStyle(color: pinkColor)),
+                            ],
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text('Quantity: ',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: blueColor)),
+                              Text('${analysisData!['quantity']}',
                                   style: const TextStyle(color: pinkColor)),
                             ],
                           ),
