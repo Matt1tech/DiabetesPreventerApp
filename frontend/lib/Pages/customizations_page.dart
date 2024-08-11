@@ -319,7 +319,6 @@ class _CustomizationsPageState extends State<CustomizationsPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              SizedBox(width: 10),
               HealthMeasurementLogsCard(
                 title: 'Max Protein',
                 name: 'maxDailyProtein',
@@ -340,7 +339,7 @@ class _CustomizationsPageState extends State<CustomizationsPage> {
                   ),
                 ],
               ),
-              SizedBox(width: 10),
+              SizedBox(width: 15),
               HealthMeasurementLogsCard(
                 title: 'Max Carbs',
                 name: 'totalCarbs',
@@ -367,7 +366,6 @@ class _CustomizationsPageState extends State<CustomizationsPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              SizedBox(width: 10),
               HealthMeasurementLogsCard(
                 title: 'Max Fiber',
                 name: 'totalFiber',
@@ -388,7 +386,7 @@ class _CustomizationsPageState extends State<CustomizationsPage> {
                   ),
                 ],
               ),
-              SizedBox(width: 10),
+              SizedBox(width: 15),
               HealthMeasurementLogsCard(
                 title: 'Max Fat',
                 name: 'totalFat',
@@ -412,7 +410,10 @@ class _CustomizationsPageState extends State<CustomizationsPage> {
             ],
           ),
           SizedBox(height: 30),
-          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            SizedBox(
+              width: 10,
+            ),
             HealthMeasurementLogsCard(
               title: 'Max Daily Calories',
               name: 'totalDailyCalories',
@@ -422,7 +423,7 @@ class _CustomizationsPageState extends State<CustomizationsPage> {
                       int.parse(user_id!), value);
                 }
               },
-              width: 350,
+              width: 370,
               height: 150,
               cardColor: Color.fromARGB(221, 255, 250, 250),
               boxShadow: [

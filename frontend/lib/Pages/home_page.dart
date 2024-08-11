@@ -501,7 +501,6 @@ class _HomePageState extends State<HomePage> {
               title: 'Blood Pressure',
               name: 'bloodPressure',
               onPressed: (int value) {
-                // Implement  backend sending logic here
                 if (user_id != null) {
                   UserHealthRecordsService.inputBloodPressure(
                       int.parse(user_id!), value);
