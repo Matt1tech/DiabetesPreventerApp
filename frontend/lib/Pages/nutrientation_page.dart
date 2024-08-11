@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/Pages/home_page.dart';
 import 'package:frontend/utils/utilities.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
@@ -107,7 +108,6 @@ class _NutrientationPageState extends State<NutrientationPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Meal data saved successfully!')),
       );
-      _resetFields();
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -255,6 +255,17 @@ class _NutrientationPageState extends State<NutrientationPage> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
+                              Text('Carbs: ',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: blueColor)),
+                              Text('${analysisData!['carbs']} g',
+                                  style: const TextStyle(color: pinkColor)),
+                            ],
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
                               Text('Cholesterol: ',
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
@@ -307,7 +318,12 @@ class _NutrientationPageState extends State<NutrientationPage> {
                       ),
                       ElevatedButton(
                         onPressed: () {
-                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => HomePage(),
+                            ),
+                          );
                         },
                         child: Text('Cancel'),
                       ),

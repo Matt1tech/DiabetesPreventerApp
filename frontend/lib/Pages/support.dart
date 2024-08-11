@@ -48,8 +48,12 @@ class _ClientSupportPageState extends State<ClientSupportPage> {
     final Uri emailLaunchUri = Uri(
       scheme: 'mailto',
       path: adminEmail,
-      query: Uri.encodeFull(
-          'subject=Support Request&body=Hello, I need support with...'),
+      query: Uri(
+        queryParameters: {
+          'subject': 'Support Request',
+          'body': 'Hello, I need support with...'
+        },
+      ).query,
     );
 
     if (await canLaunchUrl(emailLaunchUri)) {

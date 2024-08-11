@@ -340,7 +340,7 @@ class _CustomizationsPageState extends State<CustomizationsPage> {
                   ),
                 ],
               ),
-              SizedBox(width: 20),
+              SizedBox(width: 10),
               HealthMeasurementLogsCard(
                 title: 'Max Carbs',
                 name: 'totalCarbs',
@@ -388,7 +388,7 @@ class _CustomizationsPageState extends State<CustomizationsPage> {
                   ),
                 ],
               ),
-              SizedBox(width: 20),
+              SizedBox(width: 10),
               HealthMeasurementLogsCard(
                 title: 'Max Fat',
                 name: 'totalFat',
@@ -413,9 +413,6 @@ class _CustomizationsPageState extends State<CustomizationsPage> {
           ),
           SizedBox(height: 30),
           Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-            SizedBox(
-              width: 10,
-            ),
             HealthMeasurementLogsCard(
               title: 'Max Daily Calories',
               name: 'totalDailyCalories',
@@ -425,7 +422,7 @@ class _CustomizationsPageState extends State<CustomizationsPage> {
                       int.parse(user_id!), value);
                 }
               },
-              width: 370,
+              width: 350,
               height: 150,
               cardColor: Color.fromARGB(221, 255, 250, 250),
               boxShadow: [
