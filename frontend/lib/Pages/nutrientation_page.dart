@@ -63,7 +63,7 @@ class _NutrientationPageState extends State<NutrientationPage> {
             'cholesterol': nutrition['cholesterol_100g']?.toString() ?? 'N/A',
             'calories': nutrition['calories_100g']?.toString() ?? 'N/A',
             'fibers': nutrition['fibers_100g']?.toString() ?? 'N/A',
-            'carbs': nutrition['carbohydrates_100g']?.toString() ?? 'N/A',
+            'carbs': nutrition['carbs_100g']?.toString() ?? 'N/A',
           };
         });
       } else {
