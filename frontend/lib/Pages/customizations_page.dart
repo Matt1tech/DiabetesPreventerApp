@@ -316,125 +316,132 @@ class _CustomizationsPageState extends State<CustomizationsPage> {
             ),
           ),
           const SizedBox(height: 20),
-          Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                HealthMeasurementLogsCard(
-                  title: 'Max Protein',
-                  name: 'maxDailyProtein',
-                  onPressed: (int value) {
-                    if (user_id != null) {
-                      UserCustomizationService.setMaxDailyProtein(
-                          int.parse(user_id!), value);
-                    }
-                  },
-                  width: 170,
-                  height: 160,
-                  cardColor: Color.fromARGB(221, 255, 250, 250),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 10,
-                      offset: Offset(0, 4),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    HealthMeasurementLogsCard(
+                      title: 'Max Protein',
+                      name: 'maxDailyProtein',
+                      onPressed: (int value) {
+                        if (user_id != null) {
+                          UserCustomizationService.setMaxDailyProtein(
+                              int.parse(user_id!), value);
+                        }
+                      },
+                      width: 170,
+                      height: 160,
+                      cardColor: Color.fromARGB(221, 255, 250, 250),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 10,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    SizedBox(width: 10),
+                    HealthMeasurementLogsCard(
+                      title: 'Max Carbs',
+                      name: 'totalCarbs',
+                      onPressed: (int value) {
+                        if (user_id != null) {
+                          UserCustomizationService.setMaxDailyCarbs(
+                              int.parse(user_id!), value);
+                        }
+                      },
+                      width: 170,
+                      height: 160,
+                      cardColor: Color.fromARGB(221, 255, 250, 250),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 10,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-                HealthMeasurementLogsCard(
-                  title: 'Max Carbs',
-                  name: 'totalCarbs',
-                  onPressed: (int value) {
-                    if (user_id != null) {
-                      UserCustomizationService.setMaxDailyCarbs(
-                          int.parse(user_id!), value);
-                    }
-                  },
-                  width: 170,
-                  height: 160,
-                  cardColor: Color.fromARGB(221, 255, 250, 250),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 10,
-                      offset: Offset(0, 4),
+                const SizedBox(height: 15),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    HealthMeasurementLogsCard(
+                      title: 'Max Fiber',
+                      name: 'totalFiber',
+                      onPressed: (int value) {
+                        if (user_id != null) {
+                          UserCustomizationService.setMaxDailyFiber(
+                              int.parse(user_id!), value);
+                        }
+                      },
+                      width: 170,
+                      height: 160,
+                      cardColor: Color.fromARGB(221, 255, 250, 250),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 10,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    SizedBox(width: 10),
+                    HealthMeasurementLogsCard(
+                      title: 'Max Fat',
+                      name: 'totalFat',
+                      onPressed: (int value) {
+                        if (user_id != null) {
+                          UserCustomizationService.setMaxDailyFat(
+                              int.parse(user_id!), value);
+                        }
+                      },
+                      width: 170,
+                      height: 160,
+                      cardColor: Color.fromARGB(221, 255, 250, 250),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 10,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                SizedBox(height: 30),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    HealthMeasurementLogsCard(
+                      title: 'Max Daily Calories',
+                      name: 'totalDailyCalories',
+                      onPressed: (int value) {
+                        if (user_id != null) {
+                          UserCustomizationService.setMaxDailyCalories(
+                              int.parse(user_id!), value);
+                        }
+                      },
+                      width: 370,
+                      height: 150,
+                      cardColor: Color.fromARGB(221, 255, 250, 250),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 10,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ],
             ),
-            const SizedBox(height: 15),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                HealthMeasurementLogsCard(
-                  title: 'Max Fiber',
-                  name: 'totalFiber',
-                  onPressed: (int value) {
-                    if (user_id != null) {
-                      UserCustomizationService.setMaxDailyFiber(
-                          int.parse(user_id!), value);
-                    }
-                  },
-                  width: 170,
-                  height: 160,
-                  cardColor: Color.fromARGB(221, 255, 250, 250),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 10,
-                      offset: Offset(0, 4),
-                    ),
-                  ],
-                ),
-                HealthMeasurementLogsCard(
-                  title: 'Max Fat',
-                  name: 'totalFat',
-                  onPressed: (int value) {
-                    if (user_id != null) {
-                      UserCustomizationService.setMaxDailyFat(
-                          int.parse(user_id!), value);
-                    }
-                  },
-                  width: 170,
-                  height: 160,
-                  cardColor: Color.fromARGB(221, 255, 250, 250),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 10,
-                      offset: Offset(0, 4),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            SizedBox(height: 30),
-            Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-              SizedBox(
-                width: 10,
-              ),
-              HealthMeasurementLogsCard(
-                title: 'Max Daily Calories',
-                name: 'totalDailyCalories',
-                onPressed: (int value) {
-                  if (user_id != null) {
-                    UserCustomizationService.setMaxDailyCalories(
-                        int.parse(user_id!), value);
-                  }
-                },
-                width: 370,
-                height: 150,
-                cardColor: Color.fromARGB(221, 255, 250, 250),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black26,
-                    blurRadius: 10,
-                    offset: Offset(0, 4),
-                  ),
-                ],
-              ),
-            ])
-          ]),
+          ),
         ],
       ),
     );

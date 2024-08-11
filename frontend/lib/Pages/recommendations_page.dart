@@ -207,7 +207,7 @@ class _RecommendationsState extends State<RecommendationsPage> {
                       .toList(),
                 )
               : Center(
-                  child: Text('No suitable menue..',
+                  child: Text('No suitable menu..',
                       style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,

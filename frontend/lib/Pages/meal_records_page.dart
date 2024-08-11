@@ -80,8 +80,8 @@ class _MealRecordsPageState extends State<MealRecordsPage> {
     }
   }
 
-  Future<void> _pickImage() async {
-    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+  Future<void> _pickImage(ImageSource source) async {
+    final XFile? image = await _picker.pickImage(source: source);
     if (image != null) {
       if (mounted) {
         setState(() {
@@ -100,6 +100,36 @@ class _MealRecordsPageState extends State<MealRecordsPage> {
         _profilePicture = image;
       });
     }
+  }
+
+  void _showImageSourceDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Select Image Source'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            ListTile(
+              leading: Icon(Icons.camera_alt),
+              title: Text('Capture from Camera'),
+              onTap: () {
+                Navigator.of(context).pop();
+                _pickImage(ImageSource.camera);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.photo_library),
+              title: Text('Select from Gallery'),
+              onTap: () {
+                Navigator.of(context).pop();
+                _pickImage(ImageSource.gallery);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Future<void> _analyzeImage(File imageFile) async {
@@ -264,9 +294,9 @@ class _MealRecordsPageState extends State<MealRecordsPage> {
                   ),
                   SizedBox(width: 20), // Add space between buttons
                   ElevatedButton(
-                    onPressed: _pickImage,
+                    onPressed: () => _showImageSourceDialog(context),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: pinkColor, // Background color
+                      backgroundColor: pinkColor, // Background colorcolor
                     ),
                     child: Text('Capture Meal',
                         style: TextStyle(
