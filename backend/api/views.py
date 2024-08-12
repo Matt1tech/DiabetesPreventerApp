@@ -816,7 +816,7 @@ def user_recommendation(request, user_id):
     )
 
     # Ensure at least two recommendations from each category if filtering is too restrictive
-    min_recommendations_per_category = 2
+    min_recommendations_per_category = 3
     categories = recommendations.values_list('category', flat=True).distinct()
     final_recommendations = []
 

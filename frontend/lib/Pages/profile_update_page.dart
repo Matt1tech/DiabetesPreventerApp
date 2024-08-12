@@ -271,7 +271,7 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
                     onTap: _pickProfilePicture, // Shows dialog with options
                     child: CircleAvatar(
                       radius: 40,
-                      backgroundColor: Colors.grey[200],
+                      //backgroundColor: Colors.grey[200],
                       backgroundImage: _profilePicture != null
                           ? FileImage(File(_profilePicture!.path))
                           : (userProfilePicture != null
