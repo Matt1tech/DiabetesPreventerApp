@@ -174,7 +174,7 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
           }
           userProfilePicture = _profilePicture != null
               ? _profilePicture!.path
-              : userProfilePicture;
+              : (removeProfilePicture ? null : userProfilePicture);
           isSelectedMaritalStatus = [
             updatedFields['marital_status'] == 'Married',
             updatedFields['marital_status'] == 'Single'
@@ -183,7 +183,7 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
 
         await storage.write(key: 'user_name', value: userName!);
         await storage.write(
-            key: 'user_profile_picture', value: userProfilePicture!);
+            key: 'user_profile_picture', value: userProfilePicture ?? '');
         await storage.write(key: 'user_data', value: jsonEncode(updatedUser));
 
         final snackBar =
