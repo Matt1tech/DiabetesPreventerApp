@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import '../services/fetch_user_data_service.dart';
 import '../utils/utilities.dart';
 import '../widgets/widgets.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -40,6 +41,7 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
     super.initState();
 
     _loadUserData();
+    _loadUserInfo();
   }
 
   Future<void> _loadUserData() async {
@@ -56,6 +58,16 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
               : null;
         });
       }
+    }
+  }
+
+  Future<void> _loadUserInfo() async {
+    final userInfo = await loadUserInfo();
+    if (mounted) {
+      setState(() {
+        userName = userInfo['userName'];
+        userProfilePicture = userInfo['userProfilePicture'];
+      });
     }
   }
 
@@ -234,6 +246,8 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    ImageProvider<Object> imageProvider =
+        getImageProvider(_profilePicture, userProfilePicture);
     return Scaffold(
       backgroundColor: Color.fromARGB(255, 217, 217, 217),
       appBar: AppBar(
@@ -267,12 +281,10 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
                     onTap: _pickProfilePicture, // Shows dialog with options
                     child: CircleAvatar(
                       radius: 40,
-                      //backgroundColor: Colors.grey[200],
-                      backgroundImage: _profilePicture != null
-                          ? FileImage(File(_profilePicture!.path))
-                          : (userProfilePicture != null
-                              ? NetworkImage(userProfilePicture!)
-                              : null) as ImageProvider?,
+                      backgroundColor: Colors.grey[200],
+                      backgroundImage:
+                          userProfilePicture != null ? imageProvider : null,
+                      // Use ImageProvider if userProfilePicture is not null, else null
                       child: (_profilePicture == null &&
                               userProfilePicture == null)
                           ? Icon(Icons.camera_alt,
