@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/Pages/login_page.dart';
-import 'Pages/verify_otp.dart';
 
 void main() {
   runApp(const MyApp());

@@ -102,11 +102,13 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
     );
   }
 
-  void _removeProfilePicture() {
+  void _removeProfilePicture() async {
     setState(() {
       _profilePicture = null;
       userProfilePicture = null; // Also clear the userProfilePicture
     });
+    await storage.write(
+        key: 'user_profile_picture', value: userProfilePicture!);
   }
 
   @override
@@ -250,12 +252,6 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
           'Update Profile',
           style: TextStyle(color: Colors.white),
         ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.delete, color: Colors.white),
-            onPressed: _removeProfilePicture,
-          ),
-        ],
       ),
       body: SingleChildScrollView(
         child: Padding(
