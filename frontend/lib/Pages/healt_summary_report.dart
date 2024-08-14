@@ -575,10 +575,19 @@ class _HealthSummaryReportState extends State<HealthSummaryReport> {
   }
 
   Widget _buildHealthSummaryChart() {
-    if (_healthSummary.isEmpty ||
-        _healthSummary['risk_probabilities'] == null) {
-      return Center(child: Text('No risk probabilities available.'));
+    if (_healthSummary == null || _healthSummary.isEmpty) {
+      return Center(
+        child: Text(
+          'No health records found for the selected date range.',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 16.0,
+            color: pinkColor,
+          ),
+        ),
+      );
     }
+
     return Padding(
       padding: const EdgeInsets.symmetric(
           vertical: 10.0), // Adjust padding if needed

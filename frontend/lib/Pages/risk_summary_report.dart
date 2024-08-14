@@ -479,8 +479,17 @@ class _RiskSummaryReportState extends State<RiskSummaryReportPage> {
   }
 
   Widget _buildSummarySection() {
-    if (_riskSummary.isEmpty) {
-      return Center(child: Text('No risk summary available.'));
+    if (_riskSummary == null || _riskSummary.isEmpty) {
+      return Center(
+        child: Text(
+          'No health records found for the selected date range.',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 16.0,
+            color: pinkColor,
+          ),
+        ),
+      );
     }
 
     return Column(

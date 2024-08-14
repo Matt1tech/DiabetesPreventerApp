@@ -219,7 +219,7 @@ class MonthlyRiskChart extends StatelessWidget {
 
     return SideTitles(
       showTitles: true,
-      reservedSize: 35,
+      reservedSize: 30,
       getTitlesWidget: (value, meta) {
         int index = value.toInt();
         if (index < lastSixMonths.length) {
@@ -234,7 +234,7 @@ class MonthlyRiskChart extends StatelessWidget {
           );
         } else {
           return SideTitleWidget(
-              axisSide: meta.axisSide, space: 8.0, child: const Text(''));
+              axisSide: meta.axisSide, space: 60.0, child: const Text(''));
         }
       },
       interval: 1,

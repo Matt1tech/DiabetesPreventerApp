@@ -405,19 +405,19 @@ class _HomePageState extends State<HomePage> {
         maxProteinCalories: (userCustomizations?.maxProtein != null &&
                 userCustomizations!.maxProtein > 0)
             ? userCustomizations!.maxProtein.toInt()
-            : 180,
+            : 120,
         maxFatsCalories: (userCustomizations?.maxFat != null &&
                 userCustomizations!.maxFat > 0)
             ? userCustomizations!.maxFat.toInt()
-            : 250,
+            : 120,
         maxCarbsCalories: (userCustomizations?.maxCarbs != null &&
                 userCustomizations!.maxCarbs > 0)
             ? userCustomizations!.maxCarbs.toInt()
-            : 300,
+            : 120,
         maxFiberCalories: (userCustomizations?.maxFiber != null &&
                 userCustomizations!.maxFiber > 0)
             ? userCustomizations!.maxFiber.toInt()
-            : 105,
+            : 120,
       ),
     );
   }
