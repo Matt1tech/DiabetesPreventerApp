@@ -338,7 +338,7 @@ def verify_otp(request):
 Calculates the average diabetes risk for each month over the past six months for the specified user.
 
 Expected Input:
-- `GET` request with the user ID provided in the URL.
+- GET request with the user ID provided in the URL.
 
 Expected Output:
 - On success: JSON response with the monthly average risk data (status 200 OK).
@@ -442,10 +442,10 @@ def monthly_risk(request, user_id):
     Tests the machine learning model with provided input features.
 
     Expected Input:
-    - `POST` request with the following JSON data:
-        - Required features: `HighBP`, `HighChol`, `BMI`, `PhysActivity`, `Fruits`, 
-                             `Veggies`, `GenHlth`, `MentHlth`, `PhysHlth`, `Sex`, 
-                             `Age`, `DiabetesPedigreeFunction`, `FamilyHistory`, `Glucose`.
+    - POST request with the following JSON data:
+        - Required features: HighBP, HighChol, BMI, PhysActivity, Fruits, 
+                             Veggies, GenHlth, MentHlth, PhysHlth, Sex, 
+                             Age, DiabetesPedigreeFunction, FamilyHistory, Glucose.
 
     Expected Output:
     - On success: JSON response with the model's prediction and prediction probabilities (status 200 OK).
@@ -504,10 +504,10 @@ def test_model(request):
     Creates a new meal record for the user for today.
 
     Expected Input:
-    - `POST` request with the following JSON data:
-        - `user`: (int) The ID of the user.
-        - `meal_type`: (string) The type of meal (e.g., breakfast, lunch, dinner).
-        - Optional fields: `calories`, `protein`, `fats`, `carbs`, `cholesterol`, etc.
+    - POST request with the following JSON data:
+        - user: (int) The ID of the user.
+        - meal_type: (string) The type of meal (e.g., breakfast, lunch, dinner).
+        - Optional fields: calories, protein, fats, carbs, cholesterol, etc.
 
     Expected Output:
     - On success: JSON response with the created meal record (status 201 CREATED).
@@ -555,7 +555,7 @@ def create_meal(request):
     Retrieves the total nutritional intake for the current day for the specified user.
 
     Expected Input:
-    - `GET` request with the user ID provided in the URL.
+    - GET request with the user ID provided in the URL.
 
     Expected Output:
     - On success: JSON response with the total daily intake of calories, protein, fats, carbs, cholesterol, and fiber (status 200 OK).
@@ -606,10 +606,10 @@ def get_total_daily_nutrition(request, user_id):
     Updates or creates user customizations for dietary and meal preferences.
 
     Expected Input:
-    - `POST` request with the following JSON data:
-        - `user`: (int) The ID of the user.
-        - Optional fields: `daily_calories_max`, `max_protein`, `max_fat`, `max_fiber`, 
-                           `max_cholesterol`, `max_carbs`, `meals_per_day`, `allergies`, `diets_followed`.
+    - POST request with the following JSON data:
+        - user: (int) The ID of the user.
+        - Optional fields: daily_calories_max, max_protein, max_fat, max_fiber, 
+                           max_cholesterol, max_carbs, meals_per_day, allergies, diets_followed.
 
     Expected Output:
     - On success: JSON response with the updated or created customization record (status 200 OK or 201 CREATED).
@@ -701,7 +701,7 @@ def update_customizations(request):
     Retrieves the customization settings for a specified user.
 
     Expected Input:
-    - `GET` request with the user ID provided in the URL.
+    - GET request with the user ID provided in the URL.
 
     Expected Output:
     - On success: JSON response with the customization settings (status 200 OK).
@@ -734,7 +734,7 @@ def get_user_customization(request, user_id):
     Provides personalized recommendations for the specified user based on their customizations, health records, and nutritional intake.
 
     Expected Input:
-    - `GET` request with the user ID provided in the URL.
+    - GET request with the user ID provided in the URL.
 
     Expected Output:
     - On success: JSON response with a list of filtered recommendations tailored to the user's needs (status 200 OK).
@@ -805,7 +805,7 @@ def user_recommendation(request, user_id):
                 recommendations = recommendations.filter(type__in=customizations.meals_per_day)
 
         # Consider high blood sugar levels
-        if latest_health_record and latest_health_record.blood_glucose > 140:
+        if latest_health_record and latest_health_record.blood_glucose > 160:
             recommendations = recommendations.filter(no_sugar=True)
 
         # Debug: Count recommendations after filtering by customizations and health records
@@ -899,9 +899,9 @@ def user_recommendation(request, user_id):
  Creates or updates a health record for the user for the current day.
 
     Expected Input:
-    - `POST` request with the following JSON data:
-        - `user`: (int) The ID of the user.
-        - Optional fields: `weight`, `blood_glucose`, `blood_pressure`.
+    - POST request with the following JSON data:
+        - user: (int) The ID of the user.
+        - Optional fields: weight, blood_glucose, blood_pressure.
 
     Expected Output:
     - On success: JSON response with the created or updated health record (status 200 OK or 201 CREATED).
@@ -909,7 +909,7 @@ def user_recommendation(request, user_id):
 
     How It Works:
     - The view first verifies the user's existence.
-    - It then checks if any of the optional fields (`weight`, `blood_glucose`, `blood_pressure`) are provided.
+    - It then checks if any of the optional fields (weight, blood_glucose, blood_pressure) are provided.
     - Various health metrics are calculated, including BMI, age, and diabetes risk using the model.
     - If a health record exists for today, it is updated; otherwise, a new record is created.
     - The health record is saved and returned in the response.
@@ -1026,7 +1026,7 @@ def create_or_update_health_record(request):
 Retrieves the latest health record for the specified user and calculates additional features.
 
     Expected Input:
-    - `GET` request with the user ID provided in the URL.
+    - GET request with the user ID provided in the URL.
 
     Expected Output:
     - On success: JSON response with the last health record details and calculated features like BMI and diabetes risk (status 200 OK).
@@ -1138,11 +1138,11 @@ def get_last_health_record(request, user_id):
     Creates or updates a physical activity record for the user for today.
 
     Expected Input:
-    - `POST` request with the following JSON data:
-        - `user_id`: (int) The ID of the user.
-        - `duration`: (int) The duration of the physical activity in minutes.
-        - `type`: (string) The type of physical activity.
-        - `stress_level`: (int, optional) The stress level of the user.
+    - POST request with the following JSON data:
+        - user_id: (int) The ID of the user.
+        - duration: (int) The duration of the physical activity in minutes.
+        - type: (string) The type of physical activity.
+        - stress_level: (int, optional) The stress level of the user.
 
     Expected Output:
     - On success: JSON response with the status and record ID (status 200 OK).
@@ -1271,8 +1271,9 @@ def get_risk_summary_report(request, user_id):
         return Response({'error': 'Start date and end date are required.'}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
-        start_date = timezone.datetime.strptime(start_date, '%Y-%m-%d').date()
-        end_date = timezone.datetime.strptime(end_date, '%Y-%m-%d').date()
+        start_date = timezone.datetime.strptime(start_date, '%Y-%m-%d')
+        end_date = timezone.datetime.strptime(end_date, '%Y-%m-%d') + timezone.timedelta(days=1)
+
     except ValueError:
         return Response({'error': 'Invalid date format. Use YYYY-MM-DD.'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -1379,8 +1380,8 @@ def get_health_summary_report(request, user_id):
         return Response({'error': 'Start date and end date are required.'}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
-        start_date = timezone.datetime.strptime(start_date, '%Y-%m-%d').date()
-        end_date = timezone.datetime.strptime(end_date, '%Y-%m-%d').date()
+        start_date = timezone.datetime.strptime(start_date, '%Y-%m-%d')
+        end_date = timezone.datetime.strptime(end_date, '%Y-%m-%d') + timezone.timedelta(days=1)
     except ValueError:
         return Response({'error': 'Invalid date format. Use YYYY-MM-DD.'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -1525,8 +1526,6 @@ def get_health_summary_report(request, user_id):
 
 
 
-
-
    
    
    
@@ -1535,299 +1534,4 @@ def get_health_summary_report(request, user_id):
 
    
    
-   
-   
-
-   
-   
-   
-   
-  
-
-
-    
-    
-    
-    
-    
-    
-
-
-    
-    
-    
- #testing    
-
-@api_view(['GET'])
-def recommendation_list(request):
-    recommendations = Recommendation.objects.all()
-    serializer = RecommendationSerializer(recommendations, many=True, context={'request': request})
-    return Response(serializer.data)
-    
-'''    
-@api_view(['GET'])
-def user_recommendation(request, user_id):
-    # Step 1: Retrieve User Data
-    user = get_object_or_404(User, id=user_id)
-    today = timezone.now().date()
-    customizations = Customizations.objects.filter(user=user, created_at__date=today).order_by('-created_at').first()
-    meals_today = Meal.objects.filter(user=user, created_at__date=today)
-    latest_health_record = HealthRecord.objects.filter(user=user).order_by('-created_at').first()
-    
-    # Calculate Total Cholesterol from Meals
-    total_cholesterol_today = meals_today.aggregate(total_cholesterol=Sum('cholesterol'))['total_cholesterol'] or 0
-
-    # Filter Recommendations Based on Customizations and Health Records
-    recommendations = Recommendation.objects.all()
-    if customizations:
-        if 'low_fat' in customizations.diets_followed:
-            recommendations = recommendations.filter(low_fat=True)
-        if 'low_carb' in customizations.diets_followed:
-            recommendations = recommendations.filter(low_carb=True)
-        if 'high_protein' in customizations.diets_followed:
-            recommendations = recommendations.filter(high_protein=True)
-        if 'no_sugar' in customizations.diets_followed:
-            recommendations = recommendations.filter(no_sugar=True)
-        if 'wheat_free' in customizations.allergies:
-            recommendations = recommendations.filter(wheat_free=True)
-        if 'egg_free' in customizations.allergies:
-            recommendations = recommendations.filter(egg_free=True)
-        if 'soy_free' in customizations.allergies:
-            recommendations = recommendations.filter(soy_free=True)
-        if customizations.meals_per_day:
-            recommendations = recommendations.filter(type__in=customizations.meals_per_day)
-
-    # Consider high blood sugar levels
-    if latest_health_record and latest_health_record.blood_glucose > 140:
-        recommendations = recommendations.filter(no_sugar=True)
-
-    # Check Nutritional Limits
-    nutrition_summary = meals_today.aggregate(
-        total_calories=Sum('calories'),
-        total_protein=Sum('protein'),
-        total_fats=Sum('fats'),
-        total_carbs=Sum('carbs'),
-        total_fiber=Sum('fiber'),
-    )
-    
-    max_protein = customizations.max_protein if customizations else 100
-    max_fat = customizations.max_fat if customizations else 100
-    max_fiber = customizations.max_fiber if customizations else 100
-    max_cholesterol = customizations.max_cholesterol if customizations else 100
-    max_carbs = customizations.max_carbs if customizations else 100
-
-    buffer_factor = 1.1
-
-    remaining_protein = max_protein - (nutrition_summary['total_protein'] or 0)
-    remaining_fat = max_fat - (nutrition_summary['total_fats'] or 0)
-    remaining_fiber = max_fiber - (nutrition_summary['total_fiber'] or 0)
-    remaining_cholesterol = max_cholesterol - total_cholesterol_today
-    remaining_carbs = max_carbs - (nutrition_summary['total_carbs'] or 0)
-
-    # Adjust the filtering to be more lenient
-    filtered_recommendations = recommendations.filter(
-        Q(protein__lte=remaining_protein * buffer_factor) |
-        Q(fat__lte=remaining_fat * buffer_factor) |
-        Q(fiber__lte=remaining_fiber * buffer_factor) |
-        Q(cholesterol__lte=remaining_cholesterol * buffer_factor) |
-        Q(carbs__lte=remaining_carbs * buffer_factor)
-    )
-
-    # Ensure at least two recommendations from each category if filtering is too restrictive
-    min_recommendations_per_category = 2
-    categories = recommendations.values_list('category', flat=True).distinct()
-    final_recommendations = []
-
-    for category in categories:
-        category_recommendations = filtered_recommendations.filter(category=category)
-        if category_recommendations.count() < min_recommendations_per_category:
-            fallback_recommendations = recommendations.filter(category=category)[:min_recommendations_per_category]
-            final_recommendations.extend(fallback_recommendations)
-        else:
-            final_recommendations.extend(category_recommendations[:min_recommendations_per_category])
-
-    # Serialize and Return Recommendations
-    serializer = RecommendationSerializer(final_recommendations, many=True, context={'request': request})
-    
-    return Response(serializer.data, status=status.HTTP_200_OK)
-
-
-
-@api_view(['GET'])
-def user_recommendation(request, user_id):
-    # Step 1: Retrieve User Data
-    user = get_object_or_404(User, id=user_id)
-    customizations = Customizations.objects.filter(user=user, created_at__date=today).order_by('-created_at').first()
-    meals_today = Meal.objects.filter(user=user, created_at__date=timezone.now().date())
-    latest_health_record = HealthRecord.objects.filter(user=user).order_by('-created_at').first()
-    
-    # Debug Statements
-    print(f"User: {user}")
-    print(f"Customizations: {customizations}")
-    print(f"Meals Today: {meals_today}")
-    print(f"Latest Health Record: {latest_health_record}")
-
-    # Step 2: Calculate Total Cholesterol from Meals
-    total_cholesterol_today = meals_today.aggregate(total_cholesterol=Sum('cholesterol'))['total_cholesterol'] or 0
-    print(f"Total Cholesterol Today: {total_cholesterol_today}")
-
-    # Step 3: Filter Recommendations Based on Customizations and Health Records
-    recommendations = Recommendation.objects.all()
-    if customizations:
-        if 'low_fat' in customizations.diets_followed:
-            recommendations = recommendations.filter(low_fat=True)
-        if 'low_carb' in customizations.diets_followed:
-            recommendations = recommendations.filter(low_carb=True)
-        if 'high_protein' in customizations.diets_followed:
-            recommendations = recommendations.filter(high_protein=True)
-        if 'no_sugar' in customizations.diets_followed:
-            recommendations = recommendations.filter(no_sugar=True)
-        if 'wheat_free' in customizations.allergies:
-            recommendations = recommendations.filter(wheat_free=True)
-        if 'egg_free' in customizations.allergies:
-            recommendations = recommendations.filter(egg_free=True)
-        if 'soy_free' in customizations.allergies:
-            recommendations = recommendations.filter(soy_free=True)
-        if customizations.meals_per_day:
-            recommendations = recommendations.filter(type__in=customizations.meals_per_day)
-
-    # Consider high blood sugar levels
-    if latest_health_record and latest_health_record.blood_glucose > 140:  # Example threshold for high blood sugar
-        recommendations = recommendations.filter(no_sugar=True)
-    
-    # Debug Statement
-    print(f"Filtered Recommendations after Customizations and Health Records: {recommendations}")
-
-    # Step 4: Check Nutritional Limits
-    nutrition_summary = meals_today.aggregate(
-        total_calories=Sum('calories'),
-        total_protein=Sum('protein'),
-        total_fats=Sum('fats'),
-        total_carbs=Sum('carbs'),
-        total_fiber=Sum('fiber'),
-    )
-    print(f"Nutrition Summary: {nutrition_summary}")
-    
-    max_protein = customizations.max_protein if customizations else 100
-    max_fat = customizations.max_fat if customizations else 100
-    max_fiber = customizations.max_fiber if customizations else 100
-    max_cholesterol = customizations.max_cholesterol if customizations else 100
-    max_carbs = customizations.max_carbs if customizations else 100
-
-    # Allow a small buffer (e.g., 10%) for nutritional limits
-    buffer_factor = 5.1
-
-    remaining_protein = max_protein - (nutrition_summary['total_protein'] or 0)
-    remaining_fat = max_fat - (nutrition_summary['total_fats'] or 0)
-    remaining_fiber = max_fiber - (nutrition_summary['total_fiber'] or 0)
-    remaining_cholesterol = max_cholesterol - total_cholesterol_today
-    remaining_carbs = max_carbs - (nutrition_summary['total_carbs'] or 0)
-
-    recommendations = recommendations.filter(
-        Q(protein__lte=remaining_protein * buffer_factor) |
-        Q(fat__lte=remaining_fat * buffer_factor) |
-        Q(fiber__lte=remaining_fiber * buffer_factor) |
-        Q(cholesterol__lte=remaining_cholesterol * buffer_factor) |
-        Q(carbs__lte=remaining_carbs * buffer_factor)
-    )
-
-    # Debug Statement
-    print(f"Final Filtered Recommendations: {recommendations}")
-
-    # Step 5: Serialize and Return Recommendations
-    serializer = RecommendationSerializer(recommendations, many=True, context={'request': request})
-    print(f"Serialized Recommendations: {serializer.data}")
-    
-    return Response(serializer.data, status=status.HTTP_200_OK)
-
-'''
-'''
-@api_view(['GET'])
-def user_recommendation(request, user_id):
-    # Step 1: Retrieve User Data
-    user = get_object_or_404(User, id=user_id)
-    today = timezone.now().date()
-    customizations = Customizations.objects.filter(user=user, created_at__date=today).order_by('-created_at').first()
-    meals_today = Meal.objects.filter(user=user, created_at__date=today)
-    latest_health_record = HealthRecord.objects.filter(user=user).order_by('-created_at').first()
-    
-    # Debug Statements
-    print(f"User: {user}")
-    print(f"Customizations: {customizations}")
-    print(f"Meals Today: {meals_today}")
-    print(f"Latest Health Record: {latest_health_record}")
-
-    # Step 2: Calculate Total Cholesterol from Meals
-    total_cholesterol_today = meals_today.aggregate(total_cholesterol=Sum('cholesterol'))['total_cholesterol'] or 0
-    print(f"Total Cholesterol Today: {total_cholesterol_today}")
-
-    # Step 3: Filter Recommendations Based on Customizations and Health Records
-    recommendations = Recommendation.objects.all()
-    if customizations:
-        if 'low_fat' in customizations.diets_followed:
-            recommendations = recommendations.filter(low_fat=True)
-        if 'low_carb' in customizations.diets_followed:
-            recommendations = recommendations.filter(low_carb=True)
-        if 'high_protein' in customizations.diets_followed:
-            recommendations = recommendations.filter(high_protein=True)
-        if 'no_sugar' in customizations.diets_followed:
-            recommendations = recommendations.filter(no_sugar=True)
-        if 'wheat_free' in customizations.allergies:
-            recommendations = recommendations.filter(wheat_free=True)
-        if 'egg_free' in customizations.allergies:
-            recommendations = recommendations.filter(egg_free=True)
-        if 'soy_free' in customizations.allergies:
-            recommendations = recommendations.filter(soy_free=True)
-        if customizations.meals_per_day:
-            recommendations = recommendations.filter(type__in=customizations.meals_per_day)
-
-    # Consider high blood sugar levels
-    if latest_health_record and latest_health_record.blood_glucose > 140:  # Example threshold for high blood sugar
-        recommendations = recommendations.filter(no_sugar=True)
-    
-    # Debug Statement
-    print(f"Filtered Recommendations after Customizations and Health Records: {recommendations}")
-
-    # Step 4: Check Nutritional Limits
-    nutrition_summary = meals_today.aggregate(
-        total_calories=Sum('calories'),
-        total_protein=Sum('protein'),
-        total_fats=Sum('fats'),
-        total_carbs=Sum('carbs'),
-        total_fiber=Sum('fiber'),
-    )
-    print(f"Nutrition Summary: {nutrition_summary}")
-    
-    max_protein = customizations.max_protein if customizations else 100
-    max_fat = customizations.max_fat if customizations else 100
-    max_fiber = customizations.max_fiber if customizations else 100
-    max_cholesterol = customizations.max_cholesterol if customizations else 100
-    max_carbs = customizations.max_carbs if customizations else 100
-
-    # Allow a small buffer (e.g., 10%) for nutritional limits
-    buffer_factor = 1.1
-
-    remaining_protein = max_protein - (nutrition_summary['total_protein'] or 0)
-    remaining_fat = max_fat - (nutrition_summary['total_fats'] or 0)
-    remaining_fiber = max_fiber - (nutrition_summary['total_fiber'] or 0)
-    remaining_cholesterol = max_cholesterol - total_cholesterol_today
-    remaining_carbs = max_carbs - (nutrition_summary['total_carbs'] or 0)
-
-    recommendations = recommendations.filter(
-        Q(protein__lte=remaining_protein * buffer_factor) &
-        Q(fat__lte=remaining_fat * buffer_factor) &
-        Q(fiber__lte=remaining_fiber * buffer_factor) &
-        Q(cholesterol__lte=remaining_cholesterol * buffer_factor) &
-        Q(carbs__lte=remaining_carbs * buffer_factor)
-    )
-
-    # Debug Statement
-    print(f"Final Filtered Recommendations: {recommendations}")
-
-    # Step 5: Serialize and Return Recommendations
-    serializer = RecommendationSerializer(recommendations, many=True, context={'request': request})
-    print(f"Serialized Recommendations: {serializer.data}")
-    
-    return Response(serializer.data, status=status.HTTP_200_OK)
-
-'''
+ 

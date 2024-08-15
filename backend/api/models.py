@@ -38,7 +38,7 @@ class Customizations(models.Model):
     max_fiber = models.IntegerField(default=100)    
     max_fat = models.IntegerField(default=100)      
     max_carbs = models.IntegerField(default=100)  
-    created_at = models.DateTimeField(default=timezone.now)
+    created_at = models.DateTimeField()
     user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='customization')
 
     
@@ -49,7 +49,7 @@ class HealthRecord(models.Model):
     bmi = models.FloatField(null=True, blank=True)
     weight = models.FloatField(null=True, blank=True)
     diabetes_risk = models.FloatField(default=0.0)
-    created_at = models.DateTimeField(default=timezone.now)
+    created_at = models.DateTimeField()
     user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='health_records')
 
 
@@ -80,7 +80,7 @@ class PhysicalRecord(models.Model):
     duration = models.FloatField(default=0)  # Default duration in minutes
     type = models.CharField(max_length=50, choices=TYPE_CHOICES, default='Gym', blank=True, null=True)  # Default type
     stress_level = models.IntegerField(choices=STRESS_LEVEL_CHOICES, blank=True, null=True)
-    created_at = models.DateTimeField(default=timezone.now)
+    created_at = models.DateTimeField()
     user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='physical_records')
 
 
@@ -97,7 +97,7 @@ class Meal(models.Model):
     fiber = models.FloatField(default=0.0)
     cholesterol = models.FloatField(default=0.0)  # New field for cholesterol
     user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='meals')  # One-to-Many relationship with User
-    created_at = models.DateTimeField(default=timezone.now)
+    created_at = models.DateTimeField()
 
 
 class Recommendation(models.Model):
