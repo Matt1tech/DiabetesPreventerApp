@@ -180,6 +180,11 @@ class _CustomizationsPageState extends State<CustomizationsPage> {
                 tagName: "Dinner",
                 onTagClick: handleTagClick,
               ),
+              SizedBox(width: 10),
+              CustomTag(
+                tagName: "Snack",
+                onTagClick: handleTagClick,
+              ),
             ],
           ),
         ],

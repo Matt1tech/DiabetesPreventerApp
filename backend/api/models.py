@@ -10,6 +10,7 @@ class Customizations(models.Model):
         ('breakfast', 'Breakfast'),
         ('lunch', 'Lunch'),
         ('dinner', 'Dinner'),
+        ('snack', 'Snack'),
     ]
     
     ALLERGY_CHOICES = [
@@ -36,7 +37,6 @@ class Customizations(models.Model):
     max_protein = models.IntegerField(default=100)  
     max_fiber = models.IntegerField(default=100)    
     max_fat = models.IntegerField(default=100)      
-    max_cholesterol = models.IntegerField(default=100)  
     max_carbs = models.IntegerField(default=100)  
     created_at = models.DateTimeField(default=timezone.now)
     user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='customization')

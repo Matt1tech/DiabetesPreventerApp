@@ -651,7 +651,7 @@ def update_customizations(request):
         return Response({'error': 'At least one field must be provided.'}, status=status.HTTP_400_BAD_REQUEST)
 
     # Check if Customizations for today already exist
-    existing_customizations = Customizations.objects.filter(user=user).order_by('-created_at').first()
+    existing_customizations = Customizations.objects.filter(user=user, created_at__date=today).first()
     if existing_customizations:
         # Update the existing Customizations
         if daily_calories_max is not None:
@@ -749,89 +749,137 @@ def get_user_customization(request, user_id):
 """
 @api_view(['GET'])
 def user_recommendation(request, user_id):
-    # Step 1: Retrieve User Data
-    user = get_object_or_404(User, id=user_id)
-    today = timezone.now().date()
-    customizations = Customizations.objects.filter(user=user, created_at__date=today).order_by('-created_at').first()
-    meals_today = Meal.objects.filter(user=user, created_at__date=today)
-    latest_health_record = HealthRecord.objects.filter(user=user).order_by('-created_at').first()
-    
-    # Calculate Total Cholesterol from Meals
-    total_cholesterol_today = meals_today.aggregate(total_cholesterol=Sum('cholesterol'))['total_cholesterol'] or 0
+    try:
+        # Step 1: Retrieve User Data
+        user = get_object_or_404(User, id=user_id)
+        today = timezone.now().date()
+        
+        # Retrieve customizations, meals, and health records for the user
+        customizations = Customizations.objects.filter(user=user, created_at__date=today).order_by('-created_at').first()
+        meals_today = Meal.objects.filter(user=user, created_at__date=today)
+        latest_health_record = HealthRecord.objects.filter(user=user).order_by('-created_at').first()
 
-    # Filter Recommendations Based on Customizations and Health Records
-    recommendations = Recommendation.objects.all()
-    if customizations:
-        if 'low_fat' in customizations.diets_followed:
-            recommendations = recommendations.filter(low_fat=True)
-        if 'low_carb' in customizations.diets_followed:
-            recommendations = recommendations.filter(low_carb=True)
-        if 'high_protein' in customizations.diets_followed:
-            recommendations = recommendations.filter(high_protein=True)
-        if 'no_sugar' in customizations.diets_followed:
+        # Initialize nutritional limits and values
+        total_cholesterol_today = 0
+        nutrition_summary = {
+            'total_calories': 0,
+            'total_protein': 0,
+            'total_fats': 0,
+            'total_carbs': 0,
+            'total_fiber': 0,
+        }
+
+        # Calculate Total Cholesterol and Nutrition Summary if meals are found
+        if meals_today.exists():
+            total_cholesterol_today = meals_today.aggregate(total_cholesterol=Sum('cholesterol'))['total_cholesterol'] or 0
+            nutrition_summary = meals_today.aggregate(
+                total_calories=Sum('calories') or 0,
+                total_protein=Sum('protein') or 0,
+                total_fats=Sum('fats') or 0,
+                total_carbs=Sum('carbs') or 0,
+                total_fiber=Sum('fiber') or 0,
+            )
+        
+        # Filter Recommendations Based on Customizations and Health Records
+        recommendations = Recommendation.objects.all()
+
+        # Add debug info to see the count before filtering
+        print(f"Initial recommendation count: {recommendations.count()}")
+
+        if customizations:
+            if 'low_fat' in customizations.diets_followed:
+                recommendations = recommendations.filter(low_fat=True)
+            if 'low_carb' in customizations.diets_followed:
+                recommendations = recommendations.filter(low_carb=True)
+            if 'high_protein' in customizations.diets_followed:
+                recommendations = recommendations.filter(high_protein=True)
+            if 'no_sugar' in customizations.diets_followed:
+                recommendations = recommendations.filter(no_sugar=True)
+            if 'wheat_free' in customizations.allergies:
+                recommendations = recommendations.filter(wheat_free=True)
+            if 'egg_free' in customizations.allergies:
+                recommendations = recommendations.filter(egg_free=True)
+            if 'soy_free' in customizations.allergies:
+                recommendations = recommendations.filter(soy_free=True)
+            if customizations.meals_per_day:
+                recommendations = recommendations.filter(type__in=customizations.meals_per_day)
+
+        # Consider high blood sugar levels
+        if latest_health_record and latest_health_record.blood_glucose > 140:
             recommendations = recommendations.filter(no_sugar=True)
-        if 'wheat_free' in customizations.allergies:
-            recommendations = recommendations.filter(wheat_free=True)
-        if 'egg_free' in customizations.allergies:
-            recommendations = recommendations.filter(egg_free=True)
-        if 'soy_free' in customizations.allergies:
-            recommendations = recommendations.filter(soy_free=True)
-        if customizations.meals_per_day:
-            recommendations = recommendations.filter(type__in=customizations.meals_per_day)
 
-    # Consider high blood sugar levels
-    if latest_health_record and latest_health_record.blood_glucose > 140:
-        recommendations = recommendations.filter(no_sugar=True)
+        # Debug: Count recommendations after filtering by customizations and health records
+        print(f"Filtered recommendation count: {recommendations.count()}")
 
-    # Check Nutritional Limits
-    nutrition_summary = meals_today.aggregate(
-        total_calories=Sum('calories'),
-        total_protein=Sum('protein'),
-        total_fats=Sum('fats'),
-        total_carbs=Sum('carbs'),
-        total_fiber=Sum('fiber'),
-    )
-    
-    max_protein = customizations.max_protein if customizations else 100
-    max_fat = customizations.max_fat if customizations else 100
-    max_fiber = customizations.max_fiber if customizations else 100
-    max_cholesterol = customizations.max_cholesterol if customizations else 100
-    max_carbs = customizations.max_carbs if customizations else 100
+        # Set maximum nutritional limits
+        max_protein = customizations.max_protein if customizations else 100
+        max_fat = customizations.max_fat if customizations else 100
+        max_fiber = customizations.max_fiber if customizations else 100
+        max_carbs = customizations.max_carbs if customizations else 100
 
-    buffer_factor = 1.1
+        buffer_factor = 1.1
 
-    remaining_protein = max_protein - (nutrition_summary['total_protein'] or 0)
-    remaining_fat = max_fat - (nutrition_summary['total_fats'] or 0)
-    remaining_fiber = max_fiber - (nutrition_summary['total_fiber'] or 0)
-    remaining_cholesterol = max_cholesterol - total_cholesterol_today
-    remaining_carbs = max_carbs - (nutrition_summary['total_carbs'] or 0)
+        # Calculate remaining nutritional limits
+        remaining_protein = max_protein - nutrition_summary['total_protein']
+        remaining_fat = max_fat - nutrition_summary['total_fats']
+        remaining_fiber = max_fiber - nutrition_summary['total_fiber']
+        remaining_cholesterol = 100 - total_cholesterol_today
+        remaining_carbs = max_carbs - nutrition_summary['total_carbs']
 
-    # Filter recommendations based on remaining nutritional limits with buffer factor
-    filtered_recommendations = recommendations.filter(
-        protein__lte=remaining_protein * buffer_factor,
-        fat__lte=remaining_fat * buffer_factor,
-        fiber__lte=remaining_fiber * buffer_factor,
-        cholesterol__lte=remaining_cholesterol * buffer_factor,
-        carbs__lte=remaining_carbs * buffer_factor
-    )
+        # Filter recommendations based on remaining nutritional limits with buffer factor
+        filtered_recommendations = recommendations.filter(
+            protein__lte=remaining_protein * buffer_factor,
+            fat__lte=remaining_fat * buffer_factor,
+            fiber__lte=remaining_fiber * buffer_factor,
+            cholesterol__lte=remaining_cholesterol * buffer_factor,
+            carbs__lte=remaining_carbs * buffer_factor
+        )
 
-    # Ensure at least two recommendations from each category if filtering is too restrictive
-    min_recommendations_per_category = 3
-    categories = recommendations.values_list('category', flat=True).distinct()
-    final_recommendations = []
+        # Debug: Count recommendations after nutritional filtering
+        print(f"Filtered by nutritional limits count: {filtered_recommendations.count()}")
 
-    for category in categories:
-        category_recommendations = filtered_recommendations.filter(category=category)
-        if category_recommendations.count() < min_recommendations_per_category:
-            fallback_recommendations = recommendations.filter(category=category)[:min_recommendations_per_category]
-            final_recommendations.extend(fallback_recommendations)
-        else:
-            final_recommendations.extend(category_recommendations[:min_recommendations_per_category])
+        # Ensure at least two recommendations from each category
+        min_recommendations_per_category = 2
+        categories = recommendations.values_list('category', flat=True).distinct()
+        final_recommendations = []
 
-    # Serialize and Return Recommendations
-    serializer = RecommendationSerializer(final_recommendations, many=True, context={'request': request})
-    
-    return Response(serializer.data, status=status.HTTP_200_OK)
+        for category in categories:
+            category_recommendations = filtered_recommendations.filter(category=category)
+            count_category_recommendations = category_recommendations.count()
+
+            # Debug: Log or print the recommendations for each category
+            print(f"Category: {category}, Count: {count_category_recommendations}")
+
+            # If there are fewer than 2 recommendations in the category, add more from unfiltered recommendations
+            if count_category_recommendations < min_recommendations_per_category:
+                # Add the already filtered recommendations first
+                final_recommendations.extend(list(category_recommendations))
+                
+                # Determine how many more recommendations are needed
+                additional_needed = min_recommendations_per_category - count_category_recommendations
+                
+                # Fetch additional recommendations from the same category to meet the minimum requirement
+                fallback_recommendations = recommendations.filter(category=category).exclude(id__in=[rec.id for rec in category_recommendations])[:additional_needed]
+                final_recommendations.extend(list(fallback_recommendations))
+            else:
+                # Add exactly 2 recommendations per category
+                final_recommendations.extend(list(category_recommendations[:min_recommendations_per_category]))
+
+        # Debug: Log or print the final recommendations list
+        print("Final Recommendations:", final_recommendations)
+
+        # Serialize and Return Recommendations
+        serializer = RecommendationSerializer(final_recommendations, many=True, context={'request': request})
+        
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        logger.error(f"An error occurred: {e}")
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+
 
 
 
