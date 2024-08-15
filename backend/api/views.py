@@ -869,7 +869,7 @@ def user_recommendation(request, user_id):
 '''
 @api_view(['POST'])
 def create_or_update_health_record(request):
-    today = timezone.now().date()
+    today = date.today()
     data = request.data
 
     user_id = data.get('user')
@@ -903,11 +903,6 @@ def create_or_update_health_record(request):
 
     # Dynamically calculate DiabetesPedigreeFunction
     diabetes_pedigree_function = calculate_diabetes_pedigree_function(user)
-
-    # Calculate average blood glucose if not provided
-    if blood_glucose is None:
-        blood_glucose = glucose
-
     # Ensure FamilyHistory is either 0 or 1
     family_history = 1 if user.family_history else 0
 
