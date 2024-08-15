@@ -495,10 +495,18 @@ class _HealthSummaryReportState extends State<HealthSummaryReport> {
   }
 
   Widget _buildSummarySection() {
-    if (_healthSummary.isEmpty) {
-      return Center(child: Text('No health summary available.'));
+    if (_healthSummary == null || _healthSummary.isEmpty) {
+      return Center(
+        child: Text(
+          'No activity records found for the selected date range.',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 16.0,
+            color: pinkColor,
+          ),
+        ),
+      );
     }
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -533,7 +541,7 @@ class _HealthSummaryReportState extends State<HealthSummaryReport> {
           children:
               _healthSummary['risk_probabilities'].entries.map<Widget>((entry) {
             return Text(
-              '${entry.key}: ${entry.value.toStringAsFixed(2)}',
+              '${entry.key}: ${(entry.value ?? 0.0).toStringAsFixed(2)}',
               style: TextStyle(
                 fontSize: 16.0,
                 color: Color.fromARGB(255, 223, 93, 17),
@@ -543,28 +551,28 @@ class _HealthSummaryReportState extends State<HealthSummaryReport> {
         ),
         SizedBox(height: 20),
         Text(
-          'Average Blood Glucose: ${_healthSummary['average_blood_glucose'].toStringAsFixed(2)}',
+          'Average Blood Glucose: ${(_healthSummary['average_blood_glucose'] ?? 0.0).toStringAsFixed(2)}',
           style: TextStyle(
             fontSize: 16.0,
             color: const Color.fromARGB(255, 223, 140, 17),
           ),
         ),
         Text(
-          'Average Blood Pressure: ${_healthSummary['average_blood_pressure'].toStringAsFixed(2)}',
+          'Average Blood Pressure: ${(_healthSummary['average_blood_pressure'] ?? 0.0).toStringAsFixed(2)}',
           style: TextStyle(
             fontSize: 16.0,
             color: const Color.fromARGB(255, 223, 140, 17),
           ),
         ),
         Text(
-          'Average Weight: ${_healthSummary['average_weight'].toStringAsFixed(2)}',
+          'Average Weight: ${(_healthSummary['average_weight'] ?? 0.0).toStringAsFixed(2)}',
           style: TextStyle(
             fontSize: 16.0,
             color: const Color.fromARGB(255, 223, 140, 17),
           ),
         ),
         Text(
-          'Average Daily Weight Increment: ${_healthSummary['average_daily_weight_increment'].toStringAsFixed(2)}',
+          'Average Daily Weight Increment: ${(_healthSummary['average_daily_weight_increment'] ?? 0.0).toStringAsFixed(2)}',
           style: TextStyle(
             fontSize: 16.0,
             color: const Color.fromARGB(255, 223, 140, 17),
