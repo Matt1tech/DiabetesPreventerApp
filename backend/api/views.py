@@ -651,7 +651,7 @@ def update_customizations(request):
         return Response({'error': 'At least one field must be provided.'}, status=status.HTTP_400_BAD_REQUEST)
 
     # Check if Customizations for today already exist
-    existing_customizations = Customizations.objects.filter(user=user, created_at__date=today).first()
+    existing_customizations = Customizations.objects.filter(user=user).order_by('-created_at').first()
     if existing_customizations:
         # Update the existing Customizations
         if daily_calories_max is not None:
