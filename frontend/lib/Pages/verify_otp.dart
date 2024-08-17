@@ -98,15 +98,29 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
               ReusableTextFormField(
                 labelText: 'New Password',
                 icon: Icons.lock,
+                validatorFormat: RegExp(
+                    r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$'),
                 controller: _passwordController,
                 obscureText: true,
+                showPasswordToggle: true,
               ),
               const SizedBox(height: 16),
               ReusableTextFormField(
                 labelText: 'Confirm Password',
                 icon: Icons.lock,
+                validatorMessage: 'Passwords do not match',
+                validatorFormat: RegExp(r'^.{6,}$'),
                 controller: _confirmPasswordController,
                 obscureText: true,
+                showPasswordToggle: true,
+                validator: (value) {
+                  if (value != null && value.isNotEmpty) {
+                    if (value != _passwordController.text) {
+                      return 'Passwords do not match';
+                    }
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 16),
               _isLoading

@@ -168,6 +168,17 @@ class _LoginPageState extends State<LoginPage> {
                 validatorFormat: RegExp(r'.+'),
                 controller: _passwordController,
                 obscureText: true,
+                showPasswordToggle: true,
+                validator: (value) {
+                  if (value != null && value.isNotEmpty) {
+                    if (!RegExp(
+                            r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$')
+                        .hasMatch(value)) {
+                      return 'Must have 6 No, a capital letter, a small letter, and a special character';
+                    }
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 12),
               Row(

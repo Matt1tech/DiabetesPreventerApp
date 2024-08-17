@@ -46,7 +46,8 @@ class _RiskSummaryReportState extends State<RiskSummaryReportPage> {
   String? _errorMessage;
   XFile? _profilePicture;
   bool _showMore = false;
-  final GlobalKey chartKey = GlobalKey(); // Define the GlobalKey here
+  final GlobalKey pieChartKey = GlobalKey();
+  final GlobalKey lineChartKey = GlobalKey();
 
   @override
   void initState() {
@@ -120,88 +121,120 @@ class _RiskSummaryReportState extends State<RiskSummaryReportPage> {
   void _printReport() async {
     final pdf = pw.Document();
 
-    // Load the image from assets
     final image = pw.MemoryImage(
       (await rootBundle.load('assets/images/diabetesLogo.png'))
           .buffer
           .asUint8List(),
     );
 
-    // Capture the chart as an image
-    final chartImage =
-        await _captureChartAsImage(); // Make sure this is done after rendering
+    final pieChartImage = await _captureChartAsImage(pieChartKey);
+    final lineChartImage = await _captureChartAsImage(lineChartKey);
 
     pdf.addPage(
-      pw.Page(
+      pw.MultiPage(
         build: (pw.Context context) {
-          return pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: [
-              pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                children: [
-                  pw.Text(
-                    'Risk Summary Report',
-                    style: pw.TextStyle(
-                      fontSize: 24,
-                      fontWeight: pw.FontWeight.bold,
-                    ),
-                  ),
-                  pw.Column(
-                    crossAxisAlignment: pw.CrossAxisAlignment.center,
-                    children: [
-                      pw.SizedBox(height: 60),
-                      pw.Image(
-                        image,
-                        width: 70,
-                        height: 70,
-                      ),
-                      pw.SizedBox(height: 10),
-                      pw.Text(
-                        'Diabetes Preventer',
-                        style: pw.TextStyle(
-                          fontSize: 12,
-                          fontWeight: pw.FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              pw.SizedBox(height: 10),
-              pw.Text('Generation Date: $formattedDate'),
-              pw.SizedBox(height: 10),
-              pw.Text('Name: ${userName ?? "Unknown"}'),
-              pw.SizedBox(height: 10),
-              pw.Text('Risk Summary'),
-              pw.Divider(),
-              pw.Text(
-                'Overall Risk Classification: ${_riskSummary['risk_classification'] ?? 'Unknown'}',
-                style: pw.TextStyle(
-                  fontSize: 18,
-                  fontWeight: pw.FontWeight.bold,
-                ),
-              ),
-              pw.Text('Risk Probabilities:'),
-              ..._riskSummary['risk_probabilities'].entries.map((entry) {
-                final percentageValue = (entry.value * 100).toStringAsFixed(1);
-                return pw.Row(
+          return [
+            pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Row(
                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                   children: [
-                    pw.Text(entry.key),
-                    pw.Text('$percentageValue%'),
+                    pw.Text(
+                      'Risk Summary Report',
+                      style: pw.TextStyle(
+                        fontSize: 24,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
+                    pw.Column(
+                      crossAxisAlignment: pw.CrossAxisAlignment.center,
+                      children: [
+                        pw.SizedBox(height: 40),
+                        pw.Image(
+                          image,
+                          width: 65,
+                          height: 65,
+                        ),
+                        pw.SizedBox(height: 10),
+                        pw.Text(
+                          'Diabetes Preventer',
+                          style: pw.TextStyle(
+                            fontSize: 12,
+                            fontWeight: pw.FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
-                );
-              }).toList(),
-              pw.SizedBox(height: 20),
-              // Include the chart image if it's available
-              if (chartImage != null)
-                pw.Image(
-                  pw.MemoryImage(chartImage),
-                  height: 200, // Adjust the size as needed
                 ),
-            ],
-          );
+                pw.SizedBox(height: 10),
+                pw.Text('Generation Date: $formattedDate'),
+                pw.SizedBox(height: 10),
+                pw.Text('Name: ${userName ?? "Unknown"}'),
+                pw.SizedBox(height: 10),
+                pw.Text('Risk Summary'),
+                pw.Divider(),
+                pw.Text(
+                  'Overall Risk Classification: ${_riskSummary['risk_classification'] ?? 'Unknown'}',
+                  style: pw.TextStyle(
+                    fontSize: 18,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
+                pw.SizedBox(height: 10),
+                pw.Text('Risk Probabilities:'),
+                ..._riskSummary['risk_probabilities'].entries.map((entry) {
+                  final percentageValue =
+                      (entry.value * 100).toStringAsFixed(1);
+                  return pw.Row(
+                    mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                    children: [
+                      pw.Text(entry.key),
+                      pw.Text('$percentageValue%'),
+                    ],
+                  );
+                }).toList(),
+                pw.SizedBox(height: 10),
+                pw.Text(
+                  'Risk Probabilities by Date',
+                  style: pw.TextStyle(
+                    fontSize: 18,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
+                pw.SizedBox(height: 10),
+                _buildRecordsTable(),
+                pw.SizedBox(height: 30),
+                if (pieChartImage != null && lineChartImage != null)
+                  pw.Center(
+                    child: pw.Row(
+                      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                      children: [
+                        pw.Container(
+                          child: pw.Image(
+                            pw.MemoryImage(pieChartImage),
+                            height:
+                                240, // Adjust the height to fit both images in a row
+                            width: 240,
+                          ),
+                        ),
+                        // Add some spacing between charts
+                        pw.Container(
+                          child: pw.Image(
+                            pw.MemoryImage(lineChartImage),
+                            height:
+                                240, // Adjust the height to fit both images in a row
+                            width: 240,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                pw.SizedBox(height: 20),
+              ],
+            ),
+          ];
         },
       ),
     );
@@ -211,24 +244,90 @@ class _RiskSummaryReportState extends State<RiskSummaryReportPage> {
     );
   }
 
-  Future<Uint8List?> _captureChartAsImage() async {
+  Future<Uint8List?> _captureChartAsImage(GlobalKey key) async {
     try {
-      await Future.delayed(Duration(milliseconds: 300)); // Small delay
+      // Introduce a delay to ensure the chart is rendered completely.
+      await Future.delayed(Duration(milliseconds: 500));
       final RenderRepaintBoundary boundary =
-          chartKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+          key.currentContext!.findRenderObject() as RenderRepaintBoundary;
 
-      if (boundary == null) {
+      if (boundary != null) {
+        final image = await boundary.toImage(pixelRatio: 2.0);
+        final byteData = await image.toByteData(format: ImageByteFormat.png);
+        return byteData?.buffer.asUint8List();
+      } else {
         print('RenderRepaintBoundary is null');
-        return null;
       }
-
-      final image = await boundary.toImage(pixelRatio: 2.0);
-      final byteData = await image.toByteData(format: ImageByteFormat.png);
-      return byteData?.buffer.asUint8List();
     } catch (e) {
       print('Error capturing chart as image: $e');
-      return null;
     }
+    return null;
+  }
+
+  pw.Widget _buildRecordsTable() {
+    return pw.Table(
+      border: pw.TableBorder.all(),
+      children: [
+        // Table header
+        pw.TableRow(
+          children: [
+            pw.Text(
+              'Date',
+              style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+              textAlign: pw.TextAlign.center,
+            ),
+            pw.Text(
+              'Healthy (%)',
+              style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+              textAlign: pw.TextAlign.center,
+            ),
+            pw.Text(
+              'Prediabetes (%)',
+              style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+              textAlign: pw.TextAlign.center,
+            ),
+            pw.Text(
+              'Diabetes (%)',
+              style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+              textAlign: pw.TextAlign.center,
+            ),
+          ],
+        ),
+        // Table rows
+        ..._allProbabilities.map((record) {
+          return pw.TableRow(
+            children: [
+              pw.Padding(
+                padding: pw.EdgeInsets.all(4),
+                child: pw.Text(record['date'] ?? 'N/A',
+                    textAlign: pw.TextAlign.center),
+              ),
+              pw.Padding(
+                padding: pw.EdgeInsets.all(4),
+                child: pw.Text(
+                  _formatPercentage(record['probabilities']['Healthy']),
+                  textAlign: pw.TextAlign.center,
+                ),
+              ),
+              pw.Padding(
+                padding: pw.EdgeInsets.all(4),
+                child: pw.Text(
+                  _formatPercentage(record['probabilities']['Prediabetes']),
+                  textAlign: pw.TextAlign.center,
+                ),
+              ),
+              pw.Padding(
+                padding: pw.EdgeInsets.all(4),
+                child: pw.Text(
+                  _formatPercentage(record['probabilities']['Diabetes']),
+                  textAlign: pw.TextAlign.center,
+                ),
+              ),
+            ],
+          );
+        }).toList(),
+      ],
+    );
   }
 
   @override
@@ -320,6 +419,8 @@ class _RiskSummaryReportState extends State<RiskSummaryReportPage> {
                         SizedBox(height: 20),
                         // Chart
                         _buildRiskProbabilitiesChart(),
+                        SizedBox(height: 20),
+                        _buildDiabetesRiskLineChart(), // Display the line chart
                       ],
                     ),
         ),
@@ -424,9 +525,9 @@ class _RiskSummaryReportState extends State<RiskSummaryReportPage> {
           children: recordsToShow.map((record) {
             return _buildTableRow(
               record['date'] ?? 'N/A',
-              record['probabilities']['Healthy'].toString(),
-              record['probabilities']['Prediabetes'].toString(),
-              record['probabilities']['Diabetes'].toString(),
+              _formatPercentage(record['probabilities']['Healthy']),
+              _formatPercentage(record['probabilities']['Prediabetes']),
+              _formatPercentage(record['probabilities']['Diabetes']),
               blueColor,
             );
           }).toList(),
@@ -442,6 +543,10 @@ class _RiskSummaryReportState extends State<RiskSummaryReportPage> {
           ),
       ],
     );
+  }
+
+  String _formatPercentage(double value) {
+    return '${(value * 100).toStringAsFixed(1)}%';
   }
 
   Widget _buildTableRow(String date, String healthy, String prediabetes,
@@ -524,7 +629,7 @@ class _RiskSummaryReportState extends State<RiskSummaryReportPage> {
           children:
               _riskSummary['risk_probabilities'].entries.map<Widget>((entry) {
             return Text(
-              '${entry.key}: ${entry.value.toStringAsFixed(2)}',
+              '${entry.key}: ${_formatPercentage(entry.value)}',
               style: TextStyle(
                 fontSize: 16.0,
                 color: const Color.fromARGB(255, 145, 26, 17),
@@ -533,6 +638,174 @@ class _RiskSummaryReportState extends State<RiskSummaryReportPage> {
           }).toList(),
         ),
       ],
+    );
+  }
+
+  Widget _buildDiabetesRiskLineChart() {
+    final double chartHeight = MediaQuery.of(context).size.height * 0.2;
+    final double chartWidth = MediaQuery.of(context).size.width * 0.8;
+
+    return Container(
+      padding: EdgeInsets.all(8.0),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              RotatedBox(
+                quarterTurns: -1,
+                child: Text(
+                  'Risk Percentage',
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Center(
+                  child: SizedBox(
+                    height: chartHeight,
+                    width: chartWidth,
+                    child: RepaintBoundary(
+                      key: lineChartKey,
+                      child: LineChart(
+                        LineChartData(
+                          lineTouchData: LineTouchData(
+                            touchTooltipData: LineTouchTooltipData(
+                              getTooltipItems: (touchedSpots) {
+                                return touchedSpots
+                                    .map((LineBarSpot touchedSpot) {
+                                  final textStyle = const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 8,
+                                  );
+                                  return LineTooltipItem(
+                                    '${touchedSpot.y.toString()}%',
+                                    textStyle,
+                                  );
+                                }).toList();
+                              },
+                            ),
+                          ),
+                          lineBarsData: [
+                            LineChartBarData(
+                              color: blueColor,
+                              spots: _allProbabilities
+                                  .asMap()
+                                  .entries
+                                  .map((entry) {
+                                return FlSpot(
+                                  entry.key.toDouble(),
+                                  (entry.value['probabilities']['Diabetes'] *
+                                          100)
+                                      .toDouble(),
+                                );
+                              }).toList(),
+                              barWidth: 2,
+                              isCurved: true,
+                              dotData: FlDotData(
+                                show: true,
+                                getDotPainter: (spot, percent, bar, index) {
+                                  return FlDotCirclePainter(
+                                    radius: 3,
+                                    color: pinkColor,
+                                    strokeWidth: 1,
+                                    strokeColor: Colors.black,
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
+                          titlesData: FlTitlesData(
+                            leftTitles: AxisTitles(
+                              sideTitles: SideTitles(
+                                showTitles: true,
+                                interval: 10,
+                                reservedSize: 28,
+                                getTitlesWidget: (value, meta) {
+                                  return Padding(
+                                    padding: const EdgeInsets.only(right: 2.0),
+                                    child: Text(
+                                      '${value.toInt()}%',
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 8,
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                            bottomTitles: AxisTitles(
+                              sideTitles: SideTitles(
+                                showTitles: true,
+                                interval: 1,
+                                reservedSize: 28,
+                                getTitlesWidget: (value, meta) {
+                                  final int index = value.toInt();
+                                  if (index < _allProbabilities.length) {
+                                    return Padding(
+                                      padding: const EdgeInsets.only(top: 2.0),
+                                      child: Text(
+                                        _allProbabilities[index]['date'] ?? '',
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 8,
+                                        ),
+                                      ),
+                                    );
+                                  } else {
+                                    return const SizedBox.shrink();
+                                  }
+                                },
+                              ),
+                            ),
+                            topTitles: AxisTitles(
+                              sideTitles: SideTitles(showTitles: false),
+                            ),
+                            rightTitles: AxisTitles(
+                              sideTitles: SideTitles(showTitles: false),
+                            ),
+                          ),
+                          gridData: FlGridData(
+                            show: true,
+                            drawHorizontalLine: true,
+                            getDrawingHorizontalLine: (value) {
+                              return FlLine(
+                                color: Colors.grey,
+                                strokeWidth: 0.5,
+                              );
+                            },
+                            drawVerticalLine: true,
+                            getDrawingVerticalLine: (value) {
+                              return FlLine(
+                                color: Colors.grey,
+                                strokeWidth: 0.5,
+                              );
+                            },
+                          ),
+                          minY: 0,
+                          maxY: 100,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Text(
+            'Record Date',
+            style: TextStyle(
+              fontSize: 10,
+              color: Colors.black,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -579,7 +852,7 @@ class _RiskSummaryReportState extends State<RiskSummaryReportPage> {
           Container(
             height: 200,
             child: RepaintBoundary(
-              key: chartKey, // Assign the GlobalKey here
+              key: pieChartKey, // Assign the GlobalKey here
               child: Stack(
                 alignment: Alignment.center,
                 children: [

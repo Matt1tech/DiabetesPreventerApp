@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// A reusable TextFormField with validation.
+/// A reusable TextFormField with validation and optional password visibility toggle.
 ///
 /// Parameters:
 /// - `labelText`: The label for the TextFormField.
@@ -9,17 +9,21 @@ import 'package:flutter/material.dart';
 /// - `validatorFormat`: The validation format (e.g., regex pattern) to apply.
 /// - `suffixText`: The text to display as a suffix.
 /// - `validator`: An optional custom validator function.
-class ReusableTextFormField extends StatelessWidget {
+/// - `obscureText`: Controls if the text should be obscured (for passwords).
+/// - `showPasswordToggle`: Optionally add a visibility toggle for passwords.
+class ReusableTextFormField extends StatefulWidget {
   final String labelText;
   final IconData? icon;
-  final String? validatorMessage; // Change to optional
-  final RegExp? validatorFormat; // Change to optional
+  final String? validatorMessage;
+  final RegExp? validatorFormat;
   final TextEditingController controller;
   final bool obscureText;
   final TextInputType keyboardType;
   final String? suffixText;
   final String? Function(String?)? validator;
   final bool readOnly;
+  final bool
+      showPasswordToggle; // New parameter to control password visibility toggle
 
   ReusableTextFormField({
     required this.labelText,
@@ -32,18 +36,45 @@ class ReusableTextFormField extends StatelessWidget {
     this.suffixText,
     this.validator,
     this.readOnly = false,
+    this.showPasswordToggle = false, // Default to false
   });
+
+  @override
+  _ReusableTextFormFieldState createState() => _ReusableTextFormFieldState();
+}
+
+class _ReusableTextFormFieldState extends State<ReusableTextFormField> {
+  bool _passwordVisible = false; // Track password visibility state
+
+  @override
+  void initState() {
+    super.initState();
+    _passwordVisible = !widget.obscureText;
+  }
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
-      controller: controller,
-      obscureText: obscureText,
-      readOnly: readOnly,
+      controller: widget.controller,
+      obscureText:
+          widget.showPasswordToggle ? !_passwordVisible : widget.obscureText,
+      readOnly: widget.readOnly,
       decoration: InputDecoration(
-        labelText: labelText,
-        prefixIcon: icon != null ? Icon(icon) : null,
-        suffixText: suffixText,
+        labelText: widget.labelText,
+        prefixIcon: widget.icon != null ? Icon(widget.icon) : null,
+        suffixText: widget.suffixText,
+        suffixIcon: widget.showPasswordToggle
+            ? IconButton(
+                icon: Icon(
+                  _passwordVisible ? Icons.visibility : Icons.visibility_off,
+                ),
+                onPressed: () {
+                  setState(() {
+                    _passwordVisible = !_passwordVisible;
+                  });
+                },
+              )
+            : null,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8.0),
         ),
@@ -61,18 +92,17 @@ class ReusableTextFormField extends StatelessWidget {
         floatingLabelBehavior: FloatingLabelBehavior.auto,
         floatingLabelAlignment: FloatingLabelAlignment.start,
         errorStyle: TextStyle(
-          // Customize the error style here
-          fontSize: 12.0, // Set the font size for the validator message
-          color: const Color.fromARGB(
-              255, 184, 32, 21), // Set the color for the validator message
+          fontSize: 12.0,
+          color: const Color.fromARGB(255, 184, 32, 21),
         ),
       ),
-      keyboardType: keyboardType,
-      validator: validator ??
+      keyboardType: widget.keyboardType,
+      validator: widget.validator ??
           (value) {
-            if (validatorFormat != null && validatorMessage != null) {
-              if (value == null || !validatorFormat!.hasMatch(value)) {
-                return validatorMessage;
+            if (widget.validatorFormat != null &&
+                widget.validatorMessage != null) {
+              if (value == null || !widget.validatorFormat!.hasMatch(value)) {
+                return widget.validatorMessage;
               }
             } else {
               if (value == null || value.isEmpty) {
@@ -84,14 +114,3 @@ class ReusableTextFormField extends StatelessWidget {
     );
   }
 }
-
-/// A reusable TextFormField with validation.
-///
-/// Parameters:
-/// - `labelText`: The label for the TextFormField.
-/// - `icon`: The icon to display in the TextFormField.
-/// - `validatorMessage`: The message to display when validation fails.
-/// - `validatorFormat`: The validation format (e.g., regex pattern) to apply.
-/// - `suffixText`: The text to display as a suffix.
-/// - `validator`: An optional custom validator function.
-/// - `readOnly`: An optional flag to make the TextFormField read-only.

@@ -347,6 +347,7 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
                       r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$'),
                   controller: _passwordController,
                   obscureText: true,
+                  showPasswordToggle: true,
                   validator: (value) {
                     if (value != null && value.isNotEmpty) {
                       if (!RegExp(
@@ -366,6 +367,7 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
                   validatorFormat: RegExp(r'^.{6,}$'),
                   controller: _confirmPasswordController,
                   obscureText: true,
+                  showPasswordToggle: true,
                   validator: (value) {
                     if (value != null && value.isNotEmpty) {
                       if (value != _passwordController.text) {
