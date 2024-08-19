@@ -117,6 +117,28 @@ class _HealthSummaryReportState extends State<HealthSummaryReport> {
     }
   }
 
+  Future<Uint8List?> _captureChartAsImage() async {
+    try {
+      await Future.delayed(
+          Duration(milliseconds: 300)); // Ensure rendering is complete
+      final RenderRepaintBoundary boundary =
+          chartKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+
+      if (boundary == null) {
+        print('RenderRepaintBoundary is null');
+        return null;
+      }
+
+      // Increase the pixel ratio for better quality
+      final image = await boundary.toImage(pixelRatio: 3.0);
+      final byteData = await image.toByteData(format: ImageByteFormat.png);
+      return byteData?.buffer.asUint8List();
+    } catch (e) {
+      print('Error capturing chart as image: $e');
+      return null;
+    }
+  }
+
   void _printReport() async {
     final pdf = pw.Document();
 
@@ -128,94 +150,127 @@ class _HealthSummaryReportState extends State<HealthSummaryReport> {
     );
 
     // Capture the chart as an image
-    final chartImage =
-        await _captureChartAsImage(); // Make sure this is done after rendering
+    final chartImage = await _captureChartAsImage();
 
+    const double recordsPerPage = 20; // Define how many records fit per page
+    int totalRecords = _allRecords.length;
+    int pagesNeeded = (totalRecords / recordsPerPage).ceil();
+
+    for (int page = 0; page < pagesNeeded; page++) {
+      pdf.addPage(
+        pw.Page(
+          build: (pw.Context context) {
+            return pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                if (page == 0) // Only include the header on the first page
+                  pw.Row(
+                    mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                    children: [
+                      pw.Text(
+                        'Health Record Summary Report',
+                        style: pw.TextStyle(
+                          fontSize: 24,
+                          fontWeight: pw.FontWeight.bold,
+                        ),
+                      ),
+                      pw.Column(
+                        crossAxisAlignment: pw.CrossAxisAlignment.center,
+                        children: [
+                          pw.SizedBox(height: 60),
+                          pw.Image(
+                            image,
+                            width: 70,
+                            height: 70,
+                          ),
+                          pw.SizedBox(height: 10),
+                          pw.Text(
+                            'Diabetes Preventer',
+                            style: pw.TextStyle(
+                              fontSize: 12,
+                              fontWeight: pw.FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                if (page == 0) pw.SizedBox(height: 10),
+                if (page == 0) pw.Text('Generation Date: $formattedDate'),
+                if (page == 0) pw.SizedBox(height: 10),
+                if (page == 0) pw.Text('Name: ${userName ?? "Unknown"}'),
+                if (page == 0) pw.SizedBox(height: 10),
+                if (page == 0) pw.Text('Health Record Summary'),
+                if (page == 0) pw.Divider(),
+                if (page == 0)
+                  pw.Text(
+                    'Overall Risk Classification: ${_healthSummary['risk_classification'] ?? 'Unknown'}',
+                    style: pw.TextStyle(
+                      fontSize: 18,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                  ),
+                if (page == 0) pw.SizedBox(height: 15),
+                if (page == 0)
+                  pw.Text('Health Records Summary',
+                      style: pw.TextStyle(
+                        fontSize: 16,
+                        fontWeight: pw.FontWeight.bold,
+                      )),
+                if (page == 0)
+                  pw.Text(
+                    'Average Blood Glucose: ${_healthSummary['average_blood_glucose']}',
+                    style: pw.TextStyle(fontSize: 16),
+                  ),
+                if (page == 0)
+                  pw.Text(
+                    'Average Blood Pressure: ${_healthSummary['average_blood_pressure']}',
+                    style: pw.TextStyle(fontSize: 16),
+                  ),
+                if (page == 0)
+                  pw.Text(
+                    'Average Weight: ${_healthSummary['average_weight']}',
+                    style: pw.TextStyle(fontSize: 16),
+                  ),
+                if (page == 0)
+                  pw.Text(
+                    'Average Daily Weight Increment: ${_healthSummary['average_daily_weight_increment']}',
+                    style: pw.TextStyle(fontSize: 16),
+                  ),
+                pw.SizedBox(height: 20),
+                _buildRecordsTable(page, recordsPerPage),
+              ],
+            );
+          },
+        ),
+      );
+    }
+
+// Add the chart on a new page after all records
     pdf.addPage(
       pw.Page(
         build: (pw.Context context) {
           return pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            crossAxisAlignment:
+                pw.CrossAxisAlignment.start, // Center the column content
             children: [
-              pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                children: [
-                  pw.Text(
-                    'Health Record Summary Report',
-                    style: pw.TextStyle(
-                      fontSize: 24,
-                      fontWeight: pw.FontWeight.bold,
-                    ),
-                  ),
-                  pw.Column(
-                    crossAxisAlignment: pw.CrossAxisAlignment.center,
-                    children: [
-                      pw.SizedBox(height: 60),
-                      pw.Image(
-                        image,
-                        width: 70,
-                        height: 70,
-                      ),
-                      pw.SizedBox(height: 10),
-                      pw.Text(
-                        'Diabetes Preventer',
-                        style: pw.TextStyle(
-                          fontSize: 12,
-                          fontWeight: pw.FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              pw.SizedBox(height: 10),
-              pw.Text('Generation Date: $formattedDate'),
-              pw.SizedBox(height: 10),
-              pw.Text('Name: ${userName ?? "Unknown"}'),
-              pw.SizedBox(height: 10),
-              pw.Text('Health Record Summary'),
-              pw.Divider(),
               pw.Text(
-                'Overall Risk Classification: ${_healthSummary['risk_classification'] ?? 'Unknown'}',
+                'Health Summary Chart', // Title for the chart
                 style: pw.TextStyle(
-                  fontSize: 18,
+                  fontSize: 18, // Adjust the font size as needed
                   fontWeight: pw.FontWeight.bold,
                 ),
               ),
-              pw.Text('Risk Probabilities:'),
-              ..._healthSummary['risk_probabilities'].entries.map((entry) {
-                return pw.Row(
-                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                  children: [
-                    pw.Text(entry.key),
-                    pw.Text(entry.value.toString()),
-                  ],
-                );
-              }).toList(),
-              pw.SizedBox(height: 20),
-              pw.Text(
-                'Average Blood Glucose: ${_healthSummary['average_blood_glucose']}',
-                style: pw.TextStyle(fontSize: 16),
+              pw.SizedBox(height: 20), // Add some space between title and chart
+              pw.Center(
+                child: chartImage != null
+                    ? pw.Image(
+                        pw.MemoryImage(chartImage),
+                        fit: pw.BoxFit.contain,
+                        width: 400, // Adjust the size as needed to fit the page
+                      )
+                    : pw.Text("Chart not available"),
               ),
-              pw.Text(
-                'Average Blood Pressure: ${_healthSummary['average_blood_pressure']}',
-                style: pw.TextStyle(fontSize: 16),
-              ),
-              pw.Text(
-                'Average Weight: ${_healthSummary['average_weight']}',
-                style: pw.TextStyle(fontSize: 16),
-              ),
-              pw.Text(
-                'Average Daily Weight Increment: ${_healthSummary['average_daily_weight_increment']}',
-                style: pw.TextStyle(fontSize: 16),
-              ),
-              pw.SizedBox(height: 20),
-              // Include the chart image if it's available
-              if (chartImage != null)
-                pw.Image(
-                  pw.MemoryImage(chartImage),
-                  height: 200, // Adjust the size as needed
-                ),
             ],
           );
         },
@@ -227,24 +282,74 @@ class _HealthSummaryReportState extends State<HealthSummaryReport> {
     );
   }
 
-  Future<Uint8List?> _captureChartAsImage() async {
-    try {
-      await Future.delayed(Duration(milliseconds: 300)); // Small delay
-      final RenderRepaintBoundary boundary =
-          chartKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+  pw.Widget _buildRecordsTable(int page, double recordsPerPage) {
+    int startIndex = (page * recordsPerPage).toInt();
+    int endIndex = ((page + 1) * recordsPerPage).toInt();
+    endIndex = endIndex > _allRecords.length ? _allRecords.length : endIndex;
 
-      if (boundary == null) {
-        print('RenderRepaintBoundary is null');
-        return null;
-      }
-
-      final image = await boundary.toImage(pixelRatio: 2.0);
-      final byteData = await image.toByteData(format: ImageByteFormat.png);
-      return byteData?.buffer.asUint8List();
-    } catch (e) {
-      print('Error capturing chart as image: $e');
-      return null;
-    }
+    return pw.Table(
+      border: pw.TableBorder.all(),
+      children: [
+        // Table header
+        pw.TableRow(
+          children: [
+            pw.Text(
+              'Date',
+              style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+              textAlign: pw.TextAlign.center,
+            ),
+            pw.Text(
+              'Blood Pressure',
+              style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+              textAlign: pw.TextAlign.center,
+            ),
+            pw.Text(
+              'Blood Glucose',
+              style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+              textAlign: pw.TextAlign.center,
+            ),
+            pw.Text(
+              'Weight',
+              style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+              textAlign: pw.TextAlign.center,
+            ),
+          ],
+        ),
+        // Table rows
+        ..._allRecords.sublist(startIndex, endIndex).map((record) {
+          return pw.TableRow(
+            children: [
+              pw.Padding(
+                padding: pw.EdgeInsets.all(4),
+                child: pw.Text(record['date'] ?? 'N/A',
+                    textAlign: pw.TextAlign.center),
+              ),
+              pw.Padding(
+                padding: pw.EdgeInsets.all(4),
+                child: pw.Text(
+                  record['blood_pressure'].toString(),
+                  textAlign: pw.TextAlign.center,
+                ),
+              ),
+              pw.Padding(
+                padding: pw.EdgeInsets.all(4),
+                child: pw.Text(
+                  record['blood_glucose'].toString(),
+                  textAlign: pw.TextAlign.center,
+                ),
+              ),
+              pw.Padding(
+                padding: pw.EdgeInsets.all(4),
+                child: pw.Text(
+                  record['weight'].toString(),
+                  textAlign: pw.TextAlign.center,
+                ),
+              ),
+            ],
+          );
+        }).toList(),
+      ],
+    );
   }
 
   @override
@@ -334,8 +439,9 @@ class _HealthSummaryReportState extends State<HealthSummaryReport> {
                         // Summary and Note
                         _buildSummarySection(),
                         SizedBox(height: 20),
-                        // Chart
-                        _buildHealthSummaryChart(),
+                        Center(
+                          child: _buildHealthSummaryChart(),
+                        ),
                       ],
                     ),
         ),
@@ -518,64 +624,33 @@ class _HealthSummaryReportState extends State<HealthSummaryReport> {
             color: pinkColor,
           ),
         ),
-        SizedBox(height: 20),
-        Text(
-          'Overall Risk Classification: ${_healthSummary['risk_classification']}',
-          style: TextStyle(
-            fontSize: 16.0,
-            color: blueColor,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        SizedBox(height: 20),
-        Text(
-          'Risk Probabilities:',
-          style: TextStyle(
-            fontSize: 16.0,
-            color: blueColor,
-          ),
-        ),
-        SizedBox(height: 20),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children:
-              _healthSummary['risk_probabilities'].entries.map<Widget>((entry) {
-            return Text(
-              '${entry.key}: ${(entry.value ?? 0.0).toStringAsFixed(2)}',
-              style: TextStyle(
-                fontSize: 16.0,
-                color: Color.fromARGB(255, 223, 93, 17),
-              ),
-            );
-          }).toList(),
-        ),
-        SizedBox(height: 20),
+        SizedBox(height: 15),
         Text(
           'Average Blood Glucose: ${(_healthSummary['average_blood_glucose'] ?? 0.0).toStringAsFixed(2)}',
           style: TextStyle(
             fontSize: 16.0,
-            color: const Color.fromARGB(255, 223, 140, 17),
+            color: blueColor,
           ),
         ),
         Text(
           'Average Blood Pressure: ${(_healthSummary['average_blood_pressure'] ?? 0.0).toStringAsFixed(2)}',
           style: TextStyle(
             fontSize: 16.0,
-            color: const Color.fromARGB(255, 223, 140, 17),
+            color: Colors.red,
           ),
         ),
         Text(
           'Average Weight: ${(_healthSummary['average_weight'] ?? 0.0).toStringAsFixed(2)}',
           style: TextStyle(
             fontSize: 16.0,
-            color: const Color.fromARGB(255, 223, 140, 17),
+            color: pinkColor,
           ),
         ),
         Text(
           'Average Daily Weight Increment: ${(_healthSummary['average_daily_weight_increment'] ?? 0.0).toStringAsFixed(2)}',
           style: TextStyle(
             fontSize: 16.0,
-            color: const Color.fromARGB(255, 223, 140, 17),
+            color: Colors.green,
           ),
         ),
       ],
@@ -583,7 +658,7 @@ class _HealthSummaryReportState extends State<HealthSummaryReport> {
   }
 
   Widget _buildHealthSummaryChart() {
-    if (_healthSummary == null || _healthSummary.isEmpty) {
+    if (_allRecords.isEmpty) {
       return Center(
         child: Text(
           'No health records found for the selected date range.',
@@ -596,66 +671,236 @@ class _HealthSummaryReportState extends State<HealthSummaryReport> {
       );
     }
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-          vertical: 10.0), // Adjust padding if needed
+    final double chartHeight = MediaQuery.of(context).size.height * 0.25;
+    final double chartWidth = MediaQuery.of(context).size.width * 0.8;
+
+    return Container(
+      padding: EdgeInsets.all(8.0),
       child: Column(
         children: [
-          Text(
-            'Risk Probabilities',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 18.0,
-              color: pinkColor,
-            ),
-          ),
-          SizedBox(height: 10),
-          Container(
-            height: 200,
-            child: RepaintBoundary(
-              key: chartKey, // Assign the GlobalKey here
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  PieChart(
-                    PieChartData(
-                      sections: [
-                        PieChartSectionData(
-                          color: blueColor,
-                          value: _healthSummary['risk_probabilities']
-                              ['Healthy'],
-                          title: '',
-                          radius: 30,
-                        ),
-                        PieChartSectionData(
-                          color: pinkColor,
-                          value: _healthSummary['risk_probabilities']
-                              ['Prediabetes'],
-                          title: '',
-                          radius: 30,
-                        ),
-                        PieChartSectionData(
-                          color: Colors.red,
-                          value: _healthSummary['risk_probabilities']
-                              ['Diabetes'],
-                          title: '',
-                          radius: 30,
-                        ),
-                      ],
-                      sectionsSpace: 0,
-                      centerSpaceRadius: 40,
-                    ),
+          Row(
+            children: [
+              RotatedBox(
+                quarterTurns: -1,
+                child: Text(
+                  'Measure',
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
                   ),
-                  Text(
-                    '${_healthSummary['risk_classification']}',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: pinkColor,
-                    ),
-                  ),
-                ],
+                ),
               ),
+              Expanded(
+                child: Center(
+                  child: SizedBox(
+                    height: chartHeight, // Adjusted size
+                    width: chartWidth, // Adjusted size
+                    child: RepaintBoundary(
+                      key: chartKey,
+                      child: LineChart(
+                        LineChartData(
+                          lineTouchData: LineTouchData(
+                            touchTooltipData: LineTouchTooltipData(
+                              getTooltipItems: (touchedSpots) {
+                                return touchedSpots
+                                    .map((LineBarSpot touchedSpot) {
+                                  final textStyle = const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 8,
+                                  );
+                                  return LineTooltipItem(
+                                    '${touchedSpot.y.toString()}',
+                                    textStyle,
+                                  );
+                                }).toList();
+                              },
+                            ),
+                          ),
+                          lineBarsData: [
+                            // Line for Weight
+                            LineChartBarData(
+                              color: pinkColor, // Color for Weight line
+                              spots: _allRecords.asMap().entries.map((entry) {
+                                final weight =
+                                    entry.value['weight']?.toDouble() ?? 0.0;
+                                return FlSpot(entry.key.toDouble(), weight);
+                              }).toList(),
+                              barWidth: 2,
+                              isCurved: true,
+                              dotData: FlDotData(
+                                show: true,
+                                getDotPainter: (spot, percent, bar, index) {
+                                  return FlDotCirclePainter(
+                                    radius: 3,
+                                    color: pinkColor,
+                                    strokeWidth: 1,
+                                    strokeColor: Colors.black,
+                                  );
+                                },
+                              ),
+                            ),
+                            // Line for Blood Glucose
+                            LineChartBarData(
+                              color: blueColor, // Color for Blood Glucose line
+                              spots: _allRecords.asMap().entries.map((entry) {
+                                final bloodGlucose =
+                                    entry.value['blood_glucose']?.toDouble() ??
+                                        0.0;
+                                return FlSpot(
+                                    entry.key.toDouble(), bloodGlucose);
+                              }).toList(),
+                              barWidth: 2,
+                              isCurved: true,
+                              dotData: FlDotData(
+                                show: true,
+                                getDotPainter: (spot, percent, bar, index) {
+                                  return FlDotCirclePainter(
+                                    radius: 3,
+                                    color: blueColor,
+                                    strokeWidth: 1,
+                                    strokeColor: Colors.black,
+                                  );
+                                },
+                              ),
+                            ),
+                            // Line for Blood Pressure
+                            LineChartBarData(
+                              color:
+                                  Colors.red, // Color for Blood Pressure line
+                              spots: _allRecords.asMap().entries.map((entry) {
+                                final bloodPressure =
+                                    entry.value['blood_pressure']?.toDouble() ??
+                                        0.0;
+                                return FlSpot(
+                                    entry.key.toDouble(), bloodPressure);
+                              }).toList(),
+                              barWidth: 2,
+                              isCurved: true,
+                              dotData: FlDotData(
+                                show: true,
+                                getDotPainter: (spot, percent, bar, index) {
+                                  return FlDotCirclePainter(
+                                    radius: 3,
+                                    color: Colors.red,
+                                    strokeWidth: 1,
+                                    strokeColor: Colors.black,
+                                  );
+                                },
+                              ),
+                            ),
+                            // Line for Average Daily Weight Increment
+                            LineChartBarData(
+                              color: Colors
+                                  .green, // Color for Average Daily Weight Increment line
+                              spots: _allRecords.asMap().entries.map((entry) {
+                                final dailyWeightIncrement = entry
+                                        .value['average_daily_weight_increment']
+                                        ?.toDouble() ??
+                                    0.0;
+                                return FlSpot(
+                                    entry.key.toDouble(), dailyWeightIncrement);
+                              }).toList(),
+                              barWidth: 2,
+                              isCurved: true,
+                              dotData: FlDotData(
+                                show: true,
+                                getDotPainter: (spot, percent, bar, index) {
+                                  return FlDotCirclePainter(
+                                    radius: 3,
+                                    color: Colors.green,
+                                    strokeWidth: 1,
+                                    strokeColor: Colors.black,
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
+                          titlesData: FlTitlesData(
+                            leftTitles: AxisTitles(
+                              sideTitles: SideTitles(
+                                showTitles: true,
+                                interval: 40, // Increment by 40
+                                reservedSize: 28,
+                                getTitlesWidget: (value, meta) {
+                                  return Padding(
+                                    padding: const EdgeInsets.only(right: 2.0),
+                                    child: Text(
+                                      '${value.toInt()}',
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 8,
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                            bottomTitles: AxisTitles(
+                              sideTitles: SideTitles(
+                                showTitles: true,
+                                interval: 1,
+                                reservedSize: 28,
+                                getTitlesWidget: (value, meta) {
+                                  final int index = value.toInt();
+                                  if (index < _allRecords.length) {
+                                    return Padding(
+                                      padding: const EdgeInsets.only(top: 2.0),
+                                      child: Text(
+                                        _allRecords[index]['date'] ?? '',
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 8,
+                                        ),
+                                      ),
+                                    );
+                                  } else {
+                                    return const SizedBox.shrink();
+                                  }
+                                },
+                              ),
+                            ),
+                            topTitles: AxisTitles(
+                              sideTitles: SideTitles(showTitles: false),
+                            ),
+                            rightTitles: AxisTitles(
+                              sideTitles: SideTitles(showTitles: false),
+                            ),
+                          ),
+                          gridData: FlGridData(
+                            show: true,
+                            drawHorizontalLine: true,
+                            getDrawingHorizontalLine: (value) {
+                              return FlLine(
+                                color: Colors.grey,
+                                strokeWidth: 0.5,
+                              );
+                            },
+                            drawVerticalLine: true,
+                            getDrawingVerticalLine: (value) {
+                              return FlLine(
+                                color: Colors.grey,
+                                strokeWidth: 0.5,
+                              );
+                            },
+                          ),
+                          minY: 0, // Adjusted for negative values
+                          maxY: 240, // Adjust based on your data
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Text(
+            'Record Date',
+            style: TextStyle(
+              fontSize: 10,
+              color: Colors.black,
+              fontWeight: FontWeight.bold,
             ),
           ),
         ],
