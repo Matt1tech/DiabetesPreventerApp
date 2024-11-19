@@ -266,16 +266,16 @@ class _ClientSupportPageState extends State<ClientSupportPage> {
               IconButton(
                 icon: const Icon(Icons.one_x_mobiledata_outlined,
                     color: Colors.blue),
-                onPressed: () => _launchURL('https://twitter.com/yourpage'),
+                onPressed: () => _launchURL('https://twitter.com/page'),
               ),
               IconButton(
                 icon:
                     const Icon(Icons.camera_alt_outlined, color: Colors.purple),
-                onPressed: () => _launchURL('https://instagram.com/yourpage'),
+                onPressed: () => _launchURL('https://instagram.com/age'),
               ),
               IconButton(
                 icon: const Icon(Icons.leave_bags_at_home, color: Colors.blue),
-                onPressed: () => _launchURL('https://linkedin.com/yourpage'),
+                onPressed: () => _launchURL('https://linkedin.com/page'),
               ),
             ],
           ),

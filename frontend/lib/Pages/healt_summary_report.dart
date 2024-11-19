@@ -647,7 +647,7 @@ class _HealthSummaryReportState extends State<HealthSummaryReport> {
           ),
         ),
         Text(
-          'Average Daily Weight Increment: ${(_healthSummary['average_daily_weight_increment'] ?? 0.0).toStringAsFixed(2)}',
+          'Average Daily Weight Increment(KG): ${(_healthSummary['average_daily_weight_increment'] ?? 0.0).toStringAsFixed(2)}',
           style: TextStyle(
             fontSize: 16.0,
             color: Colors.green,
@@ -885,8 +885,8 @@ class _HealthSummaryReportState extends State<HealthSummaryReport> {
                               );
                             },
                           ),
-                          minY: 0, // Adjusted for negative values
-                          maxY: 240, // Adjust based on your data
+                          minY: 0,
+                          maxY: 240,
                         ),
                       ),
                     ),

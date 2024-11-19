@@ -150,7 +150,7 @@ class _LoginPageState extends State<LoginPage> {
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
-                  color: pinkColor, // Replace with your pinkColor variable
+                  color: pinkColor,
                 ),
               ),
               const SizedBox(height: 24),
@@ -227,7 +227,7 @@ class _LoginPageState extends State<LoginPage> {
                             return const Color.fromARGB(255, 88, 71, 126)
                                 .withOpacity(0.9);
                           }
-                          return pinkColor; // Replace with your pinkColor variable
+                          return pinkColor;
                         }),
                         overlayColor: WidgetStateProperty.resolveWith<Color>(
                             (Set<WidgetState> states) {

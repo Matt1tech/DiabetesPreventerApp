@@ -1248,7 +1248,7 @@ def get_physical_activity_report(request, user_id):
     summary = {
         'most_activity': most_activity,
         'most_activity_time': most_activity_time,
-        'note': 'Workout More'  # You can customize this based on conditions
+        'note': 'Workout More'  #customize this based on conditions
     }
 
     response_data = {

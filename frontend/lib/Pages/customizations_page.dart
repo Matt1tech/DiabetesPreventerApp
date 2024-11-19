@@ -307,7 +307,7 @@ class _CustomizationsPageState extends State<CustomizationsPage> {
       width: 390,
       height: 580,
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Padding(
             padding: EdgeInsets.only(right: 190),

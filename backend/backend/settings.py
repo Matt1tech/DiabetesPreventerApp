@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'django_extensions',
     'django.contrib.staticfiles',
     'api.apps.ApiConfig',
     'rest_framework',
@@ -111,12 +112,27 @@ WSGI_APPLICATION = 'backend.wsgi.application'
         #}        
     #}
 #}
+
+#DATABASES = {
+ #  'default': {
+  #      'ENGINE': 'django.db.backends.sqlite3',
+   #     'NAME': BASE_DIR / 'db.sqlite3',
+    #}
+#}
+
+
+
 DATABASES = {
-   'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'diabetespreventer_db',  # The name of PostgreSQL database
+        'USER': 'diabetes_user',         # The username created
+        'PASSWORD': 'Mm@123',       # The password for database user
+        'HOST': 'localhost', # Or the IP address of PostgreSQL servers
+        'PORT': '5432',  # Default PostgreSQL port
     }
 }
+
 
 
 # Password validation

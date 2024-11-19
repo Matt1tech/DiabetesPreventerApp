@@ -3,8 +3,7 @@ from django.contrib import admin
 from .models import *
 
 
-# Register your models here.
-
+# Register models
 @admin.register(Customizations)
 class CustomizationsAdmin(admin.ModelAdmin):
     list_display = ('user', 'daily_calories_max', 'created_at')
