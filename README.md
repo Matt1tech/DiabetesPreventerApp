@@ -1,132 +1,245 @@
 # Diabetes Preventer
 
-Diabetes Preventer is a Flutter mobile application with a Django REST backend
-for health tracking, meals, activity, reports, experimental diabetes-risk
-prediction, and food-image analysis.
+> A mobile health companion for monitoring lifestyle patterns, understanding
+> diabetes risk factors, and supporting healthier everyday decisions.
 
-> This project is informational and educational. It is not a medical device,
-> diagnosis, or substitute for professional medical care.
+![Flutter](https://img.shields.io/badge/Flutter-Mobile-02569B?logo=flutter&logoColor=white)
+![Django REST](https://img.shields.io/badge/Django-REST_API-092E20?logo=django&logoColor=white)
+![Python](https://img.shields.io/badge/Python-Machine_Learning-3776AB?logo=python&logoColor=white)
+![License: MIT](https://img.shields.io/badge/Code_License-MIT-green.svg)
+![Status](https://img.shields.io/badge/Status-FYP_Product-blueviolet)
 
-## Public repository status
+## Project recognition
 
-This clean repository excludes personal uploads, databases, credentials, FYP
-submissions, datasets, and the trained model. Read
-`docs/DEVELOPMENT_HISTORY.md`, `docs/PRIVATE_STORAGE.md`, `SECURITY.md`, and
-`docs/PUBLIC_RELEASE_CHECKLIST.md` before deployment or publication.
+Diabetes Preventer was created as my Final Year Project (FYP) and was selected
+to represent my academic programme. The project demonstrates the complete
+development of a data-driven mobile product: problem analysis, user-centred
+design, full-stack implementation, machine-learning integration, security
+hardening, testing, and deployment preparation.
 
-## Historical product overview
+This public repository preserves the engineering work while keeping assessment
+documents, personal data, credentials, datasets, and trained model artifacts
+outside Git.
 
-**Project Description**
-Diabetes Preventer Application is a mobile application developed using Flutter and Dart for the frontend, and Django with Python for the backend. The application helps users monitor their health, track daily meals, and generate reports for their daily activities and health records. It includes a machine learning model powered by a Random Forest algorithm to predict the risk of diabetes based on user data.
+## Why this project matters
 
-The backend supports local SQLite development and PostgreSQL deployment through
-environment configuration.
+Diabetes prevention depends on understanding patterns across health
+measurements, nutrition, activity, stress, and family history. These inputs are
+often recorded separately or not recorded at all. Diabetes Preventer brings
+them together in one mobile experience and turns the collected information into
+clear reports and experimental risk insights.
 
-**Features**
-Health Monitoring: Track daily health metrics and activities.
-Meal Tracking: Record and monitor daily meals and nutritional intake.
-Report Generation: Generate detailed reports on daily activities and health records.
-Diabetes Risk Prediction: Predict the risk of diabetes using a machine learning model based on Random Forest.
-Admin Console: Manage users, view analytics, and more through the admin panel.
-API Integration: Integrate the application’s endpoints with other projects easily.
-Directory Structure
-Here's a brief overview of the directory structure:
+The application is designed to encourage awareness and informed conversations
+with qualified healthcare professionals. It does not diagnose diabetes and is
+not a medical device.
 
-**Frontend (Flutter)**
-lib/Pages:
-Contains various Dart files representing different pages of the application, such as login_page.dart, home_page.dart, meal_records_page.dart, etc.
-lib/services:
-Contains service files that interact with the backend, such as AuthService, MealRecordsService, RecommendationService, etc.
-lib/utils:
-Utility functions and constants used across the app.
-lib/models:
-Data models representing the structure of various entities like meals, user customizations, health records, etc.
-Backend (Django)
-backend/api:
-Contains all the API views and serializers related to the application's functionalities.
-`.private/backend_media` stores local user uploads, and `.private/database`
-stores local databases. Neither location is published.
+## Key capabilities
 
-## Installation
+- **Health monitoring** — records relevant measurements and personal risk
+  factors over time.
+- **Meal and nutrition tracking** — captures meals and summarises daily
+  nutritional intake.
+- **Physical activity and stress records** — connects lifestyle information
+  with the user's broader health history.
+- **Diabetes-risk estimation** — integrates an experimental Random Forest model
+  trained with scikit-learn.
+- **Visual reports** — presents activity, health, nutrition, and monthly risk
+  trends in a format users can understand.
+- **Personalised recommendations** — uses health information and dietary
+  preferences to support more relevant suggestions.
+- **Food-image analysis** — sends validated images through the authenticated
+  backend so third-party service credentials never enter the mobile app.
+- **Secure account lifecycle** — supports registration, JWT authentication,
+  refresh and logout, profile management, and protected password reset.
+
+## Engineering highlights
+
+### Privacy and security by design
+
+- Secrets and deployment values are supplied through environment variables.
+- Private files live under the ignored `.private/` directory.
+- API endpoints require authentication by default and enforce record ownership.
+- Short-lived access tokens, refresh tokens, throttling, and token revocation
+  reduce account abuse risk.
+- Uploaded images are size-limited, type-checked, decoded, and renamed safely.
+- CI performs backend tests, deploy checks, static analysis, dependency audits,
+  and Flutter validation.
+
+### Applied machine learning
+
+The backend supports a Random Forest risk-prediction workflow using pandas,
+scikit-learn, and joblib. The trained model is deliberately excluded from the
+public repository: serialized Python models must come from a trusted source and
+should be versioned, evaluated, and deployed independently from application
+code.
+
+### Full-stack product delivery
+
+The Flutter client, Django REST API, relational data model, reporting features,
+ML integration, secure configuration, and deployment controls form a complete
+end-to-end product foundation rather than a standalone prediction notebook.
+
+## Architecture
+
+```text
+Flutter mobile application
+        |
+        | HTTPS + JWT
+        v
+Django REST API
+  |-- Authentication and authorization
+  |-- Health, activity, meal, and report services
+  |-- Food-image provider integration
+  |-- Machine-learning inference boundary
+        |
+        +-- PostgreSQL in deployment / SQLite in local development
+        +-- Private media and model storage
+```
+
+The project uses a layered monolithic backend: presentation is handled by API
+views and serializers, application behaviour is grouped into services and
+utilities, and persistence is handled through Django models. This keeps the
+deployment simple while maintaining clear responsibility boundaries.
+
+## Technology stack
+
+| Area | Technology |
+| --- | --- |
+| Mobile application | Flutter, Dart, Provider |
+| Backend API | Python, Django, Django REST Framework |
+| Authentication | JSON Web Tokens (JWT) |
+| Machine learning | scikit-learn, pandas, joblib |
+| Data storage | PostgreSQL or SQLite |
+| Reports and charts | Flutter charting and PDF tooling |
+| Quality and security | pytest, Ruff, Bandit, pip-audit, GitHub Actions |
+
+## Repository structure
+
+```text
+.
+|-- backend/                 Django REST API and ML integration
+|   |-- api/                 Domain models, endpoints, security, and tests
+|   `-- backend/             Project configuration and URL routing
+|-- frontend/                Flutter mobile application
+|   |-- lib/Pages/           Product screens
+|   |-- lib/services/        Authenticated API clients and integrations
+|   |-- lib/models/          Mobile data models
+|   `-- lib/widgets/         Reusable interface components
+|-- docs/                    History, provenance, and release guidance
+|-- scripts/                 Public-tree safety checks
+`-- .private/                Local-only secrets and artifacts (ignored by Git)
+```
+
+## Getting started
 
 ### Prerequisites
-Flutter and Dart: Ensure Flutter and Dart are installed for the frontend development.
-Python and Django: Install Python and Django for backend development.
-Machine Learning Libraries: Install necessary Python libraries such as pandas, scikit-learn, joblib, and others listed in requirements.txt.
 
-### Backend configuration
+- Python compatible with the versions in `backend/requirements.txt`
+- Flutter SDK with Dart 3.2 or newer
+- PostgreSQL for deployment, or SQLite for local development
 
-Create `.private/.env` from `backend/.env.example`, set a strong
-`DJANGO_SECRET_KEY`, install `backend/requirements.txt`, then run migrations.
-The private model defaults to
-`.private/models/diabetes_prediction_model.pkl`; model endpoints remain
-unavailable until a trusted model is supplied.
+### 1. Configure and run the backend
 
+Create `.private/.env` using `backend/.env.example` as the template. Supply a
+unique `DJANGO_SECRET_KEY` and configure the database and allowed origins for
+your environment.
 
+```powershell
+cd backend
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py runserver
+```
 
+Model-dependent endpoints remain unavailable until a trusted model is placed at
+the configured private model path. Never load an untrusted pickle or joblib
+file.
 
-**Usage Instructions**
-Frontend:
-Run Flutter with a public runtime API address, for example:
+### 2. Run the Flutter application
 
-`flutter run --dart-define=DIABETES_API_BASE_URL=http://10.0.2.2:8000`
+```powershell
+cd frontend
+flutter pub get
+flutter run --dart-define=DIABETES_API_BASE_URL=http://10.0.2.2:8000
+```
 
-Never place credentials in Flutter or `--dart-define`; mobile binaries can be
-inspected.
-Backend:
-Ensure the Django server is running. The frontend will interact with the backend via the provided API endpoints.
-API Documentation
-The application provides various API endpoints for user management, health monitoring, meal tracking, and report generation.
+`10.0.2.2` connects the Android emulator to a backend running on the host
+computer. Use the host machine's local network address when testing on a
+physical device. Do not pass secrets through `--dart-define`; compiled mobile
+applications can be inspected.
 
-User Management and Authentication:
-Register User: POST /create_user/ - Registers a new user.
-Login: POST /login/ - Authenticates a user and returns JWT tokens.
-Logout: POST /logout/ - Logs out the user by invalidating tokens.
-Update User Profile: PUT /update_user/ - Updates the user's profile information.
-Risk Analysis:
+## Quality checks
 
-Monthly Risk: GET /monthly_risk/{user_id}/ - Calculates the average diabetes risk for each month over the past six months for the specified user.
-Test Model: POST /test_model/ - Tests the machine learning model with provided input features.
-Meal Records:
+Before opening a pull request, run the relevant checks:
 
-Create Meal: POST /create_meal/ - Creates a new meal record for the user.
-Get Total Daily Nutrition: GET /get_total_daily_nutrition/{user_id}/ - Retrieves the total nutritional intake for the current day.
-Dietary Planner and Meal Recommendations:
+```powershell
+cd backend
+python manage.py check --deploy
+pytest
+ruff check .
+bandit -c pyproject.toml -r .
+pip-audit -r requirements.txt
 
-Update Customizations: POST /update_customizations/ - Updates or creates user customizations for dietary and meal preferences.
-Get User Customization: GET /get_user_customization/{user_id}/ - Retrieves the customization settings for a specified user.
-User Recommendations: GET /user_recommendation/{user_id}/ - Provides personalized meal recommendations based on user preferences and health data.
-Lifestyle and Health Analysis:
+cd ..\frontend
+flutter analyze --no-fatal-infos --no-fatal-warnings
+flutter test
+```
 
-Create or Update Health Record: POST /create_or_update_health_record/ - Creates or updates a health record for the user.
-Get Last Health Record: GET /get_last_health_record/{user_id}/ - Retrieves the latest health record for the user.
-Report Module:
+The repository also includes `scripts/check_public_tree.ps1`, which detects
+private paths, sensitive file types, oversized artifacts, and common secret
+patterns before publication.
 
-Get Physical Activity Report: GET /get_physical_activity_report/{user_id}/ - Retrieves a report of the user’s physical activities.
-Get Risk Summary Report: GET /get_risk_summary_report/{user_id}/ - Retrieves a summary report of the user's health risks.
-Get Health Summary Report: GET /get_health_summary_report/{user_id}/ - Retrieves a detailed health summary report for the user.
-Contributing Guidelines
-Guidelines:
+## Development workflow
 
-Follow the standard Git branching model (feature, develop, main branches).
-Ensure all code is tested before submitting a pull request.
-Write clear and concise commit messages.
-Reporting Issues:
-Submit issues via the GitHub issue tracker.
-Provide detailed information about the issue, including steps to reproduce and any relevant logs.
+```text
+feature/{name} -> dev -> master -> release
+```
 
+Changes should be developed on a focused feature branch, reviewed and
+integrated through `dev`, stabilised on `master`, and promoted to a release only
+after testing and security checks pass. See [CONTRIBUTING.md](CONTRIBUTING.md)
+for the contribution process.
 
+## Public-repository boundaries
 
+This repository intentionally excludes:
 
-## License
+- credentials and environment-specific configuration;
+- databases, user uploads, and personal information;
+- private FYP reports, assessment forms, and supporting documents;
+- datasets and trained machine-learning artifacts;
+- tunnel credentials and local development state.
 
-Software code is licensed under [MIT](LICENSE). Private FYP materials are
-excluded, and documentation rights are described in
-[LICENSE_SCOPE.md](LICENSE_SCOPE.md).
+Review [the private-storage guide](docs/PRIVATE_STORAGE.md), [asset provenance](docs/ASSET_PROVENANCE.md),
+and [the public-release checklist](docs/PUBLIC_RELEASE_CHECKLIST.md) before
+publishing or deploying a fork.
 
-Credits or Acknowledgments
-Developer: Albukaai Mohamad
-Frontend Framework: Built using Flutter and Dart.
-Backend Framework: Developed using Django and Python.
-Machine Learning Model: Implemented using scikit-learn’s Random Forest algorithm.
-Contact and security reports are handled through the maintainer's GitHub profile.
+## Project history
+
+The application evolved through iterative frontend, backend, reporting,
+machine-learning, deployment, and security phases. A concise engineering record
+is available in [DEVELOPMENT_HISTORY.md](docs/DEVELOPMENT_HISTORY.md).
+
+## Responsible use
+
+The predictions and recommendations produced by this project are experimental
+and educational. They must not be used as a diagnosis, treatment decision, or
+substitute for advice from a licensed healthcare professional. Any production
+use requires clinical validation, regulatory review, bias evaluation, model
+monitoring, and an appropriate privacy programme.
+
+Security concerns should be reported according to [SECURITY.md](SECURITY.md).
+
+## Author
+
+**Albukaai Mohamad (Matt1tech)** — Full-stack developer and project creator
+
+## Licensing and rights
+
+The software source code is available under the [MIT License](LICENSE).
+Original FYP materials and long-form documentation are not granted under the
+MIT licence; their rights and exclusions are explained in
+[LICENSE_SCOPE.md](LICENSE_SCOPE.md). Third-party assets and dependencies remain
+subject to their respective licences.
