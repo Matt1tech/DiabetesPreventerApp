@@ -1,0 +1,344 @@
+import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
+import 'package:image_picker/image_picker.dart';
+import '../utils/utilities.dart';
+import 'login_page.dart';
+import '../widgets/widgets.dart';
+import 'package:frontend/services/auth_service.dart';
+import '../globals.dart' as globals; // Import the globals file
+
+final _formKey = GlobalKey<FormState>();
+final _nameController = TextEditingController();
+final _emailController = TextEditingController();
+final _passwordController = TextEditingController();
+final _confirmPasswordController = TextEditingController();
+
+class RegisterPage extends StatefulWidget {
+  const RegisterPage({Key? key}) : super(key: key);
+
+  @override
+  _RegisterPageState createState() => _RegisterPageState();
+}
+
+class _RegisterPageState extends State<RegisterPage> {
+  final TextEditingController _dateController = TextEditingController();
+  final TextEditingController _heightController = TextEditingController();
+  List<bool> isSelectedGender = [true, false];
+  List<bool> isSelectedMaritalStatus = [true, false];
+
+  XFile? _profilePicture;
+  final ImagePicker _picker = ImagePicker();
+
+  Future<void> _pickProfilePicture() async {
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    setState(() {
+      _profilePicture = image;
+    });
+  }
+
+  @override
+  void dispose() {
+    _dateController.dispose();
+    _heightController.dispose();
+    super.dispose();
+  }
+
+  void _register() async {
+    if (_formKey.currentState!.validate()) {
+      String name = _nameController.text;
+      String email = _emailController.text.toLowerCase();
+      String password = _passwordController.text;
+      String gender = isSelectedGender[0] ? 'Male' : 'Female';
+      String maritalStatus = isSelectedMaritalStatus[0] ? 'Married' : 'Single';
+      String height = _heightController.text;
+      String birthdate = _dateController.text;
+      bool familyHistory = globals.familyHistory; // Use the global variable
+
+      var response = await AuthService().registerUser(
+        name,
+        email,
+        password,
+        gender,
+        maritalStatus,
+        height,
+        birthdate,
+        familyHistory,
+        _profilePicture != null ? File(_profilePicture!.path) : null,
+      );
+
+      if (response.statusCode == 201) {
+        bool confirmed = await showConfirmationDialog(
+          context,
+          'Registration Successful',
+          'Your account has been successfully created. Do you want to proceed to login?',
+        );
+        if (confirmed) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => LoginPage()),
+          );
+        }
+      } else {
+        final snackBar =
+            SnackBar(content: Text('Registration failed: ${response.body}'));
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Color.fromARGB(255, 217, 217, 217),
+      appBar: CustomHeader(
+        imageProvider: _profilePicture != null
+            ? FileImage(File(_profilePicture!.path))
+            : null,
+        imagePath: 'assets/images/diabetesLogo.png',
+        welcomeMessage: 'Welcome to Diabetes Preventer!',
+        showWelcomeMessage: true,
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 30),
+                const Center(
+                  child: Text(
+                    'Sign Up',
+                    style: TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      color: pinkColor,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Center(
+                  child: GestureDetector(
+                    onTap: _pickProfilePicture,
+                    child: CircleAvatar(
+                      radius: 40,
+                      backgroundColor: Colors.grey[200],
+                      backgroundImage: _profilePicture != null
+                          ? FileImage(File(_profilePicture!.path))
+                          : null,
+                      child: _profilePicture == null
+                          ? Icon(
+                              Icons.camera_alt,
+                              size: 40,
+                              color: Colors.grey[800],
+                            )
+                          : null,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                ReusableTextFormField(
+                  labelText: 'Name',
+                  icon: Icons.person,
+                  validatorMessage: 'Must include at least 3 characters',
+                  validatorFormat: RegExp(r'^.{3,}$'),
+                  controller: _nameController,
+                ),
+                const SizedBox(height: 16),
+                ReusableTextFormField(
+                  labelText: 'Email',
+                  icon: Icons.email,
+                  validatorMessage: 'Please enter a valid email',
+                  validatorFormat:
+                      RegExp(r'^[\w-]+(\.[\w-]+)*@[\w-]+(\.\w{2,3})+$'),
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                ),
+                const SizedBox(height: 16),
+                ReusableTextFormField(
+                  labelText: 'Password',
+                  icon: Icons.lock,
+                  validatorMessage:
+                      'At least 6 digits, 1 capital char, 1 small char, 1 special char',
+                  validatorFormat: RegExp(
+                      r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$'),
+                  controller: _passwordController,
+                  obscureText: true,
+                ),
+                const SizedBox(height: 16),
+                ReusableTextFormField(
+                  labelText: 'Confirm Password',
+                  icon: Icons.lock,
+                  validatorMessage: 'Passwords do not match',
+                  validatorFormat: RegExp(r'^.{6,}$'),
+                  controller: _confirmPasswordController,
+                  obscureText: true,
+                  validator: (value) {
+                    if (value != _passwordController.text) {
+                      return 'Passwords do not match';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Gender',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: blueColor,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                CustomToggleButtons(
+                  options: const ['Male', 'Female'],
+                  isSelected: isSelectedGender,
+                  onPressed: (int index) {
+                    setState(() {
+                      for (int i = 0; i < isSelectedGender.length; i++) {
+                        isSelectedGender[i] = i == index;
+                      }
+                    });
+                  },
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Marital Status',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: blueColor,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                CustomToggleButtons(
+                  options: const ['Married', 'Single'],
+                  isSelected: isSelectedMaritalStatus,
+                  onPressed: (int index) {
+                    setState(() {
+                      for (int i = 0; i < isSelectedMaritalStatus.length; i++) {
+                        isSelectedMaritalStatus[i] = i == index;
+                      }
+                    });
+                  },
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Container(
+                      width: 140,
+                      child: ReusableTextFormField(
+                        labelText: 'Height',
+                        icon: Icons.height,
+                        validatorMessage: 'Invalid Height',
+                        validatorFormat: RegExp(r'^\d+(\.\d+)?$'),
+                        controller: _heightController,
+                        suffixText: 'cm',
+                      ),
+                    ),
+                    const SizedBox(width: 25),
+                    Container(
+                      width: 160,
+                      child: buildDatePickerFieldBirthDate(
+                          context, 'Birthday', Icons.cake,
+                          width: 180, controller: _dateController),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                Center(
+                  child: ElevatedButton(
+                    style: ButtonStyle(
+                      minimumSize: WidgetStateProperty.all(const Size(340, 50)),
+                      backgroundColor: WidgetStateProperty.resolveWith<Color>(
+                        (Set<WidgetState> states) {
+                          if (states.contains(WidgetState.pressed)) {
+                            return Color.fromARGB(255, 68, 37, 135)
+                                .withOpacity(0.8);
+                          } else if (states.contains(WidgetState.hovered)) {
+                            return Color.fromARGB(255, 88, 71, 126)
+                                .withOpacity(0.9);
+                          }
+                          return pinkColor;
+                        },
+                      ),
+                      overlayColor: WidgetStateProperty.resolveWith<Color>(
+                        (Set<WidgetState> states) {
+                          if (states.contains(WidgetState.pressed)) {
+                            return Color.fromARGB(255, 68, 37, 135)
+                                .withOpacity(0.8);
+                          } else if (states.contains(WidgetState.hovered)) {
+                            return Color.fromARGB(255, 88, 71, 126)
+                                .withOpacity(0.9);
+                          }
+                          return pinkColor;
+                        },
+                      ),
+                      shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                      ),
+                    ),
+                    onPressed: _register,
+                    child: const Text(
+                      'Register',
+                      style: TextStyle(
+                        fontSize: 20,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Center(
+                  child: Text.rich(
+                    TextSpan(
+                      children: [
+                        const TextSpan(text: 'Have an account? '),
+                        TextSpan(
+                          text: 'Login',
+                          style: TextStyle(
+                            color: pinkColor,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            decoration: TextDecoration.underline,
+                          ),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => LoginPage()),
+                              );
+                            },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Center(
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Text(
+                      'Back',
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: blueColor,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

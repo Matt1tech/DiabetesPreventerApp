@@ -1,0 +1,15 @@
+[tool.bandit]
+exclude_dirs = ["api/migrations"]
+# B105 mistakes throttle-scope and JWT claim names for passwords. Actual secret
+# patterns are checked separately by the public-tree scan.
+skips = ["B105"]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E9", "F"]
+# The legacy prototype uses wildcard imports extensively. Keep undefined-name
+# and syntax protection in CI while import cleanup is handled incrementally.
+ignore = ["F401", "F403", "F405", "F811", "F841"]
