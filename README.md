@@ -21,6 +21,24 @@ This public repository preserves the engineering work while keeping assessment
 documents, personal data, credentials, datasets, and trained model artifacts
 outside Git.
 
+## Product screens
+
+The following screenshots were captured directly from the Flutter application
+running on an Android emulator. They contain no personal or production data.
+
+<table>
+  <tr>
+    <th>Secure sign-in</th>
+    <th>Risk-factor onboarding</th>
+    <th>Account registration</th>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/login.png" alt="Diabetes Preventer sign-in screen" width="260"></td>
+    <td><img src="docs/screenshots/onboarding-family-history.png" alt="Family-history onboarding screen" width="260"></td>
+    <td><img src="docs/screenshots/registration-form.png" alt="Account registration screen" width="260"></td>
+  </tr>
+</table>
+
 ## Why this project matters
 
 Diabetes prevention depends on understanding patterns across health
@@ -81,19 +99,26 @@ end-to-end product foundation rather than a standalone prediction notebook.
 
 ## Architecture
 
-```text
-Flutter mobile application
-        |
-        | HTTPS + JWT
-        v
-Django REST API
-  |-- Authentication and authorization
-  |-- Health, activity, meal, and report services
-  |-- Food-image provider integration
-  |-- Machine-learning inference boundary
-        |
-        +-- PostgreSQL in deployment / SQLite in local development
-        +-- Private media and model storage
+```mermaid
+flowchart TB
+    User[Mobile user] --> Mobile[Flutter application]
+    Mobile -->|HTTPS and JWT| API[Django REST API]
+
+    subgraph Monolith[Layered backend monolith]
+        API --> Security[Authentication, authorization and throttling]
+        Security --> Application[Health, meals, activity, recommendations and reports]
+        Application --> Data[Django models and serializers]
+        Application --> ML[Machine-learning inference boundary]
+        Application --> Food[Food-image provider adapter]
+    end
+
+    Data --> Database[(PostgreSQL / local SQLite)]
+    Data --> Media[(Private user media)]
+    ML --> Model[(Private trusted model artifact)]
+    Food --> Provider[External food-analysis API]
+
+    CI[GitHub Actions] -. tests and security checks .-> API
+    CI -. analysis and tests .-> Mobile
 ```
 
 The project uses a layered monolithic backend: presentation is handled by API
@@ -112,6 +137,42 @@ deployment simple while maintaining clear responsibility boundaries.
 | Data storage | PostgreSQL or SQLite |
 | Reports and charts | Flutter charting and PDF tooling |
 | Quality and security | pytest, Ruff, Bandit, pip-audit, GitHub Actions |
+
+## API endpoint reference
+
+The API is served from the backend root. Public routes are intentionally limited
+to account creation, authentication, token renewal, and password recovery. Every
+other API route requires a valid bearer access token; user-specific routes also
+verify that the authenticated user owns the requested record.
+
+| Area | Method | Endpoint | Access | Purpose |
+| --- | --- | --- | --- | --- |
+| Account | `POST` | `/create_user/` | Public, throttled | Register a user and optional profile image |
+| Account | `POST` | `/login/` | Public, throttled | Authenticate and issue JWT tokens |
+| Account | `POST` | `/token/refresh/` | Public with refresh token | Renew an access token |
+| Account | `POST` | `/logout/` | Authenticated | Revoke the user's existing token version |
+| Account | `PUT` | `/update_user/` | Owner only | Update profile details or credentials |
+| Password recovery | `POST` | `/request_otp/` | Public, throttled | Request a one-time password-reset code |
+| Password recovery | `POST` | `/verify_otp/` | Public, throttled | Verify the code and set a validated password |
+| Health | `POST` | `/health-record/` | Owner only | Create or update today's health record |
+| Health | `GET` | `/health-record/last/{user_id}/` | Owner only | Return the latest health record and risk metrics |
+| Health | `POST` | `/physical_record/` | Owner only | Create or update today's activity record |
+| Meals | `POST` | `/create_meal/` | Owner only | Record a meal and its nutritional values |
+| Meals | `GET` | `/total_daily_nutrition/{user_id}/` | Owner only | Aggregate today's nutritional intake |
+| Preferences | `POST` | `/update-customization/` | Owner only | Save dietary preferences and limits |
+| Preferences | `GET` | `/get-user-customization/{user_id}/` | Owner only | Return the latest dietary customisation |
+| Recommendations | `GET` | `/user_recommendations/{user_id}/` | Owner only | Return recommendations filtered for the user |
+| Image analysis | `POST` | `/analyze-food-image/` | Authenticated, throttled | Validate and proxy a food image for analysis |
+| Risk model | `POST` | `/test_model/` | Authenticated | Run experimental model inference |
+| Risk model | `GET` | `/monthly_risk/{user_id}/` | Owner only | Calculate six-month risk history |
+| Reports | `GET` | `/activity_report/{user_id}/` | Owner only | Generate an activity report for a date range |
+| Reports | `GET` | `/risk_summary_report/{user_id}/` | Owner only | Generate a diabetes-risk summary |
+| Reports | `GET` | `/health_summary_report/{user_id}/` | Owner only | Generate a health summary |
+
+The Django administration interface is available separately at `/admin/` and
+requires authorised staff credentials. Endpoint behaviour is defined in
+[`backend/api/urls.py`](backend/api/urls.py); this table should be updated when
+that routing file changes.
 
 ## Repository structure
 

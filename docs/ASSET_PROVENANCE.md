@@ -11,6 +11,7 @@ Do not publish an asset until its source and redistribution license are recorded
 | `frontend/assets/icons/piece-of-cake.svg` | Meal UI | Source and license evidence required. |
 | `frontend/assets/icons/salad.svg` | Meal UI | Source and license evidence required. |
 | `frontend/assets/icons/snack.svg` | Meal UI | Source and license evidence required. |
+| `docs/screenshots/*.png` | README product gallery | Captured from the project on an Android emulator on 2 September 2026 using empty/mock state. No personal data is shown. The screenshots include the project logo, so publication still depends on confirming the logo's ownership. |
 
 The unused `tes.jpeg` image and duplicated Poppins binaries were quarantined in
 the ignored `.private/unverified_assets/` directory. The public Flutter app now
