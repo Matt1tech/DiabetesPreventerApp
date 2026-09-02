@@ -293,15 +293,8 @@ This repository intentionally excludes:
 - datasets and trained machine-learning artifacts;
 - tunnel credentials and local development state.
 
-Review [the private-storage guide](docs/PRIVATE_STORAGE.md), [asset provenance](docs/ASSET_PROVENANCE.md),
-and [the public-release checklist](docs/PUBLIC_RELEASE_CHECKLIST.md) before
-publishing or deploying a fork.
-
-## Project history
-
-The application evolved through iterative frontend, backend, reporting,
-machine-learning, deployment, and security phases. A concise engineering record
-is available in [DEVELOPMENT_HISTORY.md](docs/DEVELOPMENT_HISTORY.md).
+Internal planning, audit records, implementation history, and private FYP
+documentation are intentionally excluded from the public Git tree.
 
 ## Responsible use
 
@@ -311,7 +304,8 @@ substitute for advice from a licensed healthcare professional. Any production
 use requires clinical validation, regulatory review, bias evaluation, model
 monitoring, and an appropriate privacy programme.
 
-Security concerns should be reported according to [SECURITY.md](SECURITY.md).
+Report sensitive security concerns privately through the maintainer's GitHub
+profile rather than opening a public issue.
 
 ## Author
 

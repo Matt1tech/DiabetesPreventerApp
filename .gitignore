@@ -207,4 +207,13 @@ diabetes.csv
 bandit-report.json
 pip-audit-report.json
 security-reports/
-security.md
+
+# Internal planning, audit, and generated documentation.
+/SECURITY.md
+/docs/*.md
+/frontend/README.md
+/.codex-*/
+/SPRINT_PLAN.md
+/ISSUE_BACKLOG.md
+/PROJECT.md
+/SRD.md
