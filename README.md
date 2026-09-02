@@ -314,7 +314,3 @@ profile rather than opening a public issue.
 ## Licensing and rights
 
 The software source code is available under the [MIT License](LICENSE).
-Original FYP materials and long-form documentation are not granted under the
-MIT licence; their rights and exclusions are explained in
-[LICENSE_SCOPE.md](LICENSE_SCOPE.md). Third-party assets and dependencies remain
-subject to their respective licences.
