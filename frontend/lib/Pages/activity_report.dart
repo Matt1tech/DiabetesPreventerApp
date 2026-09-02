@@ -254,7 +254,7 @@ class _ActivityRecordReportState extends State<ActivityRecordReport> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(170.0),
+        preferredSize: Size.fromHeight(176.0),
         child: UserHeader(
           imageProvider: imageProvider,
           pageName: 'Activity Record',

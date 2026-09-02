@@ -359,7 +359,7 @@ class _HealthSummaryReportState extends State<HealthSummaryReport> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(170.0),
+        preferredSize: Size.fromHeight(176.0),
         child: UserHeader(
           imageProvider: imageProvider,
           pageName: 'Health Summary Report',

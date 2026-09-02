@@ -12,7 +12,7 @@ class User {
   double height;
   String birthdate;
   bool family_history;
-  String profile_picture;
+  String? profile_picture;
   DateTime created_at;
 
   User({
@@ -35,10 +35,10 @@ class User {
       email: json['email'],
       gender: json['gender'],
       marital_status: json['marital_status'],
-      height: json['height'],
+      height: (json['height'] as num).toDouble(),
       birthdate: json['birthdate'],
       family_history: json['family_history'],
-      profile_picture: json['profile_picture'],
+      profile_picture: json['profile_picture'] as String?,
       created_at: DateTime.parse(json['created_at']),
     );
   }

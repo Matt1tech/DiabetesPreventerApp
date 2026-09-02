@@ -24,7 +24,27 @@ outside Git.
 ## Product screens
 
 The following screenshots were captured directly from the Flutter application
-running on an Android emulator. They contain no personal or production data.
+running on an Android emulator. Authenticated views use a fictional local demo
+profile and contain no personal or production data.
+
+### Core product experience
+
+<table>
+  <tr>
+    <th>Health dashboard</th>
+    <th>Meal tracking</th>
+    <th>Dietary customisation</th>
+    <th>Reports hub</th>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/dashboard-home.png" alt="Health dashboard with mock nutrition and risk data" width="220"></td>
+    <td><img src="docs/screenshots/meal-tracking.png" alt="Meal and nutrition entry screen" width="220"></td>
+    <td><img src="docs/screenshots/customization.png" alt="Dietary customisation screen" width="220"></td>
+    <td><img src="docs/screenshots/reports-hub.png" alt="Health and activity reports hub" width="220"></td>
+  </tr>
+</table>
+
+### Account and risk onboarding
 
 <table>
   <tr>
@@ -128,14 +148,14 @@ deployment simple while maintaining clear responsibility boundaries.
 
 ## Technology stack
 
-| Area | Technology |
-| --- | --- |
-| Mobile application | Flutter, Dart, Provider |
-| Backend API | Python, Django, Django REST Framework |
-| Authentication | JSON Web Tokens (JWT) |
-| Machine learning | scikit-learn, pandas, joblib |
-| Data storage | PostgreSQL or SQLite |
-| Reports and charts | Flutter charting and PDF tooling |
+| Area                 | Technology                                      |
+| -------------------- | ----------------------------------------------- |
+| Mobile application   | Flutter, Dart, Provider                         |
+| Backend API          | Python, Django, Django REST Framework           |
+| Authentication       | JSON Web Tokens (JWT)                           |
+| Machine learning     | scikit-learn, pandas, joblib                    |
+| Data storage         | PostgreSQL or SQLite                            |
+| Reports and charts   | Flutter charting and PDF tooling                |
 | Quality and security | pytest, Ruff, Bandit, pip-audit, GitHub Actions |
 
 ## API endpoint reference
@@ -145,29 +165,29 @@ to account creation, authentication, token renewal, and password recovery. Every
 other API route requires a valid bearer access token; user-specific routes also
 verify that the authenticated user owns the requested record.
 
-| Area | Method | Endpoint | Access | Purpose |
-| --- | --- | --- | --- | --- |
-| Account | `POST` | `/create_user/` | Public, throttled | Register a user and optional profile image |
-| Account | `POST` | `/login/` | Public, throttled | Authenticate and issue JWT tokens |
-| Account | `POST` | `/token/refresh/` | Public with refresh token | Renew an access token |
-| Account | `POST` | `/logout/` | Authenticated | Revoke the user's existing token version |
-| Account | `PUT` | `/update_user/` | Owner only | Update profile details or credentials |
-| Password recovery | `POST` | `/request_otp/` | Public, throttled | Request a one-time password-reset code |
-| Password recovery | `POST` | `/verify_otp/` | Public, throttled | Verify the code and set a validated password |
-| Health | `POST` | `/health-record/` | Owner only | Create or update today's health record |
-| Health | `GET` | `/health-record/last/{user_id}/` | Owner only | Return the latest health record and risk metrics |
-| Health | `POST` | `/physical_record/` | Owner only | Create or update today's activity record |
-| Meals | `POST` | `/create_meal/` | Owner only | Record a meal and its nutritional values |
-| Meals | `GET` | `/total_daily_nutrition/{user_id}/` | Owner only | Aggregate today's nutritional intake |
-| Preferences | `POST` | `/update-customization/` | Owner only | Save dietary preferences and limits |
-| Preferences | `GET` | `/get-user-customization/{user_id}/` | Owner only | Return the latest dietary customisation |
-| Recommendations | `GET` | `/user_recommendations/{user_id}/` | Owner only | Return recommendations filtered for the user |
-| Image analysis | `POST` | `/analyze-food-image/` | Authenticated, throttled | Validate and proxy a food image for analysis |
-| Risk model | `POST` | `/test_model/` | Authenticated | Run experimental model inference |
-| Risk model | `GET` | `/monthly_risk/{user_id}/` | Owner only | Calculate six-month risk history |
-| Reports | `GET` | `/activity_report/{user_id}/` | Owner only | Generate an activity report for a date range |
-| Reports | `GET` | `/risk_summary_report/{user_id}/` | Owner only | Generate a diabetes-risk summary |
-| Reports | `GET` | `/health_summary_report/{user_id}/` | Owner only | Generate a health summary |
+| Area              | Method | Endpoint                             | Access                    | Purpose                                          |
+| ----------------- | ------ | ------------------------------------ | ------------------------- | ------------------------------------------------ |
+| Account           | `POST` | `/create_user/`                      | Public, throttled         | Register a user and optional profile image       |
+| Account           | `POST` | `/login/`                            | Public, throttled         | Authenticate and issue JWT tokens                |
+| Account           | `POST` | `/token/refresh/`                    | Public with refresh token | Renew an access token                            |
+| Account           | `POST` | `/logout/`                           | Authenticated             | Revoke the user's existing token version         |
+| Account           | `PUT`  | `/update_user/`                      | Owner only                | Update profile details or credentials            |
+| Password recovery | `POST` | `/request_otp/`                      | Public, throttled         | Request a one-time password-reset code           |
+| Password recovery | `POST` | `/verify_otp/`                       | Public, throttled         | Verify the code and set a validated password     |
+| Health            | `POST` | `/health-record/`                    | Owner only                | Create or update today's health record           |
+| Health            | `GET`  | `/health-record/last/{user_id}/`     | Owner only                | Return the latest health record and risk metrics |
+| Health            | `POST` | `/physical_record/`                  | Owner only                | Create or update today's activity record         |
+| Meals             | `POST` | `/create_meal/`                      | Owner only                | Record a meal and its nutritional values         |
+| Meals             | `GET`  | `/total_daily_nutrition/{user_id}/`  | Owner only                | Aggregate today's nutritional intake             |
+| Preferences       | `POST` | `/update-customization/`             | Owner only                | Save dietary preferences and limits              |
+| Preferences       | `GET`  | `/get-user-customization/{user_id}/` | Owner only                | Return the latest dietary customisation          |
+| Recommendations   | `GET`  | `/user_recommendations/{user_id}/`   | Owner only                | Return recommendations filtered for the user     |
+| Image analysis    | `POST` | `/analyze-food-image/`               | Authenticated, throttled  | Validate and proxy a food image for analysis     |
+| Risk model        | `POST` | `/test_model/`                       | Authenticated             | Run experimental model inference                 |
+| Risk model        | `GET`  | `/monthly_risk/{user_id}/`           | Owner only                | Calculate six-month risk history                 |
+| Reports           | `GET`  | `/activity_report/{user_id}/`        | Owner only                | Generate an activity report for a date range     |
+| Reports           | `GET`  | `/risk_summary_report/{user_id}/`    | Owner only                | Generate a diabetes-risk summary                 |
+| Reports           | `GET`  | `/health_summary_report/{user_id}/`  | Owner only                | Generate a health summary                        |
 
 The Django administration interface is available separately at `/admin/` and
 requires authorised staff credentials. Endpoint behaviour is defined in
@@ -295,7 +315,7 @@ Security concerns should be reported according to [SECURITY.md](SECURITY.md).
 
 ## Author
 
-**Albukaai Mohamad (Matt1tech)** — Full-stack developer and project creator
+**Albukaai Mohamad (Matt1tech)** — Full-stack, AI Engineer and project creator
 
 ## Licensing and rights
 

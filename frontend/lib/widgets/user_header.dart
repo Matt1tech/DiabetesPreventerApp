@@ -26,7 +26,7 @@ class UserHeader extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Size get preferredSize => showWelcomeMessage
-      ? const Size.fromHeight(170.0)
+      ? const Size.fromHeight(176.0)
       : const Size.fromHeight(120.0);
 
   @override

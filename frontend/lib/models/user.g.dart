@@ -15,7 +15,7 @@ User _$UserFromJson(Map<String, dynamic> json) => User(
       height: (json['height'] as num).toDouble(),
       birthdate: json['birthdate'] as String,
       family_history: json['family_history'] as bool,
-      profile_picture: json['profile_picture'] as String,
+      profile_picture: json['profile_picture'] as String?,
       created_at: DateTime.parse(json['created_at'] as String),
     );
 

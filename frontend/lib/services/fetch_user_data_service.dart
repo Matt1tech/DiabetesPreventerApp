@@ -17,8 +17,10 @@ Future<Map<String, String?>> loadUserInfo() async {
     final userId = user.id;
     final email = user.email;
     final gender = user.gender;
-    // Construct the full URL for the profile picture
-    final userProfilePicture = '${'$baseUrl'}/media/${user.profile_picture}';
+    final profilePicture = user.profile_picture;
+    final userProfilePicture = profilePicture == null || profilePicture.isEmpty
+        ? null
+        : '$baseUrl/media/$profilePicture';
     return {
       'userName': userName,
       'userProfilePicture': userProfilePicture,

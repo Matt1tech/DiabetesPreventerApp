@@ -242,7 +242,7 @@ class _MealRecordsPageState extends State<MealRecordsPage> {
     return Scaffold(
       backgroundColor: Color.fromARGB(255, 217, 217, 217),
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(170.0),
+        preferredSize: Size.fromHeight(176.0),
         child: UserHeader(
           imageProvider: imageProvider,
           pageName: 'Meal Records',
