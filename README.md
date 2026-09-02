@@ -315,7 +315,7 @@ Security concerns should be reported according to [SECURITY.md](SECURITY.md).
 
 ## Author
 
-**Albukaai Mohamad (Matt1tech)** — Full-stack, AI Engineer and project creator
+**Mohamad Albukaai (Matt1tech)** — Full-stack, AI Engineer and project creator
 
 ## Licensing and rights
 
